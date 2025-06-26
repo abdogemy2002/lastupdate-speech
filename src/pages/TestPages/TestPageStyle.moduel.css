@@ -1,0 +1,10 @@
+/* إضافة خلفية للصفحة */
+body {
+    background-image: url('../../assets/flower-bg.jpg'); /* مسار الخلفية */
+    background-size: cover; /* اجعل الخلفية تغطي الصفحة بالكامل */
+    background-repeat: no-repeat; /* منع تكرار الخلفية */
+    background-position: center; /* تمركز الخلفية في منتصف الصفحة */
+    height: 100vh; /* تأكد من أن الخلفية تغطي كامل الشاشة */
+    margin: 0;
+    padding: 0;
+  }

@@ -1,0 +1,172 @@
+:root {
+    --teal-green: #20B2AA;
+    --bright-orange: #fca43c;
+    --warm-beige: #fffaf0;
+    --charcoal-grey: #2b2b2b;
+    --soft-yellow: #ffe38e;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --focus-color: rgba(28, 138, 138, 0.4);
+}
+
+@font-face {
+    font-family: "Kidzhood Arabic";
+    src: url("../assets/fonts/alfont_com_KidzhoodArabicDEMO-Light.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "RTL Mocha Yemen Sadah";
+    src: url("../assets/fonts/RTL-MochaYemen-Sadah.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+.test-page-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(4, auto);
+    gap: 20px;
+    text-align: center;
+    height: fit-content;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+    background: linear-gradient(rgb(174 174 174 / 8%), rgb(158 158 158 / 15%)), url("../assets/flower-bg.jpg") no-repeat center top;
+    background-size: cover;
+}
+
+.Test-image {
+    position: relative;
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    grid-row: 2 / 3;
+    grid-column: 1 / 2;
+    place-self: center;
+}
+
+.imgTest {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+
+.dialog-bubble {
+    position: relative;
+    grid-row: 1 / 2;
+    grid-column: 2;
+    background-color: var(--warm-beige);
+    color: var(--charcoal-grey);
+    font-family: "Kidzhood Arabic", sans-serif;
+    font-size: 2rem;
+    font-weight: bold;
+    padding: 10px 20px;
+    border: 3px solid var(--teal-green);
+    border-radius: 100px;
+    box-shadow: 0 4px 10px var(--shadow-color);
+    text-align: center;
+    top: 140px;
+    left: -70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom-left-radius: 5px;
+}
+
+.test-button-container {
+    display: none;
+    grid-row: 1;
+    grid-column: 3;
+    top: 500px;
+    background-color: rgba(0, 0, 0, 0.237);
+}
+
+.mic-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 100px;
+    background-color: var(--bright-orange);
+    color: #fff;
+    border-radius: 50%;
+    border: none;
+    box-shadow: 0 4px 6px var(--shadow-color);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    grid-row: 3 / 3;
+    grid-column: 1 / 3;
+}
+
+.mic-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 12px var(--shadow-color);
+}
+
+.next-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #fff;
+    background-color: var(--bright-orange);
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    place-self: center;
+}
+
+.next-button:hover {
+    background-color: #e89232;
+    transform: scale(1.05);
+}
+
+.stage-counter {
+    grid-row: 1;
+    grid-column: 2;
+    color: var(--teal-green);
+    font-size: 1.5rem;
+    font-weight: bold;
+    font-family: "Kidzhood Arabic", sans-serif;
+    top: 10px;
+    position: relative;
+}
+
+.stage-counter span {
+    background-color: var(--bright-orange);
+    padding: 10px;
+    border-radius: 24px;
+}
+
+@media (max-width: 768px) {
+    .test-page-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        gap: 15px;
+        padding: 10px;
+    }
+    .Test-image {
+        max-width: 200px;
+        grid-row: auto;
+        grid-column: auto;
+    }
+    .dialog-bubble {
+        font-size: 1.5rem;
+        padding: 8px 16px;
+        top: -12rem;
+        left: 0;
+    }
+    .dialog-bubble {
+        grid-row: 2 / 4;
+    }
+    .mic-button {
+        width: 80px;
+        height: 80px;
+    }
+    .stage-counter {
+        font-size: 1.2rem;
+    }
+}

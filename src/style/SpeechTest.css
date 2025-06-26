@@ -1,0 +1,45 @@
+.speech-test {
+    padding: 2rem;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  .recording-controls {
+    margin-bottom: 20px;
+  }
+  
+  .btn-start, .btn-stop, .btn-submit {
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .btn-start:hover, .btn-stop:hover, .btn-submit:hover {
+    background-color: #45a049;
+  }
+  
+  .audio-player {
+    margin: 20px 0;
+  }
+  
+  h3 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+  }
+  
+  .submit-controls {
+    margin-top: 20px;
+  }
+  
+  audio {
+    width: 100%;
+    margin-top: 10px;
+  }
+  

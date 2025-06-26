@@ -1,0 +1,697 @@
+:root {
+  --teal-green: #1c8d8d;
+  --bright-orange: #fca43c;
+  --warm-beige: #fffaf0;
+  --charcoal-grey: #2b2b2b;
+  --soft-yellow: #ffe38e;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --focus-color: rgba(28, 138, 138, 0.4);
+}
+
+/* Define Kidzhood Arabic font */
+
+@font-face {
+  font-family: "Kidzhood Arabic";
+  src: url("../assets/fonts/alfont_com_KidzhoodArabicDEMO-Light.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "RTL Mocha Yemen Sadah";
+  src: url("../assets/fonts/RTL-MochaYemen-Sadah.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+  margin: 0;
+  font-family: "Kidzhood Arabic", sans-serif;
+  color: var(--charcoal-grey);
+}
+
+h2 {
+  font-family: "RTL Mocha Yemen Sadah", sans-serif !important;
+}
+
+.signup-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: fit-content;
+  margin: 0;
+  background: url("../assets/flower-bg.jpg") center / cover no-repeat;
+  height: 90vh;
+  /* min-height: fit-content; */
+  padding: 20px;
+  background-color: #f4f4f9;
+}
+
+.back-button {
+  position: absolute;
+  top: 40px;
+  left: 20px;
+  background-color: #fca43c;
+  color: #fff;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.back-button:hover {
+  transform: scale(1.1);
+}
+
+/* Right Section: Buttons and Forms */
+
+.right-section {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  height: fit-content;
+  min-height: 10vh;
+}
+
+.dynamic-title {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 2.3rem;
+  color: var(--teal-green);
+  text-shadow: 1px 1.5px 1px var(--charcoal-grey);
+}
+
+.logoformslide {
+  width: 50%;
+  order: -1;
+}
+
+/* Buttons */
+.button-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 15px;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.921));
+  background: rgba(255, 255, 255, 0.84);
+  padding: 2rem;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.toggle-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 150px;
+  height: 150px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 3px 8px var(--shadow-color);
+  transition: all 0.3s ease, transform 0.2s ease;
+}
+
+.toggle-button img {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 10px;
+}
+
+.toggle-button.patient {
+  background-color: var(--bright-orange);
+  color: #fff;
+}
+
+.toggle-button.doctor {
+  background-color: var(--teal-green);
+  color: #fff;
+}
+
+.toggle-button.patient:hover {
+  /* background-color: var(--teal-green); */
+  color: #fff;
+  transform: scale(1.1);
+}
+
+.toggle-button.doctor:hover {
+  /* background-color: var(--bright-orange); */
+  color: #fff;
+  transform: scale(1.1);
+}
+
+.toggle-button.active {
+  border: 2px solid var(--bright-orange);
+  transform: scale(1.1);
+}
+
+.toggle-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 10px var(--shadow-color);
+}
+
+.toggle-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 00px auto;
+  position: relative;
+  width: 50%;
+}
+
+.toggle-option {
+  flex: 1;
+  text-align: center;
+  padding: 10px 0;
+  cursor: pointer;
+  position: relative;
+  color: #333;
+  font-size: 18px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.toggle-option.active {
+  color: #ffa500;
+}
+
+.toggle-option.inactive {
+  opacity: 0.5;
+}
+
+.toggle-highlight {
+  position: absolute;
+  bottom: 0;
+  height: 4px;
+  background-color: #ffa500;
+  width: 50%;
+  transition: all 0.3s ease;
+}
+
+.lines {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 247px;
+}
+
+.line {
+  width: 121px;
+  height: 4px;
+  background-color: #e8c391;
+  border-radius: 2px;
+}
+
+.line.thick {
+  background-color: #d99844;
+}
+
+/* Form Section */
+
+.form-container {
+  width: 1000px;
+  max-width: 600px;
+  height: 85vh;
+  overflow-y: scroll;
+  position: relative;
+}
+
+/* Scrollbar Styling */
+.form-container::-webkit-scrollbar {
+  width: 8px;
+  /* Width of the scrollbar */
+}
+
+.form-container::-webkit-scrollbar-thumb {
+  background: var(--teal-green);
+  /* Thumb color */
+  border-radius: 8px;
+  /* Rounded edges */
+  border: 2px solid var(--warm-beige);
+  /* Padding around the thumb */
+}
+
+.form-container::-webkit-scrollbar-thumb:hover {
+  background: var(--bright-orange);
+  /* Thumb color on hover */
+  box-shadow: 0 0 10px var(--focus-color);
+  /* Glow effect on hover */
+}
+
+.form-container::-webkit-scrollbar-track {
+  background: var(--warm-beige);
+  /* Track background color */
+  border-radius: 8px;
+  /* Rounded edges */
+  box-shadow: inset 0 0 5px var(--shadow-color);
+  /* Subtle shadow for depth */
+}
+
+.signup-form {
+  position: relative;
+  padding-top: 80px;
+  /* Add padding to avoid overlap with the fixed title */
+  display: flex;
+  flex-direction: column;
+  gap: 0rem;
+  padding: 2.5rem;
+  border-radius: 12px;
+  background: #ffffffd3;
+  transition: box-shadow 0.4s ease;
+}
+
+form.signup-form {
+  width: 100%;
+  max-width: 600px;
+  direction: rtl;
+}
+
+.signup-form:hover {
+  box-shadow: 0 10px 30px var(--shadow-color);
+}
+
+.signup-form h2 {
+  color: var(--teal-green);
+  text-align: center;
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.signup-form label {
+  font-weight: bold;
+  color: var(--charcoal-grey);
+  margin-bottom: 0.5rem;
+}
+
+.signup-form input {
+  padding: 0.8rem;
+  border: 1px solid var(--charcoal-grey);
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.signup-form input:focus {
+  border-color: var(--teal-green);
+  box-shadow: 0 0 10px var(--focus-color);
+  outline: none;
+}
+
+.signup-form .form-button {
+  background-color: var(--bright-orange);
+  color: var(--warm-beige);
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  font-weight: bold;
+  font-family: "Kidzhood Arabic", sans-serif;
+  box-shadow: 0 4px 10px var(--shadow-color);
+  transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.signup-form button:hover {
+  background-color: var(--teal-green);
+  transform: scale(1.05);
+  box-shadow: 0 6px 15px var(--shadow-color);
+}
+
+.form-container-wrapper {
+  width: 100%;
+  max-width: 1200px;
+  padding: 20px;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.toggle-button {
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.toggle-button.active-strip {
+  border-bottom: 3px solid #fff;
+}
+
+.form-container {
+  display: none;
+  transition: all 0.3s ease;
+}
+
+.form-container.visible {
+  display: block;
+}
+
+input {
+  padding: 10px;
+  font-size: 1rem;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  padding: 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.error {
+  color: rgba(255, 0, 0, 0.763);
+  font-size: 0.9rem;
+  font-family: "Kidzhood Arabic", sans-serif;
+  margin-top: 0.5rem;
+}
+
+/* Bootstrap Utility Overrides */
+
+label,
+button {
+  font-family: "Kidzhood Arabic", sans-serif;
+}
+
+.form-control {
+  border: 1.5px solid var(--charcoal-grey);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: "Kidzhood Arabic", sans-serif;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+  border-color: var(--teal-green);
+  box-shadow: 0 0 8px var(--focus-color);
+}
+
+.btn-primary {
+  background-color: var(--teal-green);
+  border: none;
+  font-weight: bold;
+  transition: background-color 0.3s ease, transform 0.2s ease,
+    box-shadow 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--bright-orange);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+/* Responsive Adjustments */
+
+@media (max-width: 768px) {
+  .signup-page {
+    flex-direction: column;
+    padding: 10px;
+  }
+
+  .logoformslide {
+    display: none;
+  }
+
+  .back-button {
+    width: 30px;
+    height: 30px;
+    top: 25px;
+    left: 10px;
+    background-color: transparent;
+  }
+
+  .right-section {
+    flex: none;
+    height: auto;
+    box-shadow: none;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    backdrop-filter: blur(10px);
+    filter: opacity(1);
+  }
+
+  .form-container-wrapper {
+    padding: 15px;
+  }
+
+  .toggle-button {
+    width: 100%;
+    font-size: 1rem;
+    padding: 12px;
+  }
+
+  .signup-form {
+    padding: 1rem;
+  }
+
+  .signup-form h2 {
+    text-align: right;
+  }
+
+  .signup-form input {
+    padding: 12px;
+    font-size: 1rem;
+  }
+
+  button {
+    padding: 12px;
+    font-size: 1.2rem;
+  }
+}
+
+/* For screens smaller than 480px (phones) */
+@media (max-width: 480px) {
+  .signup-page {
+    padding: 5px;
+  }
+
+  .form-container-wrapper {
+    padding: 10px;
+  }
+
+  .form-container .button-container {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .toggle-button {
+    font-size: 1rem;
+    padding: 10px;
+  }
+
+  .signup-form input {
+    font-size: 0.9rem;
+    padding: 8px;
+  }
+
+  .back-button {
+    background-color: #ffa500;
+    color: #fff;
+  }
+
+  button {
+    font-size: 1rem;
+    padding: 8px;
+  }
+
+  .form-container {
+    width: 100%;
+    padding: 10px;
+  }
+}
+
+.hidden {
+  display: none;
+}
+.existing-account-text {
+  font-family: "Kidzhood Arabic", sans-serif;
+  color: var(--charcoal-grey);
+  font-size: 1.1rem;
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.login-link {
+  color: var(--teal-green);
+  font-weight: bold;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  position: relative;
+  padding: 0.2rem 0.5rem;
+}
+
+.login-link:hover {
+  color: var(--bright-orange);
+  text-decoration: none;
+}
+
+.login-link::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  bottom: 0;
+  left: 0;
+  background-color: var(--bright-orange);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.3s ease;
+}
+
+.login-link:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* تعديلات إضافية لتحسين التنسيق */
+.button-container {
+  position: relative;
+  padding-bottom: 1.5rem;
+}
+
+.lines {
+  margin-top: 1.5rem;
+}
+
+/* تعديلات للعرض على الأجهزة المحمولة */
+@media (max-width: 768px) {
+  .existing-account-text {
+    font-size: 1rem;
+    margin: 0.8rem 0;
+  }
+  
+  .login-link {
+    padding: 0.1rem 0.3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .existing-account-text {
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
+  }
+}
+
+
+/* أضف هذه الأنماط في نهاية الملف */
+
+/* تنسيقات صفحة تسجيل الدخول */
+.signup-form {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.84);
+  border-radius: 15px;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.signup-form .form-label {
+  font-weight: bold;
+  color: var(--charcoal-grey);
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.signup-form .form-control {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid var(--charcoal-grey);
+  border-radius: 10px;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+}
+
+.signup-form .form-control:focus {
+  border-color: var(--teal-green);
+  box-shadow: 0 0 10px var(--focus-color);
+}
+
+.signup-form .btn-primary {
+  background-color: var(--teal-green);
+  color: white;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.signup-form .btn-primary:hover {
+  background-color: var(--bright-orange);
+  transform: scale(1.02);
+}
+
+.forgot-password {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+/* أضف هذه الأنماط في نهاية الملف */
+
+/* تنسيقات حقول الإدخال غير الصالحة */
+.is-invalid {
+  border-color: #dc3545 !important;
+}
+
+.invalid-feedback {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  text-align: right;
+}
+
+/* تنسيق زر التحميل */
+.btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+/* تعديلات للعرض على الأجهزة المحمولة */
+@media (max-width: 768px) {
+  .signup-form {
+    padding: 1.5rem;
+  }
+  
+  .signup-form .btn-primary {
+    padding: 0.7rem;
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .signup-form {
+    padding: 1rem;
+  }
+  
+  .signup-form .btn-primary {
+    padding: 0.6rem;
+    font-size: 1rem;
+  }
+}

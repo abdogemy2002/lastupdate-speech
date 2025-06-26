@@ -1,0 +1,132 @@
+/* استيراد الخط العربي */
+
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
+body {
+    font-family: 'Tajawal', sans-serif;
+    background-color: #fdfaf2;
+    margin: 0;
+    padding: 0;
+}
+
+
+/* الصفحة الرئيسية */
+
+.speech-page {
+    background-image: url(../assets/flower-bg.jpg);
+    background-size: cover;
+    background-position: center top;
+    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+
+/* الحاوية */
+
+.speech-content {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 10px;
+    /* مسافة بين الصورة والفقاعة */
+    flex-direction: row;
+    width: 100%;
+    max-width: 400px;
+    position: relative;
+}
+
+
+/* الصورة */
+
+.character-img {
+    width: 250px;
+    height: auto;
+    max-width: 100%;
+}
+
+
+/* فقاعة الكلام */
+
+.speech-bubble {
+    background: white;
+    border-radius: 15px;
+    padding: 10px 15px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    font-size: 24px;
+    font-weight: bold;
+    color: red;
+    text-align: center;
+    position: relative;
+    top: 10px;
+    /* وضعها فوق */
+    right: 0;
+    /* وضعها بجانب الصورة */
+    max-width: 50%;
+    word-wrap: break-word;
+}
+
+.speech-bubble::after {
+    content: "";
+    position: absolute;
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 15px;
+    border-style: solid;
+    border-color: white transparent transparent transparent;
+}
+
+
+/* زر الميكروفون */
+
+.mic-button {
+    background: orange;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease-in-out;
+}
+
+.mic-button:hover {
+    transform: scale(1.1);
+}
+
+
+/* دعم الأجهزة الصغيرة */
+
+@media (max-width: 480px) {
+    .speech-content {
+        flex-direction: column;
+        align-items: center;
+    }
+    .character-img {
+        width: 150px;
+    }
+    .speech-bubble {
+        font-size: 18px;
+        padding: 10px;
+        position: static;
+        transform: none;
+        max-width: 100%;
+    }
+    .mic-button {
+        width: 60px;
+        height: 60px;
+        font-size: 18px;
+    }
+}

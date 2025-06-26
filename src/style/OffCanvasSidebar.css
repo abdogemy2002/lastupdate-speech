@@ -1,0 +1,153 @@
+/* Basic styling for Offcanvas sidebar */
+@font-face {
+  font-family: "Kidzhood Arabic";
+  src: url("../assets/fonts/alfont_com_KidzhoodArabicDEMO-Light.ttf")
+    format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "RTL Mocha Yemen Sadah";
+  src: url("../assets/fonts/RTL-MochaYemen-Sadah.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* Offcanvas header */
+.offcanvas-header {
+  background-color: #fca43c; /* Orange background */
+  color: white; /* White text */
+  font-family: "Kidzhood Arabic", sans-serif; /* Use the same font */
+  padding: 15px 20px;
+  border-bottom: 3px solid #2e83a1; /* Border separating header from body */
+}
+
+
+.offcanvas-header h5 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+  margin: 0;
+}
+/* User avatar styling */
+.user-avatar {
+  width: 80px; /* Set the size of the avatar */
+  height: 80px; /* Ensure it's a square */
+  border-radius: 50%; /* Makes it circular */
+  object-fit: cover; /* Ensures the image fits within the circle */
+  border: 5px solid #fca43c; /* Subtle border color matching the header */
+  margin-bottom: 15px; /* Space below the avatar */
+  display: block; /* Make sure it's a block element for proper spacing */
+  margin-left: auto;
+  margin-right: auto; /* Centers the avatar horizontally */
+}
+
+/* User name styling */
+.user-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #20B2AA; /* Dark blue color */
+  text-align: center;
+  margin-top: 10px;
+}
+
+/* User email styling */
+.user-email {
+  font-size: 0.9rem;
+  color: #777; /* Lighter color for the email */
+  text-align: center;
+  margin-top: 5px;
+}
+
+/* Offcanvas links */
+.off-canvas-links a {
+  display: block;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-family: "Kidzhood Arabic", sans-serif;
+  color: #2b2b2b; /* Dark text */
+  text-decoration: none;
+  border-bottom: 2px solid #ddd; /* Light border */
+  transition: background-color 0.3s ease, padding-left 0.3s ease;
+  text-align: right; /* Align text to the right */
+  direction: rtl; /* Set text direction to right-to-left */
+}
+
+.off-canvas-links a:hover {
+  background-color: #20B2AA; /* Dark blue on hover */
+  color: white; /* White text on hover */
+  padding-right: 30px; /* Shift for smooth effect, adjust to right */
+  padding-left: 20px; /* Keep initial left padding */
+}
+
+/* Offcanvas body */
+.offcanvas-body {
+  background-color: #fff; /* White background */
+  padding: 20px;
+  overflow-y: auto;
+}
+/* Mobile-specific Offcanvas styling */
+@media (max-width: 768px) {
+  .offcanvas {
+    width: 250px; /* Adjust off-canvas width */
+    background-color: #fff; /* Light background */
+  }
+
+  .offcanvas-body {
+    padding: 15px; /* Less padding on mobile */
+  }
+
+  .off-canvas-links a {
+    padding: 12px 20px; /* Adjust link padding for mobile */
+  }
+
+  .navbar-toggle {
+    display: block; /* Show toggle button on mobile */
+  }
+
+  /* Ensure the links are hidden by default and only show when active */
+  .offcanvas {
+    transition: transform 0.3s ease-in-out; /* Smooth slide in/out */
+    transform: translateX(100%); /* Start off-screen */
+  }
+
+  .offcanvas.show {
+    transform: translateX(0); /* Slide into view */
+  }
+}
+
+/* Styling for the username at the top */
+.offcanvas-username {
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #20B2AA; /* Dark blue color */
+  padding: 10px;
+  text-align: center;
+  border-bottom: 2px solid #fca43c; /* Match navbar background */
+  font-family: "Kidzhood Arabic", sans-serif;
+}
+
+/* Styling for the logout button */
+.offcanvas-logout {
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+  text-align: center;
+}
+
+.logout-btn {
+  background-color: #FCA43C; /* Same as the navbar color */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-family: "Kidzhood Arabic", sans-serif;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+  background-color: #20B2AA; /* Dark blue on hover */
+}

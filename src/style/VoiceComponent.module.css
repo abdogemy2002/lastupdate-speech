@@ -1,0 +1,111 @@
+.wrapper {
+    background-color: #18b9c0;
+    padding: 25px 20px;
+    border-radius: 16px;
+    max-width: 370px;
+    margin: 30px auto;
+    font-family: 'Tahoma', sans-serif;
+  }
+  
+  .progressWrapper {
+    margin-bottom: 20px;
+  }
+  
+  .track {
+    height: 4px;
+    background-color: white;
+    position: relative;
+    border-radius: 4px;
+  }
+  
+  .thumb {
+    width: 12px;
+    height: 12px;
+    background-color: orange;
+    border-radius: 50%;
+    position: absolute;
+    top: -4px;
+    left: 55%;
+  }
+  
+  .controlsRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  
+  .micCircle {
+    background-color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .micIcon {
+    font-size: 24px;
+    color: #18b9c0;
+  }
+  
+  .controlsBox {
+    background-color: white;
+    border-radius: 14px;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .iconBtn {
+    font-size: 20px;
+    color: #18b9c0;
+    cursor: pointer;
+  }
+  
+  .secondaryRow {
+    display: flex;
+    justify-content: space-between;
+    margin: 25px 0;
+    gap: 10px;
+  }
+  
+  .listenBtn,
+  .wordsBtn {
+    flex: 1;
+    background-color: white;
+    border-radius: 12px;
+    padding: 10px;
+    font-weight: bold;
+    color: #18b9c0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    cursor: pointer;
+  }
+  
+  .wordsBtn {
+    border: 2px solid orange;
+  }
+  
+  .playIcon {
+    font-size: 16px;
+  }
+  
+  .nextBtn {
+    width: 100%;
+    background-color: orange;
+    color: white;
+    padding: 12px 0;
+    border: none;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  

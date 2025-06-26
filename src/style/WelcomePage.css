@@ -1,0 +1,166 @@
+:root {
+  --teal-green: #20B2AA;
+  --bright-orange: #fca43c;
+  --warm-beige: #fffaf0;
+  --charcoal-grey: #2b2b2b;
+  --soft-yellow: #ffe38e;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --focus-color: rgba(28, 138, 138, 0.4);
+}
+
+/* Define Kidzhood Arabic font */
+@font-face {
+  font-family: "Kidzhood Arabic";
+  src: url("../assets/fonts/alfont_com_KidzhoodArabicDEMO-Light.ttf")
+    format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "RTL Mocha Yemen Sadah";
+  src: url("../assets/fonts/RTL-MochaYemen-Sadah.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+.welcome-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+  padding: 20px;
+  background-color: #f9f9f9;
+  height: 100vh;
+  margin: 0;
+  box-sizing: border-box;
+  background: linear-gradient(rgb(174 174 174 / 8%), rgb(158 158 158 / 15%)),
+    url("../assets/flower-bg.jpg") no-repeat;
+  background-size: cover;
+  background-position: center top;
+}
+
+.welcome-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.background-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.9;
+}
+
+.welcome-content {
+  text-align: center;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.829);
+  box-shadow: #fff 0px 0px 10px 0px;
+  border-radius: 15px;
+  max-width: 600px;
+}
+
+.welcome-title {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+.welcome-image {
+  order: -1;
+}
+
+.imgwelcome {
+  width: 50%;
+}
+
+.welcome-description {
+  font-size: 1.2rem;
+  line-height: 1.8;
+  margin-bottom: 30px;
+}
+/* Styles for the popup */
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  z-index: 1000;
+  opacity: 0;
+  animation: popupFadeIn 1s forwards; /* Animation for fading in */
+}
+
+.popup-content {
+  background-color: #20B2AA; /* Background color of the popup */
+  padding: 40px 60px;
+  border-radius: 20px;
+  color: white;
+  font-size: 3rem; /* Larger font size for the phrase */
+  font-weight: bold;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); /* Shadow for the popup */
+}
+
+@keyframes popupFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+button.cta-btn {
+  background: #FCA43C !important;
+  border: 2px solid #FCA43C !important;
+  color: #ffffff !important;
+  border-radius: 25px;
+  font-size: 1.5rem;
+  position: relative; /* Necessary to position the ::before element */
+  overflow: hidden;
+  
+}
+button.cta-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%; /* Start the background off-screen */
+  width: 100%;
+  height: 100%;
+  background-color: #20B2AA; /* New hover background color */
+  z-index: 0;
+  border: 2px solid #20B2AA !important; /* Ensure border matches the background color */
+  transition: left 0.4s ease-in-out; /* Smooth slide-in animation */
+}
+
+button.cta-btn:hover {
+  color: #fff !important; /* Ensure text color is visible when background slides in */
+  border-color: #20B2AA !important; /* Ensure border matches hover effect */
+}
+
+button.cta-btn:hover::before {
+  left: 0; /* Move the background into view on hover */
+}
+
+button.cta-btn span {
+  position: relative;
+  z-index: 1; /* Ensure text stays above the sliding effect */
+}
+
+/* Adjust layout for larger screens */
+@media (min-width: 1024px) {
+  .welcome-container {
+    flex-direction: row;
+    text-align: left;
+  }
+}

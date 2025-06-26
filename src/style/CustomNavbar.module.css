@@ -1,0 +1,176 @@
+
+/* this is useless now not used anywhere */
+/* the style is merged into the component  */
+
+@font-face {
+  font-family: "Kidzhood Arabic";
+  src: url("../assets/fonts/alfont_com_KidzhoodArabicDEMO-Light.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "RTL Mocha Yemen Sadah";
+  src: url("../assets/fonts/RTL-MochaYemen-Sadah.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* Basic navbar styling */
+.custom-navbar {
+  background-color: #ffffff;
+  position: relative;
+  color: #2b2b2b;
+  font-family: "Kidzhood Arabic", sans-serif;
+  font-size: 1rem;
+}
+.shadow {
+    box-shadow: 0 6px 6px rgba(0, 0, 0, 0.1)!important;
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0 20px;
+}
+
+.navbar-brand {
+  color: #20B2AA;
+  font-size: 1.8rem;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.navbar-logo {
+  width: 120px;
+  height: auto;
+  transition: transform 0.3s ease;
+  margin: 0;
+}
+
+.navbar-logo:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 0 10px #ffe7cd);
+}
+
+/* Toggle button for mobile */
+.navbar-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.navbar-toggler-icon {
+  width: 30px;
+  height: 3px;
+  background-color: #20B2AA;
+  display: block;
+  margin: 5px 0;
+}
+
+/* Navbar links container */
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background-color: #fca43c;
+  padding: 5px 20px;
+  border-radius: 24px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-links a {
+  text-decoration: none;
+  color: #2b2b2b;
+  padding: 10px 20px;
+  border-radius: 25px;
+  transition: background-color 0.3s ease;
+  font-family: "Kidzhood Arabic", sans-serif;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.navbar-links a:hover {
+  background-color: #20B2AA;
+  color: white;
+}
+
+.navbar-btn {
+  background-color: #fca43c;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.navbar-btn:hover {
+  background-color: #20B2AA;
+}
+
+/* User Section */
+/* .navbar-user {
+  position: relative;
+}
+
+.navbar-user-name {
+  background-color: #fca43c;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+}
+
+.navbar-user-name:hover {
+  background-color: #20B2AA;
+} */
+.navbar-user-img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%; /* Make it circular */
+  border: 4px solid #fca43c; /* Orange border */
+  cursor: pointer; /* Indicate it's clickable */
+  transition: transform 0.3s ease; /* Smooth hover effect */
+}
+
+.navbar-user-img:hover {
+  transform: scale(1.1); /* Slight zoom on hover */
+}
+
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .navbar-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    width: 100%;
+    background-color: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    display: none;
+    transition: transform 0.3s ease-in-out;
+  }
+
+  .navbar-links.active {
+    display: flex;
+    transform: translateX(0);
+  }
+
+  .navbar-toggle {
+    display: block;
+  }
+
+  .navbar-links a {
+    padding: 12px 20px;
+  }
+}
