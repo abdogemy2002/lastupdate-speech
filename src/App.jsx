@@ -10,7 +10,7 @@ import SignUp from './pages/SignUp';
 import Login from './pages/Login';
 import CustomNavbar from './components/CustomNavbar';
 import Footer from './components/Footer';
-import TestWelcome from './pages/TestPages/WelcomePage';
+import TestWelcome from './pages/TestPages/InitialTest';
 import TestPage from './pages/TestPages/TestPage';
 import SpeechRecognitionPage from './pages/SpeechRecognitionPage';
 import DashboardPage from './pages/patient-dashboard';

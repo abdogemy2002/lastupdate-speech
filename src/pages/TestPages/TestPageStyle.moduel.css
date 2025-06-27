@@ -7,4 +7,20 @@ body {
     height: 100vh; /* تأكد من أن الخلفية تغطي كامل الشاشة */
     margin: 0;
     padding: 0;
+        backgroundColor: #fdfbf69c,
+
   }
+  @font-face {
+  font-family: "Kidzhood Arabic";
+  src: url("../assets/fonts/alfont_com_KidzhoodArabicDEMO-Light.ttf")
+    format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "RTL Mocha Yemen Sadah";
+  src: url("../assets/fonts/RTL-MochaYemen-Sadah.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
