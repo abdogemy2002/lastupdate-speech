@@ -5,16 +5,10 @@ import SearchIcon from '@mui/icons-material/Search';
 import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import img1 from '../assets/image1.jpg';
-import img2 from '../assets/image1.jpg'; 
-import img3 from '../assets/image1.jpg';
+import img2 from '../assets/image2.jpg'; 
+import img3 from '../assets/image4.jpg';
 
 // Animation keyframes
-const floatAnimation = keyframes`
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
-`;
-
 const pulseAnimation = keyframes`
   0% { box-shadow: 0 0 0 0 rgba(32, 178, 170, 0.4); }
   70% { box-shadow: 0 0 0 15px rgba(32, 178, 170, 0); }
@@ -159,14 +153,16 @@ const Features = () => {
         },
       }}
     >
-      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
-        <SectionTitle 
-          variant="h2" 
-          component="h2"
-          sx={{
-            fontSize: '2.5rem',
-          }}
-        >
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 , textAlign: 'center' }}>
+      <SectionTitle 
+        variant="h2" 
+        component="h2"
+        sx={{
+          fontSize: '2.5rem',
+          color: 'lightseagreen',
+        }}
+      >
+
           مميزاتنا
         </SectionTitle>
         

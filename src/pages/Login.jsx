@@ -5,16 +5,15 @@ import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { loginSuccess } from "../store/slices/userSlice"; // استيراد action تسجيل الدخول من Redux
+import { loginSuccess } from "../store/slices/userSlice";
 import "react-toastify/dist/ReactToastify.css";
-import "../style/SignUp.css";
+import styles from "../style/SignUp.module.css"; // استيراد ملف CSS Module
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch(); // استخدام useDispatch بدلاً من useAuth
+  const dispatch = useDispatch();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Validation schema
   const validationSchema = Yup.object().shape({
     email: Yup.string()
       .email("البريد الإلكتروني غير صالح")
@@ -24,7 +23,6 @@ const LoginPage = () => {
       .required("كلمة المرور مطلوبة"),
   });
 
-  // Formik configuration
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -34,7 +32,6 @@ const LoginPage = () => {
     onSubmit: async (values) => {
       setIsSubmitting(true);
       try {
-        // API call to authenticate user
         const response = await axios.post(
           "https://speech-correction-api.azurewebsites.net/api/Account/login",
           {
@@ -50,7 +47,6 @@ const LoginPage = () => {
 
         const { email, firstName, lastName, userType, profilePictureUrl, token } = response.data;
 
-
         const userPayload = {
           token,
           email,
@@ -61,13 +57,9 @@ const LoginPage = () => {
           isAuthenticated: true
         };
 
-        // Dispatch to redux
         dispatch(loginSuccess(userPayload));
-
-
         toast.success("تم تسجيل الدخول بنجاح!");
 
-        // Redirect based on user type
         if (userType === "Patient") {
           navigate("/patient-dashboard");
         } else if (userType === "Therapist") {
@@ -92,75 +84,76 @@ const LoginPage = () => {
   });
 
   return (
-    <div className="signup-page">
-      <div className="form-container-wrapper">
-        <div className="button-container">
-          <h2 className="dynamic-title">تسجيل الدخول</h2>
+    <div className={styles['signup-page']}>
+      <div className={styles['form-container-wrapper']}>
+        <div className={styles['button-container']}>
+          <h2 className={styles['dynamic-title']}>تسجيل الدخول</h2>
 
-          <p className="existing-account-text">
+          <p className={styles['existing-account-text']}>
             ليس لديك حساب؟{" "}
-            <Link to="/signup" className="login-link">
+            <Link to="/signup" className={styles['login-link']}>
               أنشئ حساب جديد
             </Link>
           </p>
 
-          <div className="lines">
-            <div className="line thick"></div>
-            <div className="line thick"></div>
+          <div className={styles.lines}>
+            <div className={`${styles.line} ${styles.thick}`}></div>
+            <div className={`${styles.line} ${styles.thick}`}></div>
           </div>
-          <form onSubmit={formik.handleSubmit} className="signup-form">
-            <div className="mb-3">
-              <label htmlFor="email" className="form-label">
+          
+          <form onSubmit={formik.handleSubmit} className={styles['signup-form']}>
+            <div className={`mb-3 ${styles['form-group']}`}>
+              <label htmlFor="email" className={styles['form-label']}>
                 البريد الإلكتروني
               </label>
               <input
                 type="email"
                 id="email"
                 name="email"
-                className={`form-control ${formik.touched.email && formik.errors.email ? "is-invalid" : ""
-                  }`}
+                className={`${styles['form-control']} ${
+                  formik.touched.email && formik.errors.email ? styles['is-invalid'] : ""
+                }`}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.email}
                 disabled={isSubmitting}
               />
               {formik.touched.email && formik.errors.email ? (
-                <div className="invalid-feedback">{formik.errors.email}</div>
+                <div className={styles['invalid-feedback']}>{formik.errors.email}</div>
               ) : null}
             </div>
 
-            <div className="mb-3">
-              <label htmlFor="password" className="form-label">
+            <div className={`mb-3 ${styles['form-group']}`}>
+              <label htmlFor="password" className={styles['form-label']}>
                 كلمة المرور
               </label>
               <input
                 type="password"
                 id="password"
                 name="password"
-                className={`form-control ${formik.touched.password && formik.errors.password
-                  ? "is-invalid"
-                  : ""
-                  }`}
+                className={`${styles['form-control']} ${
+                  formik.touched.password && formik.errors.password ? styles['is-invalid'] : ""
+                }`}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.password}
                 disabled={isSubmitting}
               />
               {formik.touched.password && formik.errors.password ? (
-                <div className="invalid-feedback">{formik.errors.password}</div>
+                <div className={styles['invalid-feedback']}>{formik.errors.password}</div>
               ) : null}
             </div>
 
             <button
               type="submit"
-              className="btn btn-primary w-100"
+              className={`${styles.btn} ${styles['btn-primary']} w-100`}
               disabled={isSubmitting || !formik.isValid}
             >
               {isSubmitting ? "جاري تسجيل الدخول..." : "تسجيل الدخول"}
             </button>
 
-            <div className="text-center mt-3">
-              <Link to="/forgot-password" className="login-link">
+            <div className={`text-center mt-3 ${styles['text-center']}`}>
+              <Link to="/forgot-password" className={styles['login-link']}>
                 نسيت كلمة المرور؟
               </Link>
             </div>
@@ -168,7 +161,11 @@ const LoginPage = () => {
         </div>
       </div>
 
-      <img src="src/assets/KHATWTNTK-logo.svg" alt="" className="logoformslide" />
+      <img 
+        src="src/assets/KHATWTNTK-logo.svg" 
+        alt="" 
+        className={styles.logoformslide} 
+      />
       <ToastContainer />
     </div>
   );

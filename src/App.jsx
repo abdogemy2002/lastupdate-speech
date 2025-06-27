@@ -55,6 +55,10 @@ const App = () => {
             element={isAuthenticated ? <SelectLetters /> : <Navigate to="/login" />}
           />
           <Route
+            path="/TestPage"
+            element={isAuthenticated ? <TestPage /> : <Navigate to="/login" />}
+          />
+          <Route
             path="/dashboard"
             element={isAuthenticated ? <DashboardPage /> : <Navigate to="/login" />}
           />
@@ -62,10 +66,7 @@ const App = () => {
             path="/TestWelcome"
             element={isAuthenticated ? <TestWelcome /> : <Navigate to="/login" />}
           />
-          <Route
-            path="/TestPage"
-            element={isAuthenticated ? <TestPage /> : <Navigate to="/login" />}
-          />
+          
           <Route
             path="/speech"
             element={isAuthenticated ? <SpeechRecognitionPage /> : <Navigate to="/login" />}

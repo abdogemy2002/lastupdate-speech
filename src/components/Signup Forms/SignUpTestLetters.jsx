@@ -16,6 +16,7 @@ import {
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import { useNavigate } from "react-router-dom";
+import backgroundPattern from '../../assets/flower-bg.jpg'; // استيراد الصورة
 
 const arabicLetters = [
     "ا", "ب", "ت", "ث", "ج", "ح", "خ",
@@ -48,15 +49,23 @@ const LetterTrainingPage = () => {
     const handleStartTraining = () => {
         navigate("/dashboard");
     };
+
+    const handleQuickTest = () => {
+        navigate("/TestPage"); // تأكد أن هذا المسار مطابق للمسار المحدد في ملف التوجيه
+    };
+
     return (
         <Box
             dir="rtl"
             sx={{
                 minHeight: "100vh",
-                backgroundImage: "url('/bg-pattern.png')", // استبدل باسم صورتك أو خليها لون فقط
+                backgroundImage: `url(${backgroundPattern})`,
                 backgroundSize: "cover",
+                backgroundAttachment: "fixed",
                 py: 4,
-                fontFamily: "Kidzhood Arabic", // الخط العام
+                fontFamily: "Kidzhood Arabic",
+                position: "relative",
+                
             }}
         >
             <Container maxWidth="sm">
@@ -74,7 +83,7 @@ const LetterTrainingPage = () => {
                         variant="h6"
                         gutterBottom
                         fontWeight="bold"
-                        sx={{ fontFamily: "RTL Mocha Yemen Sadah" }} // عنوان بخط مختلف
+                        sx={{ fontFamily: "RTL Mocha Yemen Sadah" }}
                     >
                         اختر الحروف اللي عايز تتدرب عليها:
                     </Typography>
@@ -110,7 +119,7 @@ const LetterTrainingPage = () => {
                                     <Typography
                                         sx={{
                                             fontFamily: "Kidzhood Arabic",
-                                            fontSize: "1rem" // ← تقدر تصغر أكتر لو حبيت مثلا 1rem
+                                            fontSize: "1rem"
                                         }}
                                     >
                                         {letter}
@@ -119,7 +128,6 @@ const LetterTrainingPage = () => {
                             </Grid>
                         ))}
                     </Grid>
-
 
                     <FormControlLabel
                         control={
@@ -131,18 +139,18 @@ const LetterTrainingPage = () => {
                                     "&.Mui-checked": {
                                         color: "#FCA43C",
                                     },
-                                    fontFamily: "Kidzhood Arabic", // هذا للـ Checkbox نفسه
+                                    fontFamily: "Kidzhood Arabic",
                                 }}
                             />
                         }
                         label="تدرب على كل الحروف"
                         sx={{
                             mt: 2,
-                            fontFamily: "Kidzhood Arabic !important", // هذا للنص
-                            fontSize: "1.1rem", // حجم الخط للنص
-                            "& .MuiFormControlLabel-label": { // تأكيد التطبيق على النص
+                            fontFamily: "Kidzhood Arabic !important",
+                            fontSize: "1.1rem",
+                            "& .MuiFormControlLabel-label": {
                                 fontFamily: "Kidzhood Arabic !important",
-                                fontSize: "inherit" // يرث حجم الخط من العنصر الأب
+                                fontSize: "inherit"
                             }
                         }}
                     />
@@ -150,7 +158,7 @@ const LetterTrainingPage = () => {
 
                 <Typography align="center" my={2} sx={{
                     fontFamily: "Kidzhood Arabic",
-                    fontSize: "1.3rem" // ← تقدر تصغر أكتر لو حبيت مثلا 1rem
+                    fontSize: "1.3rem"
                 }}>
                     ــــــــــ أو ــــــــــ
                 </Typography>
@@ -158,6 +166,7 @@ const LetterTrainingPage = () => {
                 <Button
                     variant="outlined"
                     fullWidth
+                    onClick={handleQuickTest} // أضف هذا السطر
                     sx={{
                         borderRadius: 4,
                         borderColor: "#00bcd4",
@@ -184,7 +193,7 @@ const LetterTrainingPage = () => {
                 <Button
                     fullWidth
                     variant="contained"
-                    onClick={handleStartTraining} 
+                    onClick={handleStartTraining}
                     sx={{
                         borderRadius: 5,
                         fontWeight: "bold",

@@ -1,16 +1,23 @@
 import React from 'react';
-import SidebarLevels from "../../components/SidebarLevels";
 import VoiceRecorder from "../../components/test components/VoiceRecorder";
-import "./TestPageStyle.moduel.css";
+import flowerBg from '../../assets/flower-bg.jpg'; // استيراد الصورة مباشرة
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 const TempPage = () => {
-  const phrase = "صباح الفل يا عم اسلام";
-
   return (
-    <div className="container-fluid vh-100 d-flex flex-column p-0">
-                 <VoiceRecorder />
-
+    <div style={{ 
+      backgroundImage: `url(${flowerBg})`,
+      backgroundSize: 'cover',
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'center',
+      minHeight: '100vh',
+      width: '100%',
+      margin: 0,
+      padding: 0
+    }}>
+      <div className="container-fluid h-100 d-flex flex-column p-0">
+        <VoiceRecorder />
+      </div>
     </div>
   );
 };

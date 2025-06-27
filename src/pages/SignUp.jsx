@@ -3,7 +3,7 @@ import { toast, ToastContainer } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import "react-toastify/dist/ReactToastify.css";
-import "../style/SignUp.css";
+import styles from "../style/SignUp.module.css"; // تغيير هنا
 import PatientSignUp from "../components/Signup Forms/PatientSignUpForm";
 import DoctorSignUp from "../components/Signup Forms/DoctorSignUpForm";
 import { loginSuccess } from "../store/slices/userSlice";
@@ -27,15 +27,6 @@ const SignUpPage = () => {
     toast.success("تم تسجيل الحساب بنجاح!");
   };
 
-  // منع السكروول لما الفورم مش ظهرة
-  useEffect(() => {
-    document.body.style.overflow = showForm ? "auto" : "hidden";
-    return () => {
-      document.body.style.overflow = "auto";
-    };
-  }, [showForm]);
-
-  // إظهار الفورم تلقائيًا لو المستخدم بالفعل مسجل دخول
   useEffect(() => {
     if (isAuthenticated) {
       setShowForm(true);
@@ -43,32 +34,32 @@ const SignUpPage = () => {
   }, [isAuthenticated]);
 
   return (
-    <div className="signup-page">
-      <div className="form-container-wrapper">
+    <div className={styles['signup-page']}>
+      <div className={styles['form-container-wrapper']}>
         {/* أزرار اختيار نوع الحساب */}
         {!showForm && (
-          <div className="button-container">
-            <h2 className="dynamic-title">حساب جديد</h2>
-            <p className="text-center mt-3">
+          <div className={styles['button-container']}>
+            <h2 className={styles['dynamic-title']}>حساب جديد</h2>
+            <p className={`text-center mt-3 ${styles['center-text']}`}>
               لديك حساب بالفعل؟{" "}
-              <Link to="/login" className="login-link">
+              <Link to="/login" className={styles['login-link']}>
                 سجل الدخول الآن
               </Link>
             </p>
-            <div className="lines">
-              <div className="line thick"></div>
-              <div className="line thick"></div>
+            <div className={styles.lines}>
+              <div className={`${styles.line} ${styles.thick}`}></div>
+              <div className={`${styles.line} ${styles.thick}`}></div>
             </div>
-            <div className="toggle-container d-flex flex-row gap-4 justify-content-center">
+            <div className={`d-flex flex-row gap-4 justify-content-center ${styles['toggle-container']}`}>
               <button
-                className={`toggle-button patient ${activeForm === "patient" ? "active-strip" : ""}`}
+                className={`${styles['toggle-button']} ${styles.patient} ${activeForm === "patient" ? styles['active-strip'] : ""}`}
                 onClick={() => handleButtonClick("patient")}
               >
                 <img src="src/assets/kids-icon.png" alt="رمز الطفل" />
                 تسجيل طفل
               </button>
               <button
-                className={`toggle-button doctor ${activeForm === "doctor" ? "active-strip" : ""}`}
+                className={`${styles['toggle-button']} ${styles.doctor} ${activeForm === "doctor" ? styles['active-strip'] : ""}`}
                 onClick={() => handleButtonClick("doctor")}
               >
                 <img src="src/assets/doctor-icon.png" alt="رمز الطبيب" />
@@ -80,7 +71,7 @@ const SignUpPage = () => {
 
         {/* الفورم بعد اختيار النوع */}
         {showForm && (
-          <div className="form-container visible">
+          <div className={`${styles['form-container']} ${styles.visible}`}>
             {activeForm === "patient" && (
               <PatientSignUp
                 setActiveForm={setActiveForm}
@@ -100,7 +91,7 @@ const SignUpPage = () => {
       </div>
 
       {/* اللوجو والتنبيهات */}
-      <img src="src/assets/KHATWTNTK-logo.svg" alt="" className="logoformslide" />
+      <img src="src/assets/KHATWTNTK-logo.svg" alt="" className={styles.logoformslide} />
       <ToastContainer />
     </div>
   );

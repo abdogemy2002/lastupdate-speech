@@ -6,11 +6,12 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { IoArrowBack } from "react-icons/io5";
 import { useDispatch } from "react-redux";
-import { loginSuccess } from "../../store/slices/userSlice"; // استيراد action تسجيل الدخول من Redux
+import { loginSuccess } from "../../store/slices/userSlice";
+import styles from "../../style/SignUp.module.css";
 
 const PatientSignUpForm = ({ setActiveForm, setShowForm, handleLogin, setShowProfileSelector }) => {
   const navigate = useNavigate();
-  const dispatch = useDispatch(); // استخدام useDispatch بدلاً من useAuth
+  const dispatch = useDispatch();
   const [step, setStep] = useState(1);
 
   const formik = useFormik({
@@ -110,7 +111,6 @@ const PatientSignUpForm = ({ setActiveForm, setShowForm, handleLogin, setShowPro
           };
           dispatch(loginSuccess(userData));
 
-
           localStorage.setItem("isNewUser", "true");
 
           toast.success("تم تسجيل الطفل بنجاح!");
@@ -122,7 +122,6 @@ const PatientSignUpForm = ({ setActiveForm, setShowForm, handleLogin, setShowPro
         });
     },
   });
-
 
   const goBack = (e) => {
     e.preventDefault();
@@ -144,7 +143,6 @@ const PatientSignUpForm = ({ setActiveForm, setShowForm, handleLogin, setShowPro
     if (isValid) {
       setStep(step + 1);
     } else {
-      // عرض أخطاء التحقق
       currentFields.forEach(field => {
         if (formik.errors[field]) {
           toast.error(formik.errors[field]);
@@ -154,31 +152,30 @@ const PatientSignUpForm = ({ setActiveForm, setShowForm, handleLogin, setShowPro
   };
 
   return (
-    <form className="signup-form" onSubmit={formik.handleSubmit}>
+    <form className={styles["signup-form"]} onSubmit={formik.handleSubmit}>
       <button
-        className="back-button"
+        className={styles["back-button"]}
         onClick={goBack}
         type="button"
       >
-        <IoArrowBack className="icon" />
+        <IoArrowBack className={styles.icon} />
       </button>
 
-      <h2>تسجيل الطفل </h2>
+      <h2>تسجيل الطفل</h2>
 
-      <div className="form-fields-container">
+      <div className={styles["form-fields-container"]}>
         {step === 1 ? (
           <>
-            {/* المرحلة الأولى: المعلومات الأساسية */}
-            <div className="mb-3">
-              <label className="form-label">
+            <div className={styles["mb-3"]}>
+              <label className={styles["form-label"]}>
                 الاسم الأول:{" "}
                 {formik.touched.firstName && formik.errors.firstName && (
-                  <span className="error">({formik.errors.firstName})</span>
+                  <span className={styles.error}>({formik.errors.firstName})</span>
                 )}
               </label>
               <input
                 type="text"
-                className="form-control"
+                className={styles["form-control"]}
                 name="firstName"
                 value={formik.values.firstName}
                 onChange={formik.handleChange}
@@ -187,16 +184,16 @@ const PatientSignUpForm = ({ setActiveForm, setShowForm, handleLogin, setShowPro
               />
             </div>
 
-            <div className="mb-3">
-              <label className="form-label">
+            <div className={styles["mb-3"]}>
+              <label className={styles["form-label"]}>
                 الاسم الأخير:{" "}
                 {formik.touched.lastName && formik.errors.lastName && (
-                  <span className="error">({formik.errors.lastName})</span>
+                  <span className={styles.error}>({formik.errors.lastName})</span>
                 )}
               </label>
               <input
                 type="text"
-                className="form-control"
+                className={styles["form-control"]}
                 name="lastName"
                 value={formik.values.lastName}
                 onChange={formik.handleChange}
@@ -205,16 +202,16 @@ const PatientSignUpForm = ({ setActiveForm, setShowForm, handleLogin, setShowPro
               />
             </div>
 
-            <div className="mb-3">
-              <label className="form-label">
+            <div className={styles["mb-3"]}>
+              <label className={styles["form-label"]}>
                 البريد الإلكتروني:{" "}
                 {formik.touched.email && formik.errors.email && (
-                  <span className="error">({formik.errors.email})</span>
+                  <span className={styles.error}>({formik.errors.email})</span>
                 )}
               </label>
               <input
                 type="email"
-                className="form-control"
+                className={styles["form-control"]}
                 name="email"
                 value={formik.values.email}
                 onChange={formik.handleChange}
@@ -223,16 +220,16 @@ const PatientSignUpForm = ({ setActiveForm, setShowForm, handleLogin, setShowPro
               />
             </div>
 
-            <div className="mb-3">
-              <label className="form-label">
+            <div className={styles["mb-3"]}>
+              <label className={styles["form-label"]}>
                 كلمة المرور:{" "}
                 {formik.touched.password && formik.errors.password && (
-                  <span className="error">({formik.errors.password})</span>
+                  <span className={styles.error}>({formik.errors.password})</span>
                 )}
               </label>
               <input
                 type="password"
-                className="form-control"
+                className={styles["form-control"]}
                 name="password"
                 value={formik.values.password}
                 onChange={formik.handleChange}
@@ -241,16 +238,16 @@ const PatientSignUpForm = ({ setActiveForm, setShowForm, handleLogin, setShowPro
               />
             </div>
 
-            <div className="mb-3">
-              <label className="form-label">
+            <div className={styles["mb-3"]}>
+              <label className={styles["form-label"]}>
                 تأكيد كلمة المرور:{" "}
                 {formik.touched.confirmPassword && formik.errors.confirmPassword && (
-                  <span className="error">({formik.errors.confirmPassword})</span>
+                  <span className={styles.error}>({formik.errors.confirmPassword})</span>
                 )}
               </label>
               <input
                 type="password"
-                className="form-control"
+                className={styles["form-control"]}
                 name="confirmPassword"
                 value={formik.values.confirmPassword}
                 onChange={formik.handleChange}
@@ -259,16 +256,16 @@ const PatientSignUpForm = ({ setActiveForm, setShowForm, handleLogin, setShowPro
               />
             </div>
 
-            <div className="mb-3">
-              <label className="form-label">
+            <div className={styles["mb-3"]}>
+              <label className={styles["form-label"]}>
                 رقم الهاتف:{" "}
                 {formik.touched.phoneNumber && formik.errors.phoneNumber && (
-                  <span className="error">({formik.errors.phoneNumber})</span>
+                  <span className={styles.error}>({formik.errors.phoneNumber})</span>
                 )}
               </label>
               <input
                 type="text"
-                className="form-control"
+                className={styles["form-control"]}
                 name="phoneNumber"
                 value={formik.values.phoneNumber}
                 onChange={formik.handleChange}
@@ -277,16 +274,16 @@ const PatientSignUpForm = ({ setActiveForm, setShowForm, handleLogin, setShowPro
               />
             </div>
 
-            <div className="mb-3">
-              <label className="form-label">
+            <div className={styles["mb-3"]}>
+              <label className={styles["form-label"]}>
                 تاريخ الميلاد:{" "}
                 {formik.touched.birthDate && formik.errors.birthDate && (
-                  <span className="error">({formik.errors.birthDate})</span>
+                  <span className={styles.error}>({formik.errors.birthDate})</span>
                 )}
               </label>
               <input
                 type="date"
-                className="form-control"
+                className={styles["form-control"]}
                 name="birthDate"
                 value={formik.values.birthDate}
                 onChange={formik.handleChange}
@@ -296,16 +293,15 @@ const PatientSignUpForm = ({ setActiveForm, setShowForm, handleLogin, setShowPro
           </>
         ) : (
           <>
-            {/* المرحلة الثانية: المعلومات الإضافية */}
-            <div className="mb-3">
-              <label className="form-label">
+            <div className={styles["mb-3"]}>
+              <label className={styles["form-label"]}>
                 الجنسية:{" "}
                 {formik.touched.nationality && formik.errors.nationality && (
-                  <span className="error">({formik.errors.nationality})</span>
+                  <span className={styles.error}>({formik.errors.nationality})</span>
                 )}
               </label>
               <select
-                className="form-control"
+                className={styles["form-control"]}
                 name="nationality"
                 value={formik.values.nationality}
                 onChange={formik.handleChange}
@@ -318,16 +314,16 @@ const PatientSignUpForm = ({ setActiveForm, setShowForm, handleLogin, setShowPro
               </select>
             </div>
 
-            <div className="mb-3">
-              <label className="form-label">
+            <div className={styles["mb-3"]}>
+              <label className={styles["form-label"]}>
                 المدينة:{" "}
                 {formik.touched.city && formik.errors.city && (
-                  <span className="error">({formik.errors.city})</span>
+                  <span className={styles.error}>({formik.errors.city})</span>
                 )}
               </label>
               <input
                 type="text"
-                className="form-control"
+                className={styles["form-control"]}
                 name="city"
                 value={formik.values.city}
                 onChange={formik.handleChange}
@@ -336,15 +332,15 @@ const PatientSignUpForm = ({ setActiveForm, setShowForm, handleLogin, setShowPro
               />
             </div>
 
-            <div className="mb-3">
-              <label className="form-label">
+            <div className={styles["mb-3"]}>
+              <label className={styles["form-label"]}>
                 الجنس:{" "}
                 {formik.touched.gender && formik.errors.gender && (
-                  <span className="error">({formik.errors.gender})</span>
+                  <span className={styles.error}>({formik.errors.gender})</span>
                 )}
               </label>
               <select
-                className="form-control"
+                className={styles["form-control"]}
                 name="gender"
                 value={formik.values.gender}
                 onChange={formik.handleChange}
@@ -355,17 +351,17 @@ const PatientSignUpForm = ({ setActiveForm, setShowForm, handleLogin, setShowPro
               </select>
             </div>
 
-            <div className="mb-3">
-              <label className="form-label">
+            <div className={styles["mb-3"]}>
+              <label className={styles["form-label"]}>
                 عدد أفراد الأسرة:{" "}
                 {formik.touched.familyMembersCount && formik.errors.familyMembersCount && (
-                  <span className="error">({formik.errors.familyMembersCount})</span>
+                  <span className={styles.error}>({formik.errors.familyMembersCount})</span>
                 )}
               </label>
               <input
                 type="number"
                 min="1"
-                className="form-control"
+                className={styles["form-control"]}
                 name="familyMembersCount"
                 value={formik.values.familyMembersCount}
                 onChange={formik.handleChange}
@@ -374,17 +370,17 @@ const PatientSignUpForm = ({ setActiveForm, setShowForm, handleLogin, setShowPro
               />
             </div>
 
-            <div className="mb-3">
-              <label className="form-label">
+            <div className={styles["mb-3"]}>
+              <label className={styles["form-label"]}>
                 ترتيب الطفل بين إخوته:{" "}
                 {formik.touched.siblingRank && formik.errors.siblingRank && (
-                  <span className="error">({formik.errors.siblingRank})</span>
+                  <span className={styles.error}>({formik.errors.siblingRank})</span>
                 )}
               </label>
               <input
                 type="number"
                 min="1"
-                className="form-control"
+                className={styles["form-control"]}
                 name="siblingRank"
                 value={formik.values.siblingRank}
                 onChange={formik.handleChange}
@@ -393,11 +389,11 @@ const PatientSignUpForm = ({ setActiveForm, setShowForm, handleLogin, setShowPro
               />
             </div>
 
-            <div className="mb-3">
-              <label className="form-label">
+            <div className={styles["mb-3"]}>
+              <label className={styles["form-label"]}>
                 نتيجة اختبار الذكاء (اختياري):{" "}
                 {formik.touched.latestIqTestResult && formik.errors.latestIqTestResult && (
-                  <span className="error">({formik.errors.latestIqTestResult})</span>
+                  <span className={styles.error}>({formik.errors.latestIqTestResult})</span>
                 )}
               </label>
               <input
@@ -405,7 +401,7 @@ const PatientSignUpForm = ({ setActiveForm, setShowForm, handleLogin, setShowPro
                 step="0.1"
                 min="0"
                 max="200"
-                className="form-control"
+                className={styles["form-control"]}
                 name="latestIqTestResult"
                 value={formik.values.latestIqTestResult}
                 onChange={formik.handleChange}
@@ -414,11 +410,11 @@ const PatientSignUpForm = ({ setActiveForm, setShowForm, handleLogin, setShowPro
               />
             </div>
 
-            <div className="mb-3">
-              <label className="form-label">
+            <div className={styles["mb-3"]}>
+              <label className={styles["form-label"]}>
                 نتيجة اختبار الأذن اليمنى (اختياري):{" "}
                 {formik.touched.latestRightEarTestResult && formik.errors.latestRightEarTestResult && (
-                  <span className="error">({formik.errors.latestRightEarTestResult})</span>
+                  <span className={styles.error}>({formik.errors.latestRightEarTestResult})</span>
                 )}
               </label>
               <input
@@ -426,7 +422,7 @@ const PatientSignUpForm = ({ setActiveForm, setShowForm, handleLogin, setShowPro
                 step="0.1"
                 min="0"
                 max="100"
-                className="form-control"
+                className={styles["form-control"]}
                 name="latestRightEarTestResult"
                 value={formik.values.latestRightEarTestResult}
                 onChange={formik.handleChange}
@@ -435,11 +431,11 @@ const PatientSignUpForm = ({ setActiveForm, setShowForm, handleLogin, setShowPro
               />
             </div>
 
-            <div className="mb-3">
-              <label className="form-label">
+            <div className={styles["mb-3"]}>
+              <label className={styles["form-label"]}>
                 نتيجة اختبار الأذن اليسرى (اختياري):{" "}
                 {formik.touched.latestLeftEarTestResult && formik.errors.latestLeftEarTestResult && (
-                  <span className="error">({formik.errors.latestLeftEarTestResult})</span>
+                  <span className={styles.error}>({formik.errors.latestLeftEarTestResult})</span>
                 )}
               </label>
               <input
@@ -447,7 +443,7 @@ const PatientSignUpForm = ({ setActiveForm, setShowForm, handleLogin, setShowPro
                 step="0.1"
                 min="0"
                 max="100"
-                className="form-control"
+                className={styles["form-control"]}
                 name="latestLeftEarTestResult"
                 value={formik.values.latestLeftEarTestResult}
                 onChange={formik.handleChange}

@@ -1,10 +1,8 @@
-// src/pages/ProfileImagePage.jsx
-
 import React, { useState } from "react";
 import { ToastContainer } from "react-toastify";
 import { useSelector } from "react-redux";
 import "react-toastify/dist/ReactToastify.css";
-import "../style/SignUp.css";
+import styles from "../style/SignUp.module.css"; // استيراد ملف CSS Module
 import ProfileImageSelector from "../components/Signup Forms/ProfileImageSelector";
 
 const ProfileImagePage = () => {
@@ -23,16 +21,20 @@ const ProfileImagePage = () => {
   };
 
   return (
-    <div className="signup-page">
-      <div className="form-container-wrapper">
-        <div className="form-container visible">
+    <div className={styles['signup-page']}>
+      <div className={styles['form-container-wrapper']}>
+        <div className={`${styles['form-container']} ${styles.visible}`}>
           <ProfileImageSelector
             onAvatarSelect={handleAvatarSelect}
             onImageUpload={handleImageUpload}
           />
         </div>
       </div>
-      <img src="src/assets/KHATWTNTK-logo.svg" alt="" className="logoformslide" />
+      <img 
+        src="src/assets/KHATWTNTK-logo.svg" 
+        alt="" 
+        className={styles.logoformslide} 
+      />
       <ToastContainer />
     </div>
   );
