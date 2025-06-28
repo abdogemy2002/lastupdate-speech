@@ -13,13 +13,14 @@ import Footer from './components/Footer';
 import TestWelcome from './pages/TestPages/InitialTest';
 import TestPage from './pages/TestPages/TestPage';
 import SpeechRecognitionPage from './pages/SpeechRecognitionPage';
-import DashboardPage from './pages/patient-dashboard';
+import PatientDashboard from './pages/patient_dashboard';
 import ProfileImageSelectorPage from './pages/ProfileImagePage';
 import SelectLetters from './components/Signup Forms/SignUpTestLetters';
+import UpdateProfile from './pages/PatientProfilePage';
 
 const App = () => {
   const dispatch = useDispatch();
-  const { isAuthenticated } = useSelector((state) => state.user);
+  const { isAuthenticated, userType } = useSelector((state) => state.user);
 
   useEffect(() => {
     AOS.init();
@@ -38,8 +39,16 @@ const App = () => {
           {/* الصفحة الرئيسية */}
           <Route
             path="/"
-            element={isAuthenticated ? <Navigate to="/dashboard" /> : <HomePage />}
+            element={
+              isAuthenticated && userType === 'Patient' ? (
+                <Navigate to="/PatientDashboard" />
+              ) : (
+                <HomePage />
+              )
+            }
           />
+
+
 
           {/* صفحات لا تحتاج مصادقة */}
           <Route path="/signup" element={<SignUp />} />
@@ -59,14 +68,21 @@ const App = () => {
             element={isAuthenticated ? <TestPage /> : <Navigate to="/login" />}
           />
           <Route
-            path="/dashboard"
-            element={isAuthenticated ? <DashboardPage /> : <Navigate to="/login" />}
+            path="/UpdateProfile"
+            element={isAuthenticated ? <UpdateProfile /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/PatientDashboard"
+            element={
+              isAuthenticated && userType === 'Patient' ?
+                <PatientDashboard /> :
+                <Navigate to="/" />
+            }
           />
           <Route
             path="/TestWelcome"
             element={isAuthenticated ? <TestWelcome /> : <Navigate to="/login" />}
           />
-          
           <Route
             path="/speech"
             element={isAuthenticated ? <SpeechRecognitionPage /> : <Navigate to="/login" />}

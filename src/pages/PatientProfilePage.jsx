@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
@@ -14,17 +14,96 @@ import {
 import { ArrowBack, Save } from "@mui/icons-material";
 import BackgroundWrapper from "../components/shared/BackgroundWrapper";
 
+// تعريف مكون الحقل النصي بشكل منفصل لمنع إعادة التصيير غير الضرورية
+const CustomTextField = React.memo(({ name, label, type = "text", disabled = false, formik, ...props }) => {
+  const [localValue, setLocalValue] = useState(formik.values[name]);
+
+  useEffect(() => {
+    setLocalValue(formik.values[name]);
+  }, [formik.values[name]]);
+
+  return (
+    <TextField
+      fullWidth
+      label={label}
+      name={name}
+      type={type}
+      disabled={disabled}
+      value={localValue}
+      onChange={(e) => setLocalValue(e.target.value)}
+      onBlur={(e) => {
+        formik.handleBlur(e);
+        formik.setFieldValue(name, e.target.value);
+      }}
+      error={formik.touched[name] && Boolean(formik.errors[name])}
+      helperText={formik.touched[name] && formik.errors[name]}
+      sx={props.sx}
+      InputLabelProps={type === "date" ? { shrink: true } : undefined}
+      inputProps={{ tabIndex: props.tabIndex }}
+    />
+  );
+});
+// تعريف مكون Select بشكل منفصل
+const CustomSelect = React.memo(({ name, label, options, formik, ...props }) => (
+  <FormControl fullWidth sx={props.sx}>
+    <InputLabel>{label}</InputLabel>
+    <Select
+      name={name}
+      value={formik.values[name]}
+      onChange={formik.handleChange}
+      onBlur={formik.handleBlur}
+      error={formik.touched[name] && Boolean(formik.errors[name])}
+      label={label}
+    >
+      {options.map((option) => (
+        <MenuItem key={option.value} value={option.value}>
+          {option.label}
+        </MenuItem>
+      ))}
+    </Select>
+  </FormControl>
+));
+
 const PatientProfilePage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const currentUser = useSelector((state) => state.user);
-
-  const [patientData, setPatientData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
-  // تعريف الفورميك
+
+  // تعريف schema التحقق مرة واحدة باستخدام useMemo
+  const validationSchema = useMemo(() => Yup.object({
+    email: Yup.string().email("البريد الإلكتروني غير صالح").required("البريد الإلكتروني مطلوب"),
+    phoneNumber: Yup.string().matches(/^\+?\d{10,15}$/, "رقم الهاتف غير صالح").required("رقم الهاتف مطلوب"),
+    firstName: Yup.string().required("الاسم الأول مطلوب"),
+    lastName: Yup.string().required("الاسم الأخير مطلوب"),
+    birthDate: Yup.date().required("تاريخ الميلاد مطلوب").max(new Date(), "تاريخ الميلاد لا يمكن أن يكون في المستقبل"),
+    nationality: Yup.string().required("الجنسية مطلوبة"),
+    city: Yup.string().required("المدينة مطلوبة"),
+    gender: Yup.string().required("الجنس مطلوب"),
+    familyMembersCount: Yup.number().min(1, "يجب أن يكون عدد أفراد الأسرة على الأقل 1").required("عدد أفراد الأسرة مطلوب"),
+    siblingRank: Yup.number().min(1, "يجب أن يكون ترتيب الطفل بين إخوته على الأقل 1").required("ترتيب الطفل بين إخوته مطلوب"),
+    latestIqTestResult: Yup.number().min(0).max(200).nullable(),
+    latestRightEarTestResult: Yup.number().min(0).max(100).nullable(),
+    latestLeftEarTestResult: Yup.number().min(0).max(100).nullable()
+  }), []);
+
+  // تعريف options للselect مرة واحدة باستخدام useMemo
+  const selectOptions = useMemo(() => ({
+    nationality: [
+      { value: "Egyptian", label: "مصري" },
+      { value: "Saudi", label: "سعودي" },
+      { value: "Emirati", label: "إماراتي" },
+      { value: "Other", label: "أخرى" }
+    ],
+    gender: [
+      { value: "male", label: "ذكر" },
+      { value: "female", label: "أنثى" }
+    ]
+  }), []);
+
   const formik = useFormik({
-    enableReinitialize: true,
-    initialValues: patientData || {
+    initialValues: {
       email: "",
       phoneNumber: "",
       firstName: "",
@@ -39,21 +118,7 @@ const PatientProfilePage = () => {
       latestRightEarTestResult: "",
       latestLeftEarTestResult: ""
     },
-    validationSchema: Yup.object({
-      email: Yup.string().email("البريد الإلكتروني غير صالح").required("البريد الإلكتروني مطلوب"),
-      phoneNumber: Yup.string().matches(/^\+?\d{10,15}$/, "رقم الهاتف غير صالح").required("رقم الهاتف مطلوب"),
-      firstName: Yup.string().required("الاسم الأول مطلوب"),
-      lastName: Yup.string().required("الاسم الأخير مطلوب"),
-      birthDate: Yup.date().required("تاريخ الميلاد مطلوب").max(new Date(), "تاريخ الميلاد لا يمكن أن يكون في المستقبل"),
-      nationality: Yup.string().required("الجنسية مطلوبة"),
-      city: Yup.string().required("المدينة مطلوبة"),
-      gender: Yup.string().required("الجنس مطلوب"),
-      familyMembersCount: Yup.number().min(1, "يجب أن يكون عدد أفراد الأسرة على الأقل 1").required("عدد أفراد الأسرة مطلوب"),
-      siblingRank: Yup.number().min(1, "يجب أن يكون ترتيب الطفل بين إخوته على الأقل 1").required("ترتيب الطفل بين إخوته مطلوب"),
-      latestIqTestResult: Yup.number().min(0).max(200).nullable(),
-      latestRightEarTestResult: Yup.number().min(0).max(100).nullable(),
-      latestLeftEarTestResult: Yup.number().min(0).max(100).nullable()
-    }),
+    validationSchema,
     onSubmit: async (values) => {
       setUpdating(true);
       try {
@@ -74,11 +139,9 @@ const PatientProfilePage = () => {
         };
 
         await axios.put(
-          `https://speech-correction-api.azurewebsites.net/api/Patient/${currentUser.email}`,
+          `https://speech-correction-api.azurewebsites.net/api/Profile/update-patient-profile`,
           updateData,
-          {
-            headers: { Authorization: `Bearer ${currentUser.token}` }
-          }
+          { headers: { Authorization: `Bearer ${currentUser.token}` } }
         );
 
         dispatch(loginSuccess({
@@ -96,18 +159,16 @@ const PatientProfilePage = () => {
       }
     }
   });
-  // جلب بيانات المريض عند تحميل الصفحة
+
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchPatientData = async () => {
       try {
         const response = await axios.get(
           `https://speech-correction-api.azurewebsites.net/api/Profile/get-patient-profile`,
-          {
-            headers: { Authorization: `Bearer ${currentUser.token}` }
-          }
+          { headers: { Authorization: `Bearer ${currentUser.token}` } }
         );
 
-        const data = {
+        const initialValues = {
           email: currentUser.email,
           phoneNumber: response.data.phoneNumber || "",
           firstName: response.data.firstName || "",
@@ -123,15 +184,19 @@ const PatientProfilePage = () => {
           latestLeftEarTestResult: response.data.latestLeftEarTestResult || ""
         };
 
-        setPatientData(data);
+        formik.resetForm({ values: initialValues });
       } catch (error) {
         console.error("Fetch error:", error);
         toast.error("حدث خطأ أثناء جلب بيانات المريض");
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    if (currentUser?.email) fetchData();
-  }, [currentUser]);
+    if (currentUser?.email) {
+      fetchPatientData();
+    }
+  }, [currentUser?.email, currentUser?.token]);
 
   const fieldStyles = {
     '& .MuiOutlinedInput-root': {
@@ -158,68 +223,8 @@ const PatientProfilePage = () => {
       textAlign: 'right'
     }
   };
-  // حقل نصي مخصص
-const CustomTextField = ({ name, label, type = "text", disabled = false, formik, tabIndex, placeholder, ...props }) => (
-  <TextField
-    fullWidth
-    label={label}
-    name={name}
-    type={type}
-    disabled={disabled}
-    value={formik.values[name]}
-    onChange={formik.handleChange}
-    onBlur={formik.handleBlur}
-    error={formik.touched[name] && Boolean(formik.errors[name])}
-    helperText={formik.touched[name] && formik.errors[name]}
-    placeholder={placeholder}
-    sx={props.sx}
-    InputLabelProps={type === "date" ? { shrink: true } : undefined}
-    inputProps={{ tabIndex }}
-  />
-);
 
-  // قائمة منسدلة مخصصة
- const CustomSelect = ({ name, label, options, formik, sx, placeholder }) => (
-  <FormControl fullWidth sx={sx}>
-    <InputLabel>{label}</InputLabel>
-    <Select
-      name={name}
-      value={formik.values[name]}
-      onChange={formik.handleChange}
-      onBlur={formik.handleBlur}
-      error={formik.touched[name] && Boolean(formik.errors[name])}
-      displayEmpty
-      renderValue={(selected) =>
-        selected ? options.find(o => o.value === selected)?.label : placeholder
-      }
-    >
-      <MenuItem disabled value="">
-        {placeholder}
-      </MenuItem>
-      {options.map((option) => (
-        <MenuItem key={option.value} value={option.value}>
-          {option.label}
-        </MenuItem>
-      ))}
-    </Select>
-  </FormControl>
-);
-
-
-  const selectOptions = {
-    nationality: [
-      { value: "Egyptian", label: "مصري" },
-      { value: "Saudi", label: "سعودي" },
-      { value: "Emirati", label: "إماراتي" },
-      { value: "Other", label: "أخرى" }
-    ],
-    gender: [
-      { value: "male", label: "ذكر" },
-      { value: "female", label: "أنثى" }
-    ]
-  };
-
-   if (!patientData) {
+  if (isLoading) {
     return (
       <Container maxWidth="md" sx={{
         py: 4,
@@ -232,6 +237,7 @@ const CustomTextField = ({ name, label, type = "text", disabled = false, formik,
       </Container>
     );
   }
+
   return (
     <BackgroundWrapper>
       <Container maxWidth="md" sx={{
@@ -465,7 +471,7 @@ const CustomTextField = ({ name, label, type = "text", disabled = false, formik,
                   color="primary"
                   size="large"
                   fullWidth
-                  startIcon={<Save />}
+                  startIcon={updating ? <CircularProgress size={24} /> : <Save />}
                   disabled={updating}
                   sx={{
                     py: 2,
@@ -483,11 +489,7 @@ const CustomTextField = ({ name, label, type = "text", disabled = false, formik,
                     }
                   }}
                 >
-                  {updating ? (
-                    <CircularProgress size={24} />
-                  ) : (
-                    "حفظ التغييرات"
-                  )}
+                  {updating ? "جاري الحفظ..." : "حفظ التغييرات"}
                 </Button>
               </Grid>
             </Grid>

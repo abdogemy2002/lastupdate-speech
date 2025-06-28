@@ -36,21 +36,19 @@ function OffCanvasSidebar({ show, onHide }) {
 
   useEffect(() => {
     if (user && user.firstName) {
-      // بيانات موجودة في الريدوكس
       setUserData({
         firstName: user.firstName,
         email: user.email,
         profileImageUrl: user.profileImageUrl
       });
     } else {
-      // حاول استرجاع البيانات من localStorage
       const persisted = localStorage.getItem('persist:root');
       if (persisted) {
         try {
           const parsed = JSON.parse(persisted);
           const storedUser = JSON.parse(parsed.user);
           if (storedUser && storedUser.isAuthenticated) {
-            dispatch(loginSuccess(storedUser)); // رجعها للريدوكس
+            dispatch(loginSuccess(storedUser));
             setUserData({
               firstName: storedUser.firstName,
               email: storedUser.email,
@@ -64,18 +62,23 @@ function OffCanvasSidebar({ show, onHide }) {
     }
   }, [user, dispatch]);
 
- const handleLogout = () => {
-  dispatch(logout());                   // تنظيف الـ Redux
-  localStorage.clear();                // تنظيف الـ localStorage كله أو استخدم removeItem("persist:root")
-  setUserData({                        // إعادة البيانات للحالة الافتراضية
-    firstName: '',
-    email: '',
-    profileImageUrl: ''
-  });
-  onHide();                            // غلق السايدبار
-  navigate("/");                       // الرجوع للصفحة الرئيسية
-};
+  const handleLogout = () => {
+    dispatch(logout());
+    localStorage.clear();
+    setUserData({
+      firstName: '',
+      email: '',
+      profileImageUrl: ''
+    });
+    onHide();
+    navigate("/");
+  };
 
+  // دالة جديدة للتعامل مع نقر تعديل الملف الشخصي
+  const handleEditProfile = () => {
+    onHide(); // إغلاق السايدبار أولاً
+    navigate("/UpdateProfile "); // الانتقال لصفحة التعديل
+  };
 
   return (
     <Drawer
@@ -115,7 +118,7 @@ function OffCanvasSidebar({ show, onHide }) {
         <Divider />
 
         <List sx={{ py: 2 }}>
-          <ListItem button component="a" href="#edit-profile">
+          <ListItem button onClick={handleEditProfile}>
             <ListItemIcon><EditIcon /></ListItemIcon>
             <ListItemText primary="تعديل الملف الشخصي" />
           </ListItem>

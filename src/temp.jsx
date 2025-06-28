@@ -13,7 +13,7 @@ import Footer from './components/Footer';
 import TestWelcome from './pages/TestPages/WelcomePage';
 import TestPage from './pages/TestPages/TestPage';
 import SpeechRecognitionPage from './pages/SpeechRecognitionPage';
-import DashboardPage from './pages/patient-dashboard';
+import DashboardPage from './pages/patient_dashboard';
 import ProfileImageSelectorPage from './pages/ProfileImagePage';
 import SelectLetters from './components/Signup Forms/SignUpTestLetters';
 

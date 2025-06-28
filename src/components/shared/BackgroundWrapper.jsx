@@ -10,18 +10,8 @@ const BackgroundWrapper = ({ children }) => {
                 backgroundImage: `url(${backgroundImage})`,
                 backgroundSize: 'cover',
                 backgroundAttachment: 'fixed',
-                py: 4,
+                py: 0,
                 position: 'relative',
-                // '&::before': {
-                //     content: '""',
-                //     position: 'absolute',
-                //     top: 0,
-                //     left: 0,
-                //     right: 0,
-                //     bottom: 0,
-                //     backgroundColor: 'rgba(255, 255, 255, 0.85)',
-                //     zIndex: 0,
-                // }
             }}
         >
             {children}

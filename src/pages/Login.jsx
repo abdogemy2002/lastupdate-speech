@@ -59,9 +59,9 @@ const LoginPage = () => {
 
         dispatch(loginSuccess(userPayload));
         toast.success("تم تسجيل الدخول بنجاح!");
-
+console.log("User data:", userPayload);
         if (userType === "Patient") {
-          navigate("/patient-dashboard");
+          navigate("/PatientDashboard");
         } else if (userType === "Therapist") {
           navigate("/therapist-dashboard");
         }
