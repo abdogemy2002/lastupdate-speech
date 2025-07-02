@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import childImage from '../../assets/vector.png';
 import {
     Box,
@@ -7,7 +7,9 @@ import {
     Stack,
     styled
 } from '@mui/material';
+
 import {
+    Pause as PauseIcon,
     PlayArrow as PlayArrowIcon,
     Bookmark as BookmarkIcon
 } from '@mui/icons-material';
@@ -27,7 +29,7 @@ const MainContainer = styled(Box)(({ theme }) => ({
     flexDirection: 'column',
     backgroundColor: '#fff',
     fontFamily: 'Tahoma, sans-serif',
-    overflow: 'visible', // مهم لظهور الموجة
+    overflow: 'visible',
     position: 'relative',
     [theme.breakpoints.up('md')]: {
         width: '70%'
@@ -56,12 +58,12 @@ const ChildFigure = styled(Box)(({ theme }) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden', // لإخفاء الأجزاء الزائدة
+    overflow: 'hidden',
     '& img': {
-        width: '80%', // تقليل عرض الصورة
-        height: '80%', // تقليل ارتفاع الصورة
-        objectFit: 'contain', // للحفاظ على التناسب
-        transition: 'transform 0.3s ease', // تأثير سلس عند التكبير
+        width: '80%',
+        height: '80%',
+        objectFit: 'contain',
+        transition: 'transform 0.3s ease',
     },
     [theme.breakpoints.down('sm')]: {
         width: '80%',
@@ -142,7 +144,6 @@ const SideButtons = styled(Stack)(({ theme }) => ({
         flexWrap: 'wrap'
     }
 }));
-
 const SideButton = styled(Button)(({ theme }) => ({
     backgroundColor: 'white',
     color: '#666666',
@@ -156,62 +157,17 @@ const SideButton = styled(Button)(({ theme }) => ({
     '&:hover': {
         backgroundColor: '#f5f5f5'
     },
+    '&.Mui-disabled': {
+        color: '#ccc',
+        '& svg': {
+            color: '#ccc !important' // إضافة !important للتأكد من تطبيق اللون
+        }
+    },
     [theme.breakpoints.down('sm')]: {
         fontSize: '14px',
         padding: '10px 15px',
         flex: 'none'
     }
-}));
-
-const MicCircle = styled(Box)(({ theme }) => ({
-  backgroundColor: 'white',
-  width: '100px',
-  height: '100px',
-  borderRadius: '50%',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  zIndex: 3,
-  flexShrink: 0,
-  position: 'relative',
-  boxShadow: '0 0 0 0 rgba(252, 164, 60, 0.7)',
-  animation: 'pulse 1.5s infinite',
-  transition: 'all 0.3s ease',
-  '&:hover': {
-    transform: 'scale(1.05)',
-    boxShadow: '0 0 0 10px rgba(252, 164, 60, 0)',
-  },
-  '& svg': {
-    position: 'relative',
-    zIndex: 2,
-  },
-  '@keyframes pulse': {
-    '0%': {
-      boxShadow: '0 0 0 0 rgba(252, 164, 60, 0.7)',
-    },
-    '70%': {
-      boxShadow: '0 0 0 15px rgba(252, 164, 60, 0)',
-    },
-    '100%': {
-      boxShadow: '0 0 0 0 rgba(252, 164, 60, 0)',
-    },
-  },
-  [theme.breakpoints.down('sm')]: {
-    width: '80px',
-    height: '80px',
-    order: -2,
-    '@keyframes pulse': {
-      '0%': {
-        boxShadow: '0 0 0 0 rgba(252, 164, 60, 0.7)',
-      },
-      '70%': {
-        boxShadow: '0 0 0 10px rgba(252, 164, 60, 0)',
-      },
-      '100%': {
-        boxShadow: '0 0 0 0 rgba(252, 164, 60, 0)',
-      },
-    }
-  }
 }));
 const NextButton = styled(Button)(({ theme }) => ({
     width: '100%',
@@ -222,7 +178,7 @@ const NextButton = styled(Button)(({ theme }) => ({
     color: 'white',
     fontWeight: 'bold',
     fontSize: '30px',
-    fontFamily:"RTL Mocha Yemen Sadah",
+    fontFamily: "RTL Mocha Yemen Sadah",
     padding: '12px 0',
     borderRadius: '12px',
     '&:hover': {
@@ -235,15 +191,44 @@ const NextButton = styled(Button)(({ theme }) => ({
         maxWidth: '100%'
     },
 }));
+// styled components for the voice recording interface
+
 
 const VoiceComponent = () => {
     const [currentPrompt, setCurrentPrompt] = React.useState('امر امير الامراء بحفر بئر في الصحراء');
-    
+    const [userRecording, setUserRecording] = React.useState(null);
+    const [hasRecorded, setHasRecorded] = React.useState(false);
+    const userRecordingRef = React.useRef(null);
+    const [isPlayingRecording, setIsPlayingRecording] = React.useState(false);
+
     const handleRecordComplete = (audioBlob) => {
-        // Handle the recorded audio blob here
-        console.log('Recording complete:', audioBlob);
+        const audioUrl = URL.createObjectURL(audioBlob);
+        setUserRecording(audioUrl);
+        setHasRecorded(true);
     };
 
+    const playUserRecording = () => {
+        if (!userRecording) return;
+
+        if (isPlayingRecording) {
+            // إذا كان التسجيل مشغلاً، نقوم بإيقافه
+            userRecordingRef.current.pause();
+            setIsPlayingRecording(false);
+        } else {
+            // إذا كان التسجيل متوقفاً، نبدأ التشغيل
+            if (userRecordingRef.current) {
+                userRecordingRef.current.currentTime = 0;
+            }
+            userRecordingRef.current = new Audio(userRecording);
+            userRecordingRef.current.play();
+            setIsPlayingRecording(true);
+
+            // نستمع لانتهاء التشغيل
+            userRecordingRef.current.onended = () => {
+                setIsPlayingRecording(false);
+            };
+        }
+    };
     return (
         <Box sx={{
             mt: 4,
@@ -256,7 +241,7 @@ const VoiceComponent = () => {
                     <ChildFigure>
                         <img src={childImage} alt="صورة الطفل" />
                     </ChildFigure>
-                    
+
                     <PromptDisplayContainer>
                         <PromptDisplay prompt={currentPrompt} />
                     </PromptDisplayContainer>
@@ -277,8 +262,24 @@ const VoiceComponent = () => {
                     </WaveDivider>
 
                     <SideButtons>
-                        <SideButton startIcon={<PlayArrowIcon sx={{ color: '#FCA43C', fontSize: '36px' }} />}>
-                            اسمع صوتك
+                        <SideButton
+                            startIcon={
+                                isPlayingRecording ? (
+                                    <PauseIcon sx={{
+                                        color: hasRecorded ? '#FCA43C' : '#ccc',
+                                        fontSize: '36px'
+                                    }} />
+                                ) : (
+                                    <PlayArrowIcon sx={{
+                                        color: hasRecorded ? '#FCA43C' : '#ccc',
+                                        fontSize: '36px'
+                                    }} />
+                                )
+                            }
+                            onClick={playUserRecording}
+                            disabled={!hasRecorded}
+                        >
+                            {isPlayingRecording ? 'إيقاف' : 'اسمع صوتك'}
                         </SideButton>
                         <SideButton startIcon={<BookmarkIcon sx={{ color: '#FCA43C', fontSize: '20px' }} />}>
                             كلماتي

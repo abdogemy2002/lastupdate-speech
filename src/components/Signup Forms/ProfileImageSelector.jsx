@@ -99,7 +99,7 @@ const ProfileImageSelector = ({ onAvatarSelect, onImageUpload }) => {
 
       // 1. رفع الصورة على السيرفر
       const uploadRes = await axios.post(
-        "https://speech-correction-api.azurewebsites.net/api/Profile/set-profile-picture",
+        "https://speech-correction-api.azurewebsites.net/api/Profile/set-or-update-profile-picture",
         formData,
         {
           headers: {

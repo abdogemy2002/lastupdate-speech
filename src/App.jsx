@@ -13,7 +13,7 @@ import Footer from './components/Footer';
 import TestWelcome from './pages/TestPages/InitialTest';
 import TestPage from './pages/TestPages/TestPage';
 import SpeechRecognitionPage from './pages/SpeechRecognitionPage';
-import PatientDashboard from './pages/patient_dashboard';
+import PatientDashboard from './pages/patient_dashboard'; // هذا الملف سيعرض كلا المحتويين
 import ProfileImageSelectorPage from './pages/ProfileImagePage';
 import SelectLetters from './components/Signup Forms/SignUpTestLetters';
 import UpdateProfile from './pages/PatientProfilePage';
@@ -48,8 +48,6 @@ const App = () => {
             }
           />
 
-
-
           {/* صفحات لا تحتاج مصادقة */}
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
@@ -71,14 +69,17 @@ const App = () => {
             path="/UpdateProfile"
             element={isAuthenticated ? <UpdateProfile /> : <Navigate to="/login" />}
           />
+          
+          {/* مسار لوحة التحكم - سيعرض كلا المحتويين حسب المسار الفرعي */}
           <Route
-            path="/PatientDashboard"
+            path="/PatientDashboard/*"
             element={
               isAuthenticated && userType === 'Patient' ?
                 <PatientDashboard /> :
                 <Navigate to="/" />
             }
           />
+          
           <Route
             path="/TestWelcome"
             element={isAuthenticated ? <TestWelcome /> : <Navigate to="/login" />}

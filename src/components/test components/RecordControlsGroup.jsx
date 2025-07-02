@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { styled, Box, IconButton, Slider, CircularProgress } from '@mui/material';
+import { styled, Box, IconButton, Slider } from '@mui/material';
 import {
     Replay as ReplayIcon,
     PlayArrow as PlayArrowIcon,
@@ -8,6 +8,7 @@ import {
     Mic as MicIcon,
     Stop as StopIcon
 } from '@mui/icons-material';
+
 
 const ControlsContainer = styled(Box)(({ theme }) => ({
     display: 'flex',
@@ -54,7 +55,7 @@ const MicCircle = styled(Box)(({ theme, isRecording }) => ({
     backgroundColor: 'white',
     width: '120px',
     aspectRatio: '1 / 1',
-    marginLeft:'15px',
+    marginLeft: '15px',
     marginBottom: '20px',
     borderRadius: '50%',
     display: 'flex',
@@ -129,8 +130,6 @@ const RecordControlsGroup = ({ audioSrc, onRecordComplete }) => {
     const [isRecording, setIsRecording] = useState(false);
     const [progress, setProgress] = useState(0);
     const [duration, setDuration] = useState(0);
-    const [recordedAudio, setRecordedAudio] = useState(null);
-    const [isProcessing, setIsProcessing] = useState(false);
     
     const audioRef = useRef(null);
     const mediaRecorderRef = useRef(null);
@@ -165,14 +164,7 @@ const RecordControlsGroup = ({ audioSrc, onRecordComplete }) => {
     }, []);
 
     const handlePlayPause = () => {
-        if (recordedAudio) {
-            if (isPlaying) {
-                audioRef.current.pause();
-            } else {
-                audioRef.current.play();
-            }
-            setIsPlaying(!isPlaying);
-        } else if (audioSrc) {
+        if (audioSrc) {
             if (isPlaying) {
                 audioRef.current.pause();
             } else {
@@ -194,9 +186,9 @@ const RecordControlsGroup = ({ audioSrc, onRecordComplete }) => {
         if (audioRef.current.duration) {
             audioRef.current.currentTime = 0;
             setProgress(0);
-            if (!isPlaying && (audioSrc || recordedAudio)) {
-                audioRef.current.play();
-                setIsPlaying(true);
+            if (isPlaying) {
+                audioRef.current.pause();
+                setIsPlaying(false);
             }
         }
     };
@@ -207,7 +199,7 @@ const RecordControlsGroup = ({ audioSrc, onRecordComplete }) => {
 
     const startRecording = async () => {
         try {
-            setIsProcessing(true);
+            setIsRecording(true);
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             mediaRecorderRef.current = new MediaRecorder(stream);
             audioChunksRef.current = [];
@@ -218,17 +210,13 @@ const RecordControlsGroup = ({ audioSrc, onRecordComplete }) => {
 
             mediaRecorderRef.current.onstop = () => {
                 const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
-                const audioUrl = URL.createObjectURL(audioBlob);
-                setRecordedAudio(audioUrl);
                 if (onRecordComplete) onRecordComplete(audioBlob);
-                setIsProcessing(false);
             };
 
             mediaRecorderRef.current.start();
-            setIsRecording(true);
         } catch (error) {
             console.error('Error accessing microphone:', error);
-            setIsProcessing(false);
+            setIsRecording(false);
         }
     };
 
@@ -252,7 +240,7 @@ const RecordControlsGroup = ({ audioSrc, onRecordComplete }) => {
         <>
             <audio 
                 ref={audioRef} 
-                src={recordedAudio || audioSrc} 
+                src={audioSrc} 
                 preload="metadata" 
                 onEnded={() => setIsPlaying(false)}
             />
@@ -262,17 +250,17 @@ const RecordControlsGroup = ({ audioSrc, onRecordComplete }) => {
                     value={progress}
                     onChange={handleSeek}
                     aria-label="audio progress"
-                    disabled={!audioSrc && !recordedAudio}
+                    disabled={!audioSrc}
                 />
 
                 <Box display="flex" justifyContent="center" gap="40px">
                     <IconButton 
                         onClick={handleReplay} 
                         aria-label="replay"
-                        disabled={!audioSrc && !recordedAudio}
+                        disabled={!audioSrc}
                     >
                         <ReplayIcon sx={{ 
-                            color: (!audioSrc && !recordedAudio) ? '#ccc' : '#FCA43C', 
+                            color: !audioSrc ? '#ccc' : '#FCA43C', 
                             fontSize: '28px' 
                         }} />
                     </IconButton>
@@ -280,16 +268,16 @@ const RecordControlsGroup = ({ audioSrc, onRecordComplete }) => {
                     <IconButton 
                         onClick={handlePlayPause} 
                         aria-label={isPlaying ? 'pause' : 'play'}
-                        disabled={!audioSrc && !recordedAudio}
+                        disabled={!audioSrc}
                     >
                         {isPlaying ? (
                             <PauseIcon sx={{ 
-                                color: (!audioSrc && !recordedAudio) ? '#ccc' : '#FCA43C', 
+                                color: !audioSrc ? '#ccc' : '#FCA43C', 
                                 fontSize: '28px' 
                             }} />
                         ) : (
                             <PlayArrowIcon sx={{ 
-                                color: (!audioSrc && !recordedAudio) ? '#ccc' : '#FCA43C', 
+                                color: !audioSrc ? '#ccc' : '#FCA43C', 
                                 fontSize: '28px' 
                             }} />
                         )}
@@ -298,10 +286,10 @@ const RecordControlsGroup = ({ audioSrc, onRecordComplete }) => {
                     <IconButton 
                         onClick={handleBookmark} 
                         aria-label="bookmark"
-                        disabled={!audioSrc && !recordedAudio}
+                        disabled={!audioSrc}
                     >
                         <BookmarkIcon sx={{ 
-                            color: (!audioSrc && !recordedAudio) ? '#ccc' : '#FCA43C', 
+                            color: !audioSrc ? '#ccc' : '#FCA43C', 
                             fontSize: '28px' 
                         }} />
                     </IconButton>
@@ -316,16 +304,11 @@ const RecordControlsGroup = ({ audioSrc, onRecordComplete }) => {
                 <MicCircle 
                     isRecording={isRecording}
                     onClick={handleMicClick}
-                    disabled={isProcessing}
                 >
-                    {isProcessing ? (
-                        <CircularProgress size={45} color="inherit" />
+                    {isRecording ? (
+                        <StopIcon sx={{ color: 'red', fontSize: '45px' }} />
                     ) : (
-                        isRecording ? (
-                            <StopIcon sx={{ color: 'red', fontSize: '45px' }} />
-                        ) : (
-                            <MicIcon sx={{ color: '#FCA43C', fontSize: '45px' }} />
-                        )
+                        <MicIcon sx={{ color: '#FCA43C', fontSize: '45px' }} />
                     )}
                 </MicCircle>
             </Box>

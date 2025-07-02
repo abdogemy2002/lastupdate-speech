@@ -1,7 +1,8 @@
 import React from 'react';
 import VoiceRecorder from "../../components/test components/VoiceRecorder";
-import flowerBg from '../../assets/flower-bg.jpg'; // استيراد الصورة مباشرة
-import 'bootstrap/dist/css/bootstrap.min.css';
+import flowerBg from '../../assets/flower-bg.jpg'; 
+import DashboardTabs from '../../components/dashboard/DashboardTabs';
+import { Dashboard } from '@mui/icons-material';
 
 const TempPage = () => {
   return (
@@ -16,6 +17,7 @@ const TempPage = () => {
       padding: 0
     }}>
       <div className="container-fluid h-100 d-flex flex-column p-0">
+        <DashboardTabs />
         <VoiceRecorder />
       </div>
     </div>

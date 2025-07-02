@@ -25,7 +25,7 @@ import { logout, loginSuccess } from "../store/slices/userSlice";
 
 const CustomNavbar = () => {
   const dispatch = useDispatch();
-  const { isAuthenticated, firstName, profileImageUrl } = useSelector((state) => state.user);
+  const { isAuthenticated, firstName, lastName, profileImageUrl } = useSelector((state) => state.user);
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showOffcanvas, setShowOffcanvas] = useState(false);
@@ -35,29 +35,28 @@ const CustomNavbar = () => {
 
   const toggleOffcanvas = () => setShowOffcanvas(!showOffcanvas);
 
-  // ✅ محاولة استعادة البيانات من localStorage لو فُقدت بعد reload
   useEffect(() => {
-  const storedAuth = localStorage.getItem("persist:root");
-  if (storedAuth) {
-    try {
-      const parsed = JSON.parse(storedAuth);
-      const parsedUser = parsed.user ? JSON.parse(parsed.user) : null;
+    const storedAuth = localStorage.getItem("persist:root");
+    if (storedAuth) {
+      try {
+        const parsed = JSON.parse(storedAuth);
+        const parsedUser = parsed.user ? JSON.parse(parsed.user) : null;
 
-      if (parsedUser && parsedUser.isAuthenticated && !isAuthenticated) {
-        dispatch(loginSuccess({
-          token: parsedUser.token,
-          email: parsedUser.email,
-          firstName: parsedUser.firstName,
-          lastName: parsedUser.lastName,
-          userType: parsedUser.userType,
-          profileImageUrl: parsedUser.profileImageUrl
-        }));
+        if (parsedUser && parsedUser.isAuthenticated && !isAuthenticated) {
+          dispatch(loginSuccess({
+            token: parsedUser.token,
+            email: parsedUser.email,
+            firstName: parsedUser.firstName,
+            lastName: parsedUser.lastName,
+            userType: parsedUser.userType,
+            profileImageUrl: parsedUser.profileImageUrl
+          }));
+        }
+      } catch (err) {
+        console.error("فشل في استرجاع البيانات من localStorage:", err);
       }
-    } catch (err) {
-      console.error("فشل في استرجاع البيانات من localStorage:", err);
     }
-  }
-}, [dispatch, isAuthenticated]);
+  }, [dispatch, isAuthenticated]);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -87,7 +86,7 @@ const CustomNavbar = () => {
   return (
     <AppBar position="sticky" sx={{ bgcolor: 'white', boxShadow: '0 6px 6px rgba(0, 0, 0, 0.1)' }}>
       <Container maxWidth="lg">
-        <Toolbar disableGutters sx={{ width: '100%', justifyContent: 'space-between' }}>
+        <Toolbar disableGutters sx={{ width: '100%', justifyContent: 'space-between', position: 'relative' }}>
           {/* Logo */}
           <Box
             component="img"
@@ -107,29 +106,21 @@ const CustomNavbar = () => {
             }}
           />
 
-          {/* Mobile menu */}
-          {isMobile && (
-            <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              edge="start"
-              onClick={() => setMobileOpen(!mobileOpen)}
-              sx={{ mr: 2 }}
-            >
-              <MenuIcon />
-            </IconButton>
-          )}
-
-          {/* Desktop nav */}
+          {/* Centered nav items */}
           {!isMobile && (
-            <Box sx={{
-              display: 'flex',
-              alignItems: 'center',
-              backgroundColor: '#fca43c',
-              padding: '5px 20px',
-              borderRadius: '24px',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-            }}>
+            <Box
+              sx={{
+                position: 'absolute',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                display: 'flex',
+                alignItems: 'center',
+                backgroundColor: '#fca43c',
+                padding: '5px 20px',
+                borderRadius: '24px',
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+              }}
+            >
               {navItems.map((item) => (
                 <Button
                   key={item.text}
@@ -152,14 +143,52 @@ const CustomNavbar = () => {
             </Box>
           )}
 
-          {/* User Section */}
+          {/* Mobile menu icon */}
+          {isMobile && (
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="start"
+              onClick={() => setMobileOpen(!mobileOpen)}
+              sx={{ mr: 2 }}
+            >
+              <MenuIcon />
+            </IconButton>
+          )}
+
+          {/* User section */}
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             {isAuthenticated ? (
-              <>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 2 }}>
+                <Box sx={{ display: { xs: 'none', md: 'block' }, textAlign: 'right' }}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontFamily: "'Tajawal', sans-serif",
+                      fontWeight: 700,
+                      fontSize: '1rem',
+                      color: 'text.primary',
+                      mb: 0.3
+                    }}
+                  >
+                    مرحباً، {firstName}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontFamily: "'Tajawal', sans-serif",
+                      fontSize: '0.75rem',
+                      color: 'text.secondary'
+                    }}
+                  >
+                    استمر في التعلم لتحسين نطقك
+                  </Typography>
+                </Box>
+
                 <IconButton onClick={toggleOffcanvas} sx={{ p: 0 }}>
                   <UserAvatar
                     alt={firstName || "المستخدم"}
-                    src={profileImageUrl || "src/assets/user-img.jpg"} // ← استخدم الصورة اللي جاية من API أو fallback
+                    src={profileImageUrl || "src/assets/user-img.jpg"}
                   />
                 </IconButton>
                 <OffCanvasSidebar
@@ -167,7 +196,7 @@ const CustomNavbar = () => {
                   onHide={toggleOffcanvas}
                   onLogout={handleLogout}
                 />
-              </>
+              </Box>
             ) : (
               <Button
                 variant="contained"
