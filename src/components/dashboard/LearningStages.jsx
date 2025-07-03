@@ -1,8 +1,35 @@
 import React from 'react';
-import { Card, CardHeader, CardContent, Grid, Avatar, Typography, Chip } from '@mui/material';
-import { EmojiObjects, RecordVoiceOver, Forum } from '@mui/icons-material';
+import { Card, CardHeader, CardContent, Grid, Typography, IconButton, Box } from '@mui/material';
+import { Lock, ArrowForwardIos } from '@mui/icons-material';
 
 const LearningStages = ({ stages }) => {
+  const levelsData = [
+    {
+      id: 1,
+      title: "المستوى الأول",
+      description: "هتتعلم نطق الكلمات صح عن طريق السمع والتكرار.",
+      unlocked: true,
+      color: "#FFA726", // Orange
+      icon: <ArrowForwardIos />
+    },
+    {
+      id: 2,
+      title: "المستوى الثاني",
+      description: "هتتدرب على نطق جمل بسيطة وسهلة.",
+      unlocked: false,
+      color: "#BDBDBD", // Gray
+      icon: <Lock />
+    },
+    {
+      id: 3,
+      title: "المستوى الثالث",
+      description: "هتتحدى نفسك وتنطق جمل أطول وأصعب.",
+      unlocked: false,
+      color: "#BDBDBD",
+      icon: <Lock />
+    }
+  ];
+
   return (
     <Card sx={{ 
       mb: 4,
@@ -18,59 +45,65 @@ const LearningStages = ({ stages }) => {
       />
       <CardContent>
         <Grid container spacing={3}>
-          {stages.map(stage => (
-            <Grid item xs={12} md={4} key={stage.id}>
+          {levelsData.map(level => (
+            <Grid item xs={12} md={4} key={level.id}>
               <Card 
                 sx={{ 
-                  height: '100%',
-                  border: stage.current ? '2px solid' : 'none',
-                  borderColor: stage.current ? 'primary.main' : 'none',
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)'
+                  backgroundColor: level.color,
+                  color: "#fff",
+                  borderRadius: "16px",
+                  boxShadow: 3,
+                  opacity: level.unlocked ? 1 : 0.7,
+                  transition: "0.3s",
+                  cursor: level.unlocked ? "pointer" : "default",
+                  height: "100%",
+                  display: 'flex',
+                  flexDirection: 'column',
+                  p: 3
                 }}
               >
-                <CardContent sx={{ textAlign: 'center' }}>
-                  <Avatar
-                    sx={{ 
-                      width: 64, 
-                      height: 64, 
-                      bgcolor: stage.completed ? 'success.light' : 'grey.100',
-                      mb: 2,
-                      mx: 'auto'
+                <Box sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 2
+                }}>
+                  {/* Icon */}
+                  <IconButton
+                    sx={{
+                      color: "#fff",
+                      alignSelf: 'center',
+                      mb: 2
                     }}
                   >
-                    {stage.icon}
-                  </Avatar>
-                  <Typography variant="h6" gutterBottom sx={{ fontFamily: "'Tajawal', sans-serif" }}>
-                    {stage.title}
+                    {level.icon}
+                  </IconButton>
+                  
+                  {/* Title */}
+                  <Typography 
+                    variant="h6" 
+                    fontWeight="bold" 
+                    sx={{ 
+                      fontFamily: "'Tajawal', sans-serif",
+                      textAlign: 'center',
+                      mb: 1
+                    }}
+                  >
+                    {level.title}
                   </Typography>
-                  <Typography color="text.secondary" sx={{ mb: 2, fontFamily: "'Tajawal', sans-serif" }}>
-                    {stage.description}
+                  
+                  {/* Description */}
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      fontFamily: "'Tajawal', sans-serif",
+                      textAlign: 'center',
+                      mt: 1
+                    }}
+                  >
+                    {level.description}
                   </Typography>
-                  {stage.completed && (
-                    <Chip 
-                      label="مكتمل" 
-                      color="success" 
-                      size="small" 
-                      sx={{ fontFamily: "'Tajawal', sans-serif" }}
-                    />
-                  )}
-                  {stage.current && (
-                    <Chip 
-                      label="جاري العمل" 
-                      color="primary" 
-                      size="small" 
-                      sx={{ fontFamily: "'Tajawal', sans-serif" }}
-                    />
-                  )}
-                  {!stage.completed && !stage.current && (
-                    <Chip 
-                      label="قفل" 
-                      color="default" 
-                      size="small" 
-                      sx={{ fontFamily: "'Tajawal', sans-serif" }}
-                    />
-                  )}
-                </CardContent>
+                </Box>
               </Card>
             </Grid>
           ))}

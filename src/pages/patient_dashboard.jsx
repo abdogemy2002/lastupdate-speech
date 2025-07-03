@@ -1,5 +1,5 @@
-import React from 'react';
-import { Container, useMediaQuery, useTheme } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Container, useMediaQuery, useTheme, CircularProgress, Alert } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import BackgroundWrapper from '../components/shared/BackgroundWrapper';
 import NavigationTabs from '../components/dashboard/DashboardTabs';
@@ -7,6 +7,7 @@ import StatsCards from '../components/dashboard/StatsCards';
 import LearningStages from '../components/dashboard/LearningStages';
 import RecommendedLessons from '../components/dashboard/RecommendedLessons';
 import SpecialistsList from '../components/SpecialistsList/SpecialistsList';
+import DoctorsCarousel from '../components/dashboard/DoctorsCarousel';
 import {
   EmojiObjects as EmojiObjectsIcon,
   RecordVoiceOver as RecordVoiceOverIcon,
@@ -17,9 +18,45 @@ const DashboardPage = () => {
   const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
-  // تحديد ما إذا كنا في مسار الأخصائيين
-  const showSpecialists = location.pathname.endsWith('/specialists');
+  const [doctors, setDoctors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const response = await fetch('https://speech-correction-api.azurewebsites.net/api/Doctor/get-all-doctors');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const result = await response.json();
+        
+        const transformedDoctors = result.data.map(doctor => ({
+          id: doctor.id || Math.random().toString(36).substr(2, 9),
+          name: `${doctor.firstName || 'دكتور'} ${doctor.lastName || ''}`.trim(),
+          specialty: 'أخصائي تخاطب',
+          image: doctor.profilePictureUrl || '/default-doctor-avatar.png',
+          rating: doctor.rating || 0,
+          availableSlots: doctor.workingDays && doctor.workingDays.length > 0 
+            ? doctor.workingDays 
+            : ['لا يوجد مواعيد متاحة'],
+          about: doctor.about || 'لا يوجد معلومات إضافية',
+          workingHours: doctor.availableFrom && doctor.availableTo 
+            ? `${doctor.availableFrom} - ${doctor.availableTo}`
+            : 'غير محدد',
+          city: doctor.city || null
+        }));
+
+        setDoctors(transformedDoctors);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDoctors();
+  }, []);
 
   const userData = {
     name: "أحمد محمد",
@@ -35,51 +72,6 @@ const DashboardPage = () => {
     { id: 1, title: "الكلمات", description: "تحسين نطق الكلمات الفردية", icon: <EmojiObjectsIcon fontSize="large" />, completed: true },
     { id: 2, title: "جمل بسيطة", description: "نطق جمل قصيرة وبسيطة", icon: <RecordVoiceOverIcon fontSize="large" />, completed: true, current: true },
     { id: 3, title: "جمل صعبة", description: "نطق جمل طويلة ومعقدة", icon: <ForumIcon fontSize="large" />, completed: false }
-  ];
-
-  const doctors = [
-    {
-      id: 1,
-      firstName: "محمد",
-      lastName: "علي",
-      specialty: "أخصائي نطق ولغة",
-      rating: 4.8,
-      image: "https://randomuser.me/api/portraits/men/32.jpg",
-      workingDays: ["الإثنين", "الأربعاء", "السبت"],
-      availableFrom: "10:00",
-      availableTo: "12:00",
-      city: "القاهرة",
-      nationality: "مصري",
-      about: "أخصائي تخاطب مع أكثر من 10 سنوات خبرة في علاج اضطرابات النطق واللغة لدى الأطفال والكبار."
-    },
-    {
-      id: 2,
-      firstName: "أحمد",
-      lastName: "مصطفى",
-      specialty: "استشائي تخاطب",
-      rating: 4.6,
-      image: "https://randomuser.me/api/portraits/men/44.jpg",
-      workingDays: ["الأحد", "الثلاثاء", "الخميس"],
-      availableFrom: "09:00",
-      availableTo: "11:00",
-      city: "الرياض",
-      nationality: "سعودي",
-      about: "متخصص في علاج التأتأة واضطرابات الطلاقة الكلامية."
-    },
-    {
-      id: 3,
-      firstName: "سارة",
-      lastName: "عبد الرحمن",
-      specialty: "اخصائية نطق أطفال",
-      rating: 4.9,
-      image: "https://randomuser.me/api/portraits/women/65.jpg",
-      workingDays: ["الاثنين", "الأربعاء", "الجمعة"],
-      availableFrom: "11:00",
-      availableTo: "13:00",
-      city: "جدة",
-      nationality: "سعودية",
-      about: "خبيرة في علاج اضطرابات اللغة عند الأطفال وذوي الاحتياجات الخاصة."
-    }
   ];
 
   const recommendedLessons = [
@@ -100,21 +92,47 @@ const DashboardPage = () => {
     }
   ];
 
+  if (loading) {
+    return (
+      <BackgroundWrapper>
+        <Container maxWidth="lg" sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          minHeight: '70vh'
+        }}>
+          <CircularProgress size={60} />
+        </Container>
+      </BackgroundWrapper>
+    );
+  }
+
+  if (error) {
+    return (
+      <BackgroundWrapper>
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+          <Alert severity="error">
+            فشل في تحميل البيانات: {error}
+          </Alert>
+        </Container>
+      </BackgroundWrapper>
+    );
+  }
+
+  const showSpecialists = location.pathname.endsWith('/specialists');
+
   return (
     <BackgroundWrapper>
-      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1, py: 4 }}>
-        {/* التبويبات الثابتة - تظهر دائمًا */}
+      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1, py: 0 }}>
         <NavigationTabs />
-        
-        {/* عرض المحتوى حسب المسار */}
+
         {showSpecialists ? (
-          // عرض قائمة الأخصائيين كاملة
           <SpecialistsList doctors={doctors} />
         ) : (
-          // عرض لوحة التحكم العادية
           <>
             <StatsCards userData={userData} />
             <LearningStages stages={stages} />
+            <DoctorsCarousel doctors={doctors} />
             <RecommendedLessons lessons={recommendedLessons} />
           </>
         )}

@@ -1,24 +1,31 @@
 import React from 'react';
-import { Card, CardHeader, CardContent, Grid, Avatar, Typography, Chip, Button, Paper, Box, IconButton } from '@mui/material';
-import { Star, ArrowBackIos, ArrowForwardIos } from '@mui/icons-material';
+import { Card, CardHeader, CardContent, Grid, Avatar, Typography, Chip, Button, Paper, Box, Alert } from '@mui/material';
+import { Star, ArrowForwardIos } from '@mui/icons-material';
 import Carousel from 'react-material-ui-carousel';
 import { useNavigate } from 'react-router-dom';
 
 const DoctorsCarousel = ({ doctors }) => {
   const navigate = useNavigate();
 
+  if (!doctors || doctors.length === 0) {
+    return (
+      <Alert severity="info" sx={{ mb: 4 }}>
+        لا يوجد أطباء متاحين حالياً
+      </Alert>
+    );
+  }
+
   return (
-    <Card sx={{ 
+    <Card sx={{
       mb: 4,
       backgroundColor: 'rgba(255, 255, 255, 0.8)',
       backdropFilter: 'blur(5px)',
-      position: 'relative' // إضافة هذه الخاصية للتحكم في موضع زر المزيد
+      position: 'relative'
     }}>
-      {/* زر المزيد في الزاوية اليمنى العليا */}
-      <Button 
+      <Button
         variant="text"
         endIcon={<ArrowForwardIos />}
-        onClick={() => navigate('/specialists')} // تغيير المسار حسب صفحة الأخصائيين لديك
+        onClick={() => navigate('/PatientDashboard/specialists')}
         sx={{
           position: 'absolute',
           top: 16,
@@ -31,9 +38,9 @@ const DoctorsCarousel = ({ doctors }) => {
         المزيد
       </Button>
 
-      <CardHeader 
-        title="الأطباء المقترحين" 
-        titleTypographyProps={{ 
+      <CardHeader
+        title="الأطباء المقترحين"
+        titleTypographyProps={{
           variant: 'h5',
           sx: { fontFamily: "'Tajawal', sans-serif" }
         }}
@@ -49,7 +56,7 @@ const DoctorsCarousel = ({ doctors }) => {
           cycleNavigation
           fullHeightHover
           NextIcon={<ArrowForwardIos />}
-          PrevIcon={<ArrowBackIos />}
+          PrevIcon={<ArrowForwardIos />}
         >
           {doctors.map(doctor => (
             <Paper key={doctor.id} sx={{ p: 2, backgroundColor: 'rgba(255, 255, 255, 0.9)' }}>
@@ -61,8 +68,8 @@ const DoctorsCarousel = ({ doctors }) => {
                   />
                 </Grid>
                 <Grid item xs={12} md={8}>
-                  <Box sx={{ 
-                    display: 'flex', 
+                  <Box sx={{
+                    display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'flex-start',
                     mb: 2
@@ -74,37 +81,48 @@ const DoctorsCarousel = ({ doctors }) => {
                       <Typography color="text.secondary" sx={{ fontFamily: "'Tajawal', sans-serif" }}>
                         {doctor.specialty}
                       </Typography>
+                      {doctor.city && (
+                        <Typography color="text.secondary" sx={{ fontFamily: "'Tajawal', sans-serif", mt: 1 }}>
+                          {doctor.city}
+                        </Typography>
+                      )}
                     </Box>
                     <Chip
                       icon={<Star />}
-                      label={doctor.rating}
+                      label={doctor.rating.toFixed(1)}
                       color="warning"
                       sx={{ fontFamily: "'Tajawal', sans-serif" }}
                     />
                   </Box>
+                  
                   <Typography variant="subtitle2" sx={{ mt: 2, fontFamily: "'Tajawal', sans-serif" }}>
-                    المواعيد المتاحة:
+                    ساعات العمل: {doctor.workingHours}
+                  </Typography>
+                  
+                  <Typography variant="subtitle2" sx={{ mt: 2, fontFamily: "'Tajawal', sans-serif" }}>
+                    الأيام المتاحة:
                   </Typography>
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, my: 2 }}>
                     {doctor.availableSlots.map((slot, index) => (
-                      <Chip 
-                        key={index} 
-                        label={slot} 
-                        variant="outlined" 
+                      <Chip
+                        key={index}
+                        label={slot}
+                        variant="outlined"
                         sx={{ fontFamily: "'Tajawal', sans-serif" }}
                       />
                     ))}
                   </Box>
+                  
                   <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
-                    <Button 
-                      variant="outlined" 
+                    <Button
+                      variant="outlined"
                       fullWidth
                       sx={{ fontFamily: "'Tajawal', sans-serif" }}
                     >
                       حجز موعد
                     </Button>
-                    <Button 
-                      variant="contained" 
+                    <Button
+                      variant="contained"
                       fullWidth
                       sx={{ fontFamily: "'Tajawal', sans-serif" }}
                     >

@@ -1,66 +1,57 @@
 import React from 'react';
-import { Box, Tabs, Tab, styled, Container, useTheme, useMediaQuery } from '@mui/material';
+import { Box, Tabs, Tab, styled, useTheme, useMediaQuery } from '@mui/material';
 import { Dashboard, Chat, Assessment } from '@mui/icons-material';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const NavigationTabs = () => {
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const location = useLocation();
     const navigate = useNavigate();
 
-    // تحديد التاب النشطة بناءً على المسار
     const getActiveTab = () => {
         if (location.pathname.includes('specialists')) return 0;
         if (location.pathname.includes('PatientDashboard')) return 1;
-        if (location.pathname.includes('Test') || location.pathname.includes('report')) return 2;
-        return 1; // افتراضيًا لوحة التحكم
+        if (location.pathname.includes('Testtt') || location.pathname.includes('report')) return 2;
+        return 1;
     };
 
     const handleChange = (event, newValue) => {
         switch (newValue) {
-            case 0: 
-                navigate('/PatientDashboard/specialists'); // تغيير المسار إلى المسار الفرعي
-                break;
-            case 1: 
-                navigate('/PatientDashboard'); 
-                break;
-            case 2: 
-                navigate('/TestWelcome'); 
-                break;
-            default: 
-                navigate('/PatientDashboard');
+            case 0: navigate('/PatientDashboard/specialists'); break;
+            case 1: navigate('/PatientDashboard'); break;
+            case 2: navigate('/TestWelcomek'); break;
+            default: navigate('/PatientDashboard');
         }
     };
 
     const StyledTab = styled(Tab)(({ theme }) => ({
-        fontFamily: "'Tajawal', sans-serif",
+        fontFamily: '"Kidzhood Arabic", sans-serif',
         textTransform: 'none',
-        fontWeight: 600,
+        fontWeight: 'bold',
         fontSize: isMobile ? '0.85rem' : '1rem',
-        color: '#0c4a6e',
+        borderRadius: '12px',
+
+        color: '#fff',
         backgroundColor: 'transparent',
-        borderRadius: '8px',
-        padding: isMobile ? '8px 12px' : '10px 20px',
-        margin: '0 4px',
-        transition: 'all 0.3s ease',
+        padding: isMobile ? '10px 12px' : '12px 16px',
         minHeight: 'auto',
         height: 'auto',
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: '8px',
+        flex: 1,
+        transition: 'all 0.3s ease',
+        flexDirection: 'row', // تغيير اتجاه العناصر إلى أفقي
+        alignItems: 'center', // توسيط العناصر عمودياً
+        gap: '8px', // مسافة بين الأيقونة والنص
         '&.Mui-selected': {
-            color: '#fff',
+            color: 'white',
             backgroundColor: '#20B2AA',
-            boxShadow: '0 2px 8px rgba(32, 178, 170, 0.4)',
         },
         '&:hover': {
-            backgroundColor: 'rgba(32, 178, 170, 0.15)',
-            color: '#20B2AA',
+            backgroundColor: 'rgba(255, 255, 255, 0.65)',
+            color: '#666',
         },
         '& .MuiTab-iconWrapper': {
-            marginRight: 0,
-            marginBottom: 0,
+            margin: 0, // إزالة الهوامش الافتراضية
             display: 'flex',
             fontSize: '1.2rem',
         }
@@ -68,60 +59,61 @@ const NavigationTabs = () => {
 
     return (
         <Box sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            mb: 4,
-            backgroundColor: 'rgba(255, 255, 255, 0.8)',
-            backdropFilter: 'blur(5px)',
-            p: 2,
-            borderRadius: 2,
-            boxShadow: 3,
+            width: '100%',
+            borderRadius: '12px',
+            backgroundColor: '#fca43c',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            mb: 3,
         }}>
-            <Container maxWidth="lg" sx={{ p: 0 }}>
-                <Tabs
-                    value={getActiveTab()}
-                    onChange={handleChange}
-                    variant={isMobile ? "scrollable" : "fullWidth"}
-                    scrollButtons="auto"
-                    allowScrollButtonsMobile
-                    indicatorColor="none"
+            <Tabs
+                value={getActiveTab()}
+                onChange={handleChange}
+                variant={isMobile ? "scrollable" : "fullWidth"}
+                scrollButtons="auto"
+                allowScrollButtonsMobile
+                indicatorColor="none"
+                sx={{
+                    minHeight: 'auto',
+                    borderRadius: '12px',
+
+                    '& .MuiTabs-flexContainer': {
+                        width: '100%',
+                    },
+                }}
+            >
+                <StyledTab
+                    icon={<Chat />}
+                    label="التواصل مع أخصائي"
                     sx={{
-                        '& .MuiTabs-flexContainer': {
-                            gap: 1,
-                            justifyContent: 'center',
-                        },
+                        '& .MuiTab-iconWrapper': {
+                            // color: getActiveTab() === 0 ? 'white' : '#2b2b2b'
+                            color: '#fff'
+                        }
                     }}
-                >
-                    <StyledTab
-                        icon={<Chat />}
-                        label="التواصل مع أخصائي"
-                        sx={{
-                            '& .MuiTab-iconWrapper': {
-                                color: getActiveTab() === 0 ? '#fff' : '#20B2AA'
-                            }
-                        }}
-                    />
-                    <StyledTab
-                        icon={<Dashboard />}
-                        label="لوحة التحكم"
-                        sx={{
-                            '& .MuiTab-iconWrapper': {
-                                color: getActiveTab() === 1 ? '#fff' : '#20B2AA'
-                            }
-                        }}
-                    />
-                    <StyledTab
-                        icon={<Assessment />}
-                        label="تقارير"
-                        sx={{
-                            '& .MuiTab-iconWrapper': {
-                                color: getActiveTab() === 2 ? '#fff' : '#20B2AA'
-                            }
-                        }}
-                    />
-                </Tabs>
-            </Container>
+                />
+                <StyledTab
+                    icon={<Dashboard />}
+                    label="لوحة التحكم"
+                    sx={{
+                        '& .MuiTab-iconWrapper': {
+                            // color: getActiveTab() === 1 ? 'white' : '#2b2b2b'
+                            color: '#fff'
+
+                        }
+                    }}
+                />
+                <StyledTab
+                    icon={<Assessment />}
+                    label="تقارير"
+                    sx={{
+                        '& .MuiTab-iconWrapper': {
+                            // color: getActiveTab() === 2 ? 'white' : '#2b2b2b'
+                            color: '#fff'
+
+                        }
+                    }}
+                />
+            </Tabs>
         </Box>
     );
 };

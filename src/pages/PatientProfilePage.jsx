@@ -9,10 +9,11 @@ import { loginSuccess } from "../store/slices/userSlice";
 import {
   Container, Typography, TextField, Select, MenuItem, FormControl,
   InputLabel, Button, Paper, Grid, Divider, Avatar,
-  IconButton, CircularProgress, Box
+  IconButton, CircularProgress, Box, Modal
 } from "@mui/material";
-import { ArrowBack, Save } from "@mui/icons-material";
+import { ArrowBack, Save, Edit } from "@mui/icons-material";
 import BackgroundWrapper from "../components/shared/BackgroundWrapper";
+import EditProfileImage from "../components/Signup Forms/ProfileImageSelector";
 
 // تعريف مكون الحقل النصي بشكل منفصل لمنع إعادة التصيير غير الضرورية
 const CustomTextField = React.memo(({ name, label, type = "text", disabled = false, formik, ...props }) => {
@@ -43,6 +44,7 @@ const CustomTextField = React.memo(({ name, label, type = "text", disabled = fal
     />
   );
 });
+
 // تعريف مكون Select بشكل منفصل
 const CustomSelect = React.memo(({ name, label, options, formik, ...props }) => (
   <FormControl fullWidth sx={props.sx}>
@@ -70,6 +72,7 @@ const PatientProfilePage = () => {
   const currentUser = useSelector((state) => state.user);
   const [isLoading, setIsLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const [openImageModal, setOpenImageModal] = useState(false);
 
   // تعريف schema التحقق مرة واحدة باستخدام useMemo
   const validationSchema = useMemo(() => Yup.object({
@@ -203,11 +206,8 @@ const PatientProfilePage = () => {
       borderRadius: '10px',
       fontFamily: '"Kidzhood Arabic", sans-serif',
       '& fieldset': {
-        borderColor: '#2b2b2b',
+        borderColor: '#fca43c',
         borderWidth: '1.5px'
-      },
-      '&:hover fieldset': {
-        borderColor: '#2b2b2b'
       },
       '&.Mui-focused fieldset': {
         borderColor: '#1c8d8d',
@@ -216,7 +216,9 @@ const PatientProfilePage = () => {
     },
     '& .MuiInputLabel-root': {
       fontFamily: '"Kidzhood Arabic", sans-serif',
-      color: '#2b2b2b'
+      color: '#1c8d8d',
+      fontSize: '1rem',
+      fontWeight: 'bold',
     },
     '& .MuiFormHelperText-root': {
       fontFamily: '"Kidzhood Arabic", sans-serif',
@@ -257,7 +259,8 @@ const PatientProfilePage = () => {
           boxShadow: '0 0 20px rgba(255, 255, 255, 0.3)',
           backdropFilter: 'blur(5px)',
           transition: 'box-shadow 0.4s ease',
-          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
+          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)'
+
 
         }}>
           {/* رأس الصفحة */}
@@ -302,11 +305,12 @@ const PatientProfilePage = () => {
 
           <Divider sx={{ mb: 4 }} />
 
-          {/* صورة الملف الشخصي */}
+          {/* صورة الملف الشخصي مع زر التعديل */}
           <Box sx={{
             display: "flex",
             justifyContent: "center",
-            mb: 4
+            mb: 4,
+            position: 'relative'
           }}>
             <Avatar
               src={currentUser.profileImageUrl}
@@ -316,7 +320,50 @@ const PatientProfilePage = () => {
                 border: '3px solid #1c8d8d'
               }}
             />
+            <IconButton
+              onClick={() => setOpenImageModal(true)}
+              sx={{
+                position: 'absolute',
+                bottom: 0,
+                right: 330,
+                backgroundColor: '#1c8d8d',
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: '#fca43c',
+                  transform: 'scale(1.1)'
+                }
+              }}
+            >
+              <Edit fontSize="small" />
+            </IconButton>
           </Box>
+
+          {/* مودال تعديل الصورة */}
+          <Modal
+            open={openImageModal}
+            onClose={() => setOpenImageModal(false)}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(5px)'
+            }}
+          >
+            <Box sx={{
+              backgroundColor: 'white',
+              borderRadius: 2,
+              boxShadow: 24,
+              p: 4,
+              maxWidth: 500,
+              width: '90%',
+              outline: 'none'
+            }}>
+              <EditProfileImage
+                onClose={() => setOpenImageModal(false)}
+                currentImage={currentUser.profileImageUrl}
+              />
+            </Box>
+          </Modal>
 
           {/* نموذج التعديل */}
           <form onSubmit={formik.handleSubmit}>
@@ -397,7 +444,6 @@ const PatientProfilePage = () => {
                 />
               </Grid>
 
-
               {/* معلومات المريض الخاصة */}
               <Grid item xs={12}>
                 <Typography variant="h6" sx={{
@@ -461,7 +507,6 @@ const PatientProfilePage = () => {
                   sx={fieldStyles}
                 />
               </Grid>
-
 
               {/* زر الحفظ */}
               <Grid item xs={12} sx={{ mt: 3 }}>

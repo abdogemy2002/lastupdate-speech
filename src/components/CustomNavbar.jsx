@@ -22,6 +22,7 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import OffCanvasSidebar from "./OffCanvasSidebar";
 import { logout, loginSuccess } from "../store/slices/userSlice";
+import logo from "../assets/KHATWTNTK-logo-notext.svg";
 
 const CustomNavbar = () => {
   const dispatch = useDispatch();
@@ -90,7 +91,7 @@ const CustomNavbar = () => {
           {/* Logo */}
           <Box
             component="img"
-            src="src/assets/KHATWTNTK-logo-notext.svg"
+            src={logo}
             alt="Logo"
             onClick={() => navigate("/")}
             sx={{
