@@ -18,7 +18,7 @@ const LearningStages = () => {
     // TODO: استبدل هذا بطلب API فعلي لجلب مستوى المستخدم
     const fetchUserLevel = () => {
    
-      setCurrentUserLevel(1);
+      setCurrentUserLevel(3);
     };
 
     fetchUserLevel();

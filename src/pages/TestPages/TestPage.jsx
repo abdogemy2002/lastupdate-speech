@@ -17,7 +17,7 @@ const TempPage = () => {
       padding: 0
     }}>
       <div className="container-fluid h-100 d-flex flex-column p-0">
-        <DashboardTabs />
+        {/* <DashboardTabs /> */}
         <VoiceRecorder />
       </div>
     </div>

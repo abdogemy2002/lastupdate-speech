@@ -8,15 +8,12 @@ import {
     Grid,
     Paper,
     Typography,
-    Select,
-    MenuItem,
-    InputLabel,
-    FormControl,
 } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import { useNavigate } from "react-router-dom";
-import backgroundPattern from '../../assets/flower-bg.jpg'; // استيراد الصورة
+import backgroundPattern from '../../assets/flower-bg.jpg';
+import { useSelector } from 'react-redux'; // Import useSelector
 
 const arabicLetters = [
     "ا", "ب", "ت", "ث", "ج", "ح", "خ",
@@ -24,10 +21,14 @@ const arabicLetters = [
     "ض", "ط", "ظ", "ع", "غ", "ف", "ق",
     "ك", "ل", "م", "ن", "ه", "و", "ي",
 ];
+
 const LetterTrainingPage = () => {
     const navigate = useNavigate();
     const [selectedLetters, setSelectedLetters] = useState([]);
     const [trainAll, setTrainAll] = useState(false);
+    
+    // Get token from Redux store
+    const token = useSelector(state => state.user.token);
 
     const handleLetterToggle = (letter) => {
         setSelectedLetters((prev) =>
@@ -46,12 +47,83 @@ const LetterTrainingPage = () => {
         }
     };
 
-    const handleStartTraining = () => {
-        navigate("/dashboard");
+    const storeSelectedLetters = async () => {
+        // تحضير البيانات حسب متطلبات API
+        const issuesData = selectedLetters.map(letter => {
+            const letterIndex = arabicLetters.indexOf(letter);
+            return {
+                letterId: letterIndex + 1, // الفهرس من 1 إلى 28
+                confidence: 0 // قيمة الثقة دائماً 0 كما طُلب
+            };
+        });
+
+        // لوج البيانات المرسلة
+        console.log("بيانات الإرسال إلى الخادم:", {
+            endpoint: "https://speech-correction-api.azurewebsites.net/api/Test/store-issues",
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: issuesData
+        });
+
+        try {
+            const response = await fetch(
+                'https://speech-correction-api.azurewebsites.net/api/Test/store-issues',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(issuesData)
+                }
+            );
+
+            // لوج الاستجابة الخام من الخادم
+            console.log("استجابة الخادم الخام:", response);
+
+            if (!response.ok) {
+                throw new Error('فشل في حفظ البيانات');
+            }
+
+            const result = await response.json();
+            
+            // لوج البيانات المستلمة من الخادم
+            console.log("بيانات الاستجابة من الخادم:", result);
+            
+            return true;
+        } catch (error) {
+            console.error('حدث خطأ أثناء إرسال البيانات:', error);
+            return false;
+        }
+    };
+
+    const handleStartTraining = async () => {
+        console.log("بدء عملية التدريب...");
+        
+        if (!token) {
+            console.error("لا يوجد توكن، يرجى تسجيل الدخول أولاً");
+            return;
+        }
+        
+        // إرسال البيانات أولاً
+        const success = await storeSelectedLetters();
+        
+        if (success) {
+            console.log("تم حفظ البيانات بنجاح، الانتقال إلى لوحة التحكم");
+        } else {
+            console.log("حدثت مشكلة في حفظ البيانات، ولكن سيتم الانتقال إلى لوحة التحكم");
+        }
+        
+        // الانتقال للصفحة التالية
+        // navigate("/dashboard");
     };
 
     const handleQuickTest = () => {
-        navigate("/TestPage"); // تأكد أن هذا المسار مطابق للمسار المحدد في ملف التوجيه
+        console.log("الانتقال إلى صفحة الاختبار السريع");
+        navigate("/TestPage");
     };
 
     return (
@@ -166,7 +238,7 @@ const LetterTrainingPage = () => {
                 <Button
                     variant="outlined"
                     fullWidth
-                    onClick={handleQuickTest} // أضف هذا السطر
+                    onClick={handleQuickTest}
                     sx={{
                         borderRadius: 4,
                         borderColor: "#00bcd4",

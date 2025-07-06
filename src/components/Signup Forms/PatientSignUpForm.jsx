@@ -100,13 +100,15 @@ const PatientSignUpForm = ({ setActiveForm, setShowForm, handleLogin, setShowPro
 
       axios.post("https://speech-correction-api.azurewebsites.net/api/Account/register", requestData)
         .then((response) => {
+          // أضفنا id هنا
           const userData = {
+            id: response.data.id, // إضافة حقل id
             token: response.data.token,
             email: response.data.email,
             firstName: response.data.firstName,
             lastName: response.data.lastName,
             userType: response.data.userType,
-            profileImageUrl: response.data.profilePictureUrl || null,
+            profilePictureUrl: response.data.profilePictureUrl || null, // تأكد من تطابق الأسماء
             isAuthenticated: true,
           };
           dispatch(loginSuccess(userData));

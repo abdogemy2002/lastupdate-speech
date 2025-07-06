@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
+  id: null, // أضفنا حقل id هنا
   token: null,
   email: null,
   firstName: null,
@@ -15,7 +16,8 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     loginSuccess(state, action) {
-      const { token, email, firstName, lastName, userType, profileImageUrl } = action.payload;
+      const { id, token, email, firstName, lastName, userType, profileImageUrl } = action.payload;
+      state.id = id; // أضفنا تعيين id هنا
       state.token = token;
       state.email = email;
       state.firstName = firstName;
@@ -25,6 +27,7 @@ const userSlice = createSlice({
       state.isAuthenticated = true;
     },
     logout(state) {
+      state.id = null; // أضفنا إعادة تعيين id هنا
       state.token = null;
       state.email = null;
       state.firstName = null;

@@ -45,9 +45,10 @@ const LoginPage = () => {
           }
         );
 
-        const { email, firstName, lastName, userType, profilePictureUrl, token } = response.data;
+        const { id,email, firstName, lastName, userType, profilePictureUrl, token } = response.data;
 
         const userPayload = {
+          id,
           token,
           email,
           firstName,
@@ -59,7 +60,8 @@ const LoginPage = () => {
 
         dispatch(loginSuccess(userPayload));
         toast.success("تم تسجيل الدخول بنجاح!");
-console.log("User data:", userPayload);
+        console.log("User data:", userPayload);
+
         if (userType === "Patient") {
           navigate("/PatientDashboard");
         } else if (userType === "Therapist") {
@@ -67,6 +69,7 @@ console.log("User data:", userPayload);
         }
       } catch (error) {
         let errorMessage = "فشل تسجيل الدخول";
+        console.error("Login error:", error);
         if (error.response) {
           if (error.response.status === 401) {
             errorMessage = "البريد الإلكتروني أو كلمة المرور غير صحيحة";
@@ -100,7 +103,7 @@ console.log("User data:", userPayload);
             <div className={`${styles.line} ${styles.thick}`}></div>
             <div className={`${styles.line} ${styles.thick}`}></div>
           </div>
-          
+
           <form onSubmit={formik.handleSubmit} className={styles['signup-form']}>
             <div className={`mb-3 ${styles['form-group']}`}>
               <label htmlFor="email" className={styles['form-label']}>
@@ -110,9 +113,8 @@ console.log("User data:", userPayload);
                 type="email"
                 id="email"
                 name="email"
-                className={`${styles['form-control']} ${
-                  formik.touched.email && formik.errors.email ? styles['is-invalid'] : ""
-                }`}
+                className={`${styles['form-control']} ${formik.touched.email && formik.errors.email ? styles['is-invalid'] : ""
+                  }`}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.email}
@@ -131,9 +133,8 @@ console.log("User data:", userPayload);
                 type="password"
                 id="password"
                 name="password"
-                className={`${styles['form-control']} ${
-                  formik.touched.password && formik.errors.password ? styles['is-invalid'] : ""
-                }`}
+                className={`${styles['form-control']} ${formik.touched.password && formik.errors.password ? styles['is-invalid'] : ""
+                  }`}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.password}
@@ -161,10 +162,10 @@ console.log("User data:", userPayload);
         </div>
       </div>
 
-      <img 
-        src="src/assets/KHATWTNTK-logo.svg" 
-        alt="" 
-        className={styles.logoformslide} 
+      <img
+        src="src/assets/KHATWTNTK-logo.svg"
+        alt=""
+        className={styles.logoformslide}
       />
       <ToastContainer />
     </div>

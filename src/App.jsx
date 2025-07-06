@@ -17,6 +17,7 @@ import PatientDashboard from './pages/patient_dashboard'; // هذا الملف �
 import ProfileImageSelectorPage from './pages/ProfileImagePage';
 import SelectLetters from './components/Signup Forms/SignUpTestLetters';
 import UpdateProfile from './pages/PatientProfilePage';
+import ChatPage from './pages/ChatPage'; 
 
 const App = () => {
   const dispatch = useDispatch();
@@ -51,6 +52,7 @@ const App = () => {
           {/* صفحات لا تحتاج مصادقة */}
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/chat" element={<ChatPage />} />
 
           {/* صفحات تحتاج مصادقة */}
           <Route
@@ -69,7 +71,7 @@ const App = () => {
             path="/UpdateProfile"
             element={isAuthenticated ? <UpdateProfile /> : <Navigate to="/login" />}
           />
-          
+
           {/* مسار لوحة التحكم - سيعرض كلا المحتويين حسب المسار الفرعي */}
           <Route
             path="/PatientDashboard/*"
@@ -79,7 +81,7 @@ const App = () => {
                 <Navigate to="/" />
             }
           />
-          
+
           <Route
             path="/TestWelcome"
             element={isAuthenticated ? <TestWelcome /> : <Navigate to="/login" />}

@@ -331,6 +331,7 @@ const DoctorsList = () => {
             pb: 6
         }} dir="rtl">
             <Button
+                onClick={() => navigate('/chat')} // أضف هذا السطر
                 variant="contained"
                 sx={{
                     mb: 4,
@@ -359,7 +360,7 @@ const DoctorsList = () => {
                     left: '24px',
                     top: '50%',
                     transform: 'translateY(-50%)',
-                    fontSize: '1.8rem'
+                    fontSize: '1.8rem',
                 }} />
 
                 الرسائل
