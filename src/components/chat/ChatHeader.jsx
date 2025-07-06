@@ -1,34 +1,51 @@
 import React from 'react';
-import { Box, Avatar, IconButton, Typography } from '@mui/material';
-import { deepOrange } from '@mui/material/colors';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import {
+    AppBar,
+    Toolbar,
+    Typography,
+    Avatar,
+    Box,
+    IconButton
+} from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
 
-const ChatHeader = ({ isMobile, selectedConversation, handleBack, currentUserId, getOtherUser }) => {
-    return (
-        <Box sx={{
-            p: 2,
-            display: 'flex',
-            alignItems: 'center',
-            borderBottom: '1px solid #e0e0e0',
-            backgroundColor: 'white'
-        }}>
-            {isMobile && (
-                <IconButton onClick={handleBack} sx={{ mr: 1 }}>
-                    <ArrowBackIcon />
-                </IconButton>
+const ChatHeader = ({
+    selectedConversation,
+    currentUserId,
+    setIsSidebarOpen
+}) => (
+    <AppBar position="static" color="default" elevation={1}>
+        <Toolbar>
+            <IconButton
+                edge="start"
+                color="inherit"
+                aria-label="menu"
+                onClick={() => setIsSidebarOpen(true)}
+                sx={{ mr: 2 }}
+            >
+                <MenuIcon />
+            </IconButton>
+            {selectedConversation ? (
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Avatar
+                        alt={selectedConversation.receiverDisplayName}
+                        src={selectedConversation.receiverProfileImage || undefined}
+                        sx={{ mr: 2, bgcolor: '#3f51b5' }}
+                    >
+                        {selectedConversation.receiverDisplayName?.charAt(0) || 'U'}
+                    </Avatar>
+                    <Typography variant="h6" noWrap>
+                        {selectedConversation.receiverDisplayName ||
+                            `User ${selectedConversation.user1Id === currentUserId
+                                ? selectedConversation.user2Id
+                                : selectedConversation.user1Id}`}
+                    </Typography>
+                </Box>
+            ) : (
+                <Typography variant="h6">Speech Correction Chat</Typography>
             )}
-            <Avatar sx={{
-                bgcolor: deepOrange[500],
-                mr: 2,
-                color: 'white'
-            }}>
-                {getOtherUser(selectedConversation)?.charAt(0) || 'U'}
-            </Avatar>
-            <Typography variant="h6" fontWeight="bold">
-                {getOtherUser(selectedConversation) || 'مستخدم غير معروف'}
-            </Typography>
-        </Box>
-    );
-};
+        </Toolbar>
+    </AppBar>
+);
 
 export default ChatHeader;

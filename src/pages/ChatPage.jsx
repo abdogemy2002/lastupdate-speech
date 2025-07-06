@@ -1,14 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
+import { useSelector } from 'react-redux';
 import {
-    AppBar, Toolbar, Typography,
-    List, ListItem, ListItemText,
-    Avatar, Badge, TextField,
-    Button, IconButton, Paper,
-    Box, Divider, Drawer,
-    Dialog, DialogTitle, DialogContent,
-    DialogActions, ListItemAvatar,
-    CircularProgress
+    AppBar,
+    Toolbar,
+    Box,
+    Typography,
+    IconButton,
+    Avatar,
+    TextField,
+    Divider,
+    CircularProgress,
+    Button,
+    Paper
 } from '@mui/material';
 import {
     Send as SendIcon,
@@ -17,107 +21,114 @@ import {
     Close as CloseIcon
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
-import { useSelector } from 'react-redux';
+import { useChatContext } from '../components/chat/ChatContext';
+import ConversationList from '../components/chat/ConversationList';
+import NewConversationDialog from '../components/chat/NewConversationDialog';
 
 const ChatContainer = styled(Box)({
     display: 'flex',
-    height: '100vh',
-    backgroundColor: '#f5f7fb',
+    height: 'calc(100vh - 64px)',
+    backgroundColor: '#E0F7FA',
+    borderRadius: '16px',
+    overflow: 'hidden',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+    margin: '16px',
+    border: '2px solid #20B2AA'
 });
 
-const Sidebar = styled(Paper)({
+const Sidebar = styled(Paper)(({ theme }) => ({
     width: 300,
     height: '100%',
     overflowY: 'auto',
-    borderRadius: 0,
-    boxShadow: '2px 0 5px rgba(0,0,0,0.1)',
-    '@media (max-width: 768px)': {
-        width: '100%',
+    borderRadius: '0',
+    backgroundColor: '#FFF8E1',
+    borderRight: '2px solid #FFA726',
+    [theme.breakpoints.down('md')]: {
+        position: 'absolute',
+        zIndex: 1200,
+        width: '80%',
+        transform: 'translateX(0)',
+        transition: 'transform 0.3s ease-in-out',
+        '&.hidden': {
+            transform: 'translateX(-100%)'
+        }
     },
-});
+}));
 
 const MainContent = styled(Box)({
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
+    backgroundColor: '#f5f7fb',
 });
 
 const MessageArea = styled(Box)({
     flex: 1,
     overflowY: 'auto',
-    padding: 20,
+    padding: '16px',
     display: 'flex',
     flexDirection: 'column',
-    backgroundColor: '#f0f2f5',
-    backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' viewBox=\'0 0 100 100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z\' fill=\'%239C92AC\' fill-opacity=\'0.05\' fill-rule=\'evenodd\'/%3E%3C/svg%3E")',
+    backgroundColor: '#E0F7FA',
+    backgroundImage: 'linear-gradient(to bottom, #E0F7FA, #B2EBF2)'
 });
 
 const MessageInputArea = styled(Box)({
-    padding: 16,
-    borderTop: '1px solid #e0e0e0',
-    backgroundColor: 'white',
+    padding: '16px',
+    borderTop: '2px solid #B2EBF2',
+    backgroundColor: '#FFF8E1',
+    display: 'flex',
+    alignItems: 'center'
 });
 
-const MessageBubble = styled(Box, {
-    shouldForwardProp: (prop) => prop !== 'iscurrentuser',
-})(({ iscurrentuser }) => ({
+const MessageBubble = styled(Box)(({ iscurrentuser }) => ({
     maxWidth: '75%',
     padding: '12px 16px',
-    borderRadius: '18px',
+    borderRadius: iscurrentuser ? '16px 0 16px 16px' : '0 16px 16px 16px',
     marginBottom: '12px',
     alignSelf: iscurrentuser ? 'flex-end' : 'flex-start',
-    backgroundColor: iscurrentuser ? '#dcf8c6' : 'white',
-    boxShadow: '0 1px 1px rgba(0,0,0,0.1)',
+    backgroundColor: iscurrentuser ? '#FFECB3' : '#FFFFFF',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
     wordBreak: 'break-word',
     position: 'relative',
-    '&:after': {
+    border: iscurrentuser ? '1px solid #FFA726' : '1px solid #B2EBF2',
+    fontFamily: "'Tajawal', sans-serif",
+    '&:before': {
         content: '""',
         position: 'absolute',
-        bottom: 0,
-        width: 0,
-        height: 0,
+        width: '0',
+        height: '0',
         borderStyle: 'solid',
-        borderColor: iscurrentuser
-            ? 'transparent transparent #dcf8c6 transparent'
-            : 'transparent transparent white transparent',
-        borderWidth: iscurrentuser
-            ? '0 0 12px 12px'
-            : '0 12px 12px 0',
+        borderWidth: iscurrentuser ? '0 0 12px 12px' : '0 12px 12px 0',
+        borderColor: iscurrentuser ? 'transparent transparent #FFECB3 transparent' : 'transparent transparent #FFFFFF transparent',
         right: iscurrentuser ? '-8px' : 'auto',
         left: iscurrentuser ? 'auto' : '-8px',
-        transform: iscurrentuser ? 'rotate(-20deg)' : 'rotate(20deg)'
+        top: '0'
     }
 }));
 
-
 const Timestamp = styled(Typography)({
     fontSize: '0.7rem',
-    color: '#888',
-    marginTop: 4,
+    color: '#00695C',
+    marginTop: '4px',
     textAlign: 'right',
+    fontFamily: "'Tajawal', sans-serif"
 });
 
 const ConnectionStatus = styled(Box)(({ status }) => ({
     display: 'flex',
     alignItems: 'center',
-    padding: '4px 12px',
-    borderRadius: 20,
+    padding: '8px 16px',
+    borderRadius: '16px',
     backgroundColor: status === 'connected' ? '#4caf50' : status === 'connecting' ? '#ff9800' : '#f44336',
     color: 'white',
-    fontSize: '0.75rem',
-    fontWeight: 500,
-    marginRight: 16,
+    fontSize: '0.8rem',
+    fontWeight: 'bold',
+    margin: '8px 16px',
+    fontFamily: "'Tajawal', sans-serif"
 }));
 
-const StatusDot = styled(Box)({
-    width: 8,
-    height: 8,
-    borderRadius: '50%',
-    marginRight: 6,
-});
-
-export default function ChatComponent() {
+export default function ChatMain() {
     const user = useSelector(state => state.user);
     const currentUserId = user.id;
     const token = user.token;
@@ -133,6 +144,8 @@ export default function ChatComponent() {
     const [loading, setLoading] = useState(true);
     const messageEndRef = useRef(null);
 
+    const { lastSeen, setLastSeen } = useChatContext();
+
     // Initialize SignalR connection
     useEffect(() => {
         if (!token) return;
@@ -144,42 +157,30 @@ export default function ChatComponent() {
                 transport: 1 // WebSockets
             })
             .configureLogging(LogLevel.Information)
-            .withAutomaticReconnect({
-                nextRetryDelayInMilliseconds: retryContext => {
-                    if (retryContext.elapsedMilliseconds < 60000) {
-                        return 2000; // Retry every 2 seconds for the first minute
-                    }
-                    return 5000; // Then every 5 seconds
-                }
-            })
+            .withAutomaticReconnect()
             .build();
 
         setConnectionStatus('connecting');
 
         newConnection.start()
             .then(() => {
-                console.log('SignalR Connected!');
                 setConnection(newConnection);
                 setConnectionStatus('connected');
                 setLoading(false);
             })
             .catch(e => {
-                console.log('Connection failed: ', e);
                 setConnectionStatus('disconnected');
             });
 
-        newConnection.onreconnecting(error => {
-            console.log('Connection lost. Reconnecting...', error);
+        newConnection.onreconnecting(() => {
             setConnectionStatus('connecting');
         });
 
-        newConnection.onreconnected(connectionId => {
-            console.log('Reconnected successfully');
+        newConnection.onreconnected(() => {
             setConnectionStatus('connected');
         });
 
-        newConnection.onclose(error => {
-            console.log('Connection closed', error);
+        newConnection.onclose(() => {
             setConnectionStatus('disconnected');
         });
 
@@ -201,13 +202,7 @@ export default function ChatComponent() {
         });
 
         connection.on('ConversationStarted', (conversation) => {
-            setConversations(prev => {
-                const exists = prev.some(c => c.id === conversation.id);
-                if (!exists) {
-                    return [...prev, conversation];
-                }
-                return prev;
-            });
+            setConversations(prev => [...prev, conversation]);
         });
 
         connection.on('ReceiveMessage', (messageContent, conversationId) => {
@@ -225,7 +220,6 @@ export default function ChatComponent() {
                         lastMessageAt: new Date().toISOString()
                     };
 
-                    // If this is the selected conversation, update it too
                     if (selectedConversation?.id === conversationId) {
                         setSelectedConversation(updatedConv);
                     }
@@ -256,33 +250,28 @@ export default function ChatComponent() {
         try {
             await connection.invoke('SendMessage', selectedConversation.id, newMessage);
 
-            // Optimistically update UI
             const tempMessage = {
                 senderId: currentUserId,
                 content: newMessage,
                 sentAt: new Date().toISOString()
             };
 
-            // Create a new updated conversation object
             const updatedConversation = {
                 ...selectedConversation,
                 messages: [...selectedConversation.messages, tempMessage],
                 lastMessageAt: new Date().toISOString()
             };
 
-            // Update both conversations list and selected conversation
             setConversations(prev => prev.map(conv =>
                 conv.id === selectedConversation.id ? updatedConversation : conv
             ));
-
-            // Update the selected conversation directly
             setSelectedConversation(updatedConversation);
-
             setNewMessage('');
         } catch (error) {
             console.error('Error sending message:', error);
         }
     };
+
     const handleStartNewConversation = async () => {
         if (!newConversationUserId.trim() || !connection) return;
 
@@ -300,19 +289,6 @@ export default function ChatComponent() {
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
-    };
-
-    const isToday = (dateString) => {
-        const date = new Date(dateString);
-        const today = new Date();
-        return date.getDate() === today.getDate() &&
-            date.getMonth() === today.getMonth() &&
-            date.getFullYear() === today.getFullYear();
-    };
-
     if (!token) {
         return (
             <Box sx={{
@@ -324,18 +300,23 @@ export default function ChatComponent() {
                 textAlign: 'center',
                 p: 3
             }}>
-                <Typography variant="h5" gutterBottom>
-                    Authentication Required
+                <Typography variant="h5" gutterBottom sx={{ fontFamily: "'Kidzhood Arabic', Arial, sans-serif" }}>
+                    يلزم تسجيل الدخول
                 </Typography>
-                <Typography variant="body1" color="textSecondary" sx={{ mb: 3 }}>
-                    Please log in to access the chat feature
+                <Typography variant="body1" sx={{ mb: 3, fontFamily: "'Tajawal', sans-serif" }}>
+                    يرجى تسجيل الدخول للوصول إلى خدمة المحادثة
                 </Typography>
                 <Button
                     variant="contained"
-                    color="primary"
                     href="/login"
+                    sx={{
+                        backgroundColor: '#FFA726',
+                        color: 'white',
+                        fontFamily: "'Tajawal', sans-serif",
+                        fontWeight: 'bold'
+                    }}
                 >
-                    Go to Login
+                    تسجيل الدخول
                 </Button>
             </Box>
         );
@@ -343,13 +324,8 @@ export default function ChatComponent() {
 
     if (loading) {
         return (
-            <Box sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: '100vh'
-            }}>
-                <CircularProgress size={60} />
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                <CircularProgress size={60} thickness={4} sx={{ color: '#20B2AA' }} />
             </Box>
         );
     }
@@ -357,155 +333,74 @@ export default function ChatComponent() {
     return (
         <ChatContainer>
             {/* Sidebar */}
-            <Sidebar sx={{ display: { xs: isSidebarOpen ? 'block' : 'none', md: 'block' } }}>
-                <Box sx={{ p: 2, display: 'flex', alignItems: 'center' }}>
-                    <Typography variant="h6" sx={{ flexGrow: 1 }}>Conversations</Typography>
+            <Sidebar className={isSidebarOpen ? '' : 'hidden'}>
+                <Box sx={{ p: 2, display: 'flex', alignItems: 'center', backgroundColor: '#FFA726', borderBottom: '2px solid #E65100' }}>
+                    <Typography variant="h6" sx={{ flexGrow: 1, color: 'white', fontFamily: "'Kidzhood Arabic', Arial, sans-serif", fontWeight: 'bold' }}>
+                        المحادثات
+                    </Typography>
                     <IconButton
                         onClick={() => setIsNewConversationDialogOpen(true)}
-                        color="primary"
+                        color="inherit"
                     >
-                        <PersonAddIcon />
+                        <PersonAddIcon sx={{ color: 'white' }} />
                     </IconButton>
                     <IconButton
                         onClick={() => setIsSidebarOpen(false)}
-                        sx={{ display: { md: 'none' } }}
+                        sx={{ display: { md: 'none' }, color: 'white' }}
                     >
                         <CloseIcon />
                     </IconButton>
                 </Box>
-                <Divider />
 
-                {/* Connection Status */}
-                <Box sx={{ p: 2, display: 'flex', alignItems: 'center' }}>
-                    <ConnectionStatus status={connectionStatus}>
-                        <StatusDot />
-                        {connectionStatus === 'connected' ? 'Connected' :
-                            connectionStatus === 'connecting' ? 'Connecting...' : 'Disconnected'}
-                    </ConnectionStatus>
-                    <Typography variant="body2" color="textSecondary">
-                        {user.firstName} {user.lastName}
-                    </Typography>
-                </Box>
-                <Divider />
+                <Divider sx={{ borderColor: '#E65100' }} />
 
-                {/* Conversation list */}
-                <List sx={{ overflowY: 'auto', flex: 1 }}>
-                    {conversations.length === 0 ? (
-                        <Box sx={{ p: 3, textAlign: 'center' }}>
-                            <Typography variant="body1" color="textSecondary">
-                                No conversations yet
-                            </Typography>
-                            <Button
-                                variant="outlined"
-                                startIcon={<PersonAddIcon />}
-                                onClick={() => setIsNewConversationDialogOpen(true)}
-                                sx={{ mt: 2 }}
-                            >
-                                Start a Conversation
-                            </Button>
-                        </Box>
-                    ) : (
-                        conversations.map(conversation => {
-                            const otherUser = conversation.user1Id === currentUserId
-                                ? conversation.user2Id
-                                : conversation.user1Id;
+                <ConnectionStatus 
+                    status={connectionStatus} 
+                    userName={`${user.firstName} ${user.lastName}`} 
+                />
+                
+                <Divider sx={{ borderColor: '#E65100' }} />
 
-                            const lastMessage = conversation.messages[conversation.messages.length - 1];
-                            const unreadCount = conversation.messages.filter(
-                                m => m.senderId !== currentUserId && !m.readAt
-                            ).length;
-
-                            return (
-                                <ListItem
-                                    key={conversation.id}
-                                    button
-                                    selected={selectedConversation?.id === conversation.id}
-                                    onClick={() => {
-                                        setSelectedConversation(conversation);
-                                        setIsSidebarOpen(false);
-                                    }}
-                                >
-                                    <ListItemAvatar>
-                                        <Badge
-                                            badgeContent={unreadCount}
-                                            color="primary"
-                                            invisible={unreadCount === 0}
-                                        >
-                                            <Avatar
-                                                alt={conversation.receiverDisplayName}
-                                                src={conversation.receiverProfileImage || undefined}
-                                                sx={{ bgcolor: '#3f51b5' }}
-                                            >
-                                                {conversation.receiverDisplayName?.charAt(0) || 'U'}
-                                            </Avatar>
-                                        </Badge>
-                                    </ListItemAvatar>
-                                    <ListItemText
-                                        primary={conversation.receiverDisplayName || `User ${otherUser}`}
-                                        secondary={lastMessage?.content || 'No messages yet'}
-                                        secondaryTypographyProps={{
-                                            noWrap: true,
-                                            style: {
-                                                width: '200px',
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis'
-                                            }
-                                        }}
-                                    />
-                                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                                        <Typography variant="caption">
-                                            {conversation.lastMessageAt &&
-                                                (isToday(conversation.lastMessageAt)
-                                                    ? formatTime(conversation.lastMessageAt)
-                                                    : formatDate(conversation.lastMessageAt))}
-                                        </Typography>
-                                        {unreadCount > 0 && (
-                                            <Box sx={{
-                                                bgcolor: 'primary.main',
-                                                borderRadius: '50%',
-                                                width: 20,
-                                                height: 20,
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                marginTop: 0.5
-                                            }}>
-                                                <Typography variant="caption" sx={{ color: 'white' }}>
-                                                    {unreadCount}
-                                                </Typography>
-                                            </Box>
-                                        )}
-                                    </Box>
-                                </ListItem>
-                            );
-                        })
-                    )}
-                </List>
+                <ConversationList
+                    conversations={conversations}
+                    currentUserId={currentUserId}
+                    selectedConversation={selectedConversation}
+                    setSelectedConversation={setSelectedConversation}
+                    setIsSidebarOpen={setIsSidebarOpen}
+                    setIsNewConversationDialogOpen={setIsNewConversationDialogOpen}
+                    lastSeen={lastSeen}
+                />
             </Sidebar>
 
             {/* Main Chat Area */}
             <MainContent>
-                <AppBar position="static" color="default" elevation={1}>
+                <AppBar position="static" color="default" elevation={0} sx={{ backgroundColor: '#FFA726', borderBottom: '2px solid #E65100' }}>
                     <Toolbar>
                         <IconButton
                             edge="start"
                             color="inherit"
                             aria-label="menu"
-                            onClick={() => setIsSidebarOpen(true)}
+                            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                             sx={{ mr: 2, display: { md: 'none' } }}
                         >
-                            <MenuIcon />
+                            {isSidebarOpen ? <CloseIcon /> : <MenuIcon />}
                         </IconButton>
                         {selectedConversation ? (
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                 <Avatar
                                     alt={selectedConversation.receiverDisplayName}
-                                    src={selectedConversation.receiverProfileImage || undefined}
-                                    sx={{ mr: 2, bgcolor: '#3f51b5' }}
+                                    src={selectedConversation.receiverProfileImage}
+                                    sx={{ 
+                                        mr: 2, 
+                                        bgcolor: '#20B2AA',
+                                        width: 40,
+                                        height: 40,
+                                        border: '2px solid white'
+                                    }}
                                 >
                                     {selectedConversation.receiverDisplayName?.charAt(0) || 'U'}
                                 </Avatar>
-                                <Typography variant="h6" noWrap>
+                                <Typography variant="h6" noWrap sx={{ color: 'white', fontFamily: "'Kidzhood Arabic', Arial, sans-serif", fontWeight: 'bold' }}>
                                     {selectedConversation.receiverDisplayName ||
                                         `User ${selectedConversation.user1Id === currentUserId
                                             ? selectedConversation.user2Id
@@ -513,7 +408,7 @@ export default function ChatComponent() {
                                 </Typography>
                             </Box>
                         ) : (
-                            <Typography variant="h6">Speech Correction Chat</Typography>
+                            <Typography variant="h6" sx={{ color: 'white', fontFamily: "'Kidzhood Arabic', Arial, sans-serif", fontWeight: 'bold' }}>محادثات التطبيق</Typography>
                         )}
                     </Toolbar>
                 </AppBar>
@@ -534,19 +429,25 @@ export default function ChatComponent() {
                                 }}>
                                     <Avatar
                                         alt={selectedConversation.receiverDisplayName}
-                                        src={selectedConversation.receiverProfileImage || undefined}
-                                        sx={{ width: 80, height: 80, mb: 2, bgcolor: '#3f51b5' }}
+                                        src={selectedConversation.receiverProfileImage}
+                                        sx={{ 
+                                            width: 80, 
+                                            height: 80, 
+                                            mb: 2, 
+                                            bgcolor: '#20B2AA',
+                                            border: '3px solid #FFA726'
+                                        }}
                                     >
                                         {selectedConversation.receiverDisplayName?.charAt(0) || 'U'}
                                     </Avatar>
-                                    <Typography variant="h5" gutterBottom>
+                                    <Typography variant="h5" gutterBottom sx={{ fontFamily: "'Kidzhood Arabic', Arial, sans-serif", color: '#00695C' }}>
                                         {selectedConversation.receiverDisplayName ||
                                             `User ${selectedConversation.user1Id === currentUserId
                                                 ? selectedConversation.user2Id
                                                 : selectedConversation.user1Id}`}
                                     </Typography>
-                                    <Typography variant="body1" color="textSecondary">
-                                        This is the beginning of your conversation
+                                    <Typography variant="body1" sx={{ color: '#00695C', fontFamily: "'Tajawal', sans-serif" }}>
+                                        هذه بداية محادثتك مع هذا المستخدم
                                     </Typography>
                                 </Box>
                             ) : (
@@ -564,10 +465,11 @@ export default function ChatComponent() {
                                                     my: 2,
                                                     px: 2,
                                                     py: 1,
-                                                    bgcolor: 'rgba(0,0,0,0.05)',
-                                                    borderRadius: 2
+                                                    bgcolor: '#FFECB3',
+                                                    borderRadius: '16px',
+                                                    border: '1px solid #FFA726'
                                                 }}>
-                                                    <Typography variant="caption">
+                                                    <Typography variant="caption" sx={{ fontFamily: "'Tajawal', sans-serif", color: '#E65100' }}>
                                                         {new Date(message.sentAt).toLocaleDateString([], {
                                                             weekday: 'long',
                                                             year: 'numeric',
@@ -577,7 +479,8 @@ export default function ChatComponent() {
                                                     </Typography>
                                                 </Box>
                                             )}
-                                            <MessageBubble iscurrentuser={isCurrentUser}>                                                <Typography>{message.content}</Typography>
+                                            <MessageBubble iscurrentuser={isCurrentUser}>
+                                                <Typography sx={{ fontFamily: "'Tajawal', sans-serif" }}>{message.content}</Typography>
                                                 <Timestamp>{formatTime(message.sentAt)}</Timestamp>
                                             </MessageBubble>
                                         </React.Fragment>
@@ -596,22 +499,30 @@ export default function ChatComponent() {
                             p: 3
                         }}>
                             <Box>
-                                <Typography variant="h5" gutterBottom>
-                                    Welcome to Speech Correction Chat
+                                <Typography variant="h5" gutterBottom sx={{ fontFamily: "'Kidzhood Arabic', Arial, sans-serif", color: '#00695C' }}>
+                                    مرحبًا بكم في محادثات التطبيق
                                 </Typography>
-                                <Typography variant="body1" color="textSecondary" sx={{ mb: 3 }}>
+                                <Typography variant="body1" sx={{ color: '#00695C', fontFamily: "'Tajawal', sans-serif", mb: 3 }}>
                                     {conversations.length > 0
-                                        ? "Select a conversation from the sidebar to start chatting"
-                                        : "Start a new conversation by clicking the '+' button"}
+                                        ? "اختر محادثة من القائمة الجانبية لبدء الدردشة"
+                                        : "ابدأ محادثة جديدة بالضغط على زر الإضافة"}
                                 </Typography>
                                 <Button
                                     variant="contained"
-                                    color="primary"
                                     startIcon={<PersonAddIcon />}
                                     onClick={() => setIsNewConversationDialogOpen(true)}
-                                    sx={{ mt: 2 }}
+                                    sx={{ 
+                                        mt: 2,
+                                        backgroundColor: '#FFA726',
+                                        color: 'white',
+                                        fontFamily: "'Tajawal', sans-serif",
+                                        fontWeight: 'bold',
+                                        '&:hover': {
+                                            backgroundColor: '#E65100'
+                                        }
+                                    }}
                                 >
-                                    Start New Conversation
+                                    بدء محادثة جديدة
                                 </Button>
                             </Box>
                         </Box>
@@ -621,68 +532,60 @@ export default function ChatComponent() {
                 {/* Message Input */}
                 {selectedConversation && (
                     <MessageInputArea>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <TextField
-                                fullWidth
-                                variant="outlined"
-                                placeholder="Type a message..."
-                                value={newMessage}
-                                onChange={(e) => setNewMessage(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && !e.shiftKey) {
-                                        e.preventDefault();
-                                        handleSendMessage();
-                                    }
-                                }}
-                                multiline
-                                maxRows={4}
-                                sx={{ mr: 1 }}
-                            />
-                            <IconButton
-                                color="primary"
-                                onClick={handleSendMessage}
-                                disabled={!newMessage.trim()}
-                                sx={{ alignSelf: 'flex-end', mb: 1 }}
-                            >
-                                <SendIcon />
-                            </IconButton>
-                        </Box>
+                        <TextField
+                            fullWidth
+                            variant="outlined"
+                            placeholder="اكتب رسالة هنا..."
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    handleSendMessage();
+                                }
+                            }}
+                            multiline
+                            maxRows={4}
+                            sx={{ 
+                                mr: 1,
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: '16px',
+                                    fontFamily: "'Tajawal', sans-serif",
+                                    backgroundColor: 'white'
+                                }
+                            }}
+                        />
+                        <IconButton
+                            color="primary"
+                            onClick={handleSendMessage}
+                            disabled={!newMessage.trim()}
+                            sx={{ 
+                                alignSelf: 'flex-end',
+                                mb: 1,
+                                backgroundColor: '#20B2AA',
+                                color: 'white',
+                                '&:hover': {
+                                    backgroundColor: '#00897B'
+                                },
+                                '&:disabled': {
+                                    backgroundColor: '#B2DFDB'
+                                }
+                            }}
+                        >
+                            <SendIcon />
+                        </IconButton>
                     </MessageInputArea>
                 )}
             </MainContent>
 
             {/* New Conversation Dialog */}
-            <Dialog
+            <NewConversationDialog
                 open={isNewConversationDialogOpen}
                 onClose={() => setIsNewConversationDialogOpen(false)}
-            >
-                <DialogTitle>Start New Conversation</DialogTitle>
-                <DialogContent>
-                    <Box sx={{ p: 2, minWidth: 300 }}>
-                        <TextField
-                            autoFocus
-                            margin="dense"
-                            label="User ID"
-                            type="text"
-                            fullWidth
-                            variant="outlined"
-                            value={newConversationUserId}
-                            onChange={(e) => setNewConversationUserId(e.target.value)}
-                            placeholder="Enter user ID to start conversation"
-                        />
-                    </Box>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setIsNewConversationDialogOpen(false)}>Cancel</Button>
-                    <Button
-                        onClick={handleStartNewConversation}
-                        variant="contained"
-                        disabled={!newConversationUserId.trim()}
-                    >
-                        Start Conversation
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                newConversationUserId={newConversationUserId}
+                setNewConversationUserId={setNewConversationUserId}
+                handleStartNewConversation={handleStartNewConversation}
+            />
         </ChatContainer>
     );
 }

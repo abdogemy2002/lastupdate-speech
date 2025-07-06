@@ -13,11 +13,12 @@ import Footer from './components/Footer';
 import TestWelcome from './pages/TestPages/InitialTest';
 import TestPage from './pages/TestPages/TestPage';
 import SpeechRecognitionPage from './pages/SpeechRecognitionPage';
-import PatientDashboard from './pages/patient_dashboard'; // هذا الملف سيعرض كلا المحتويين
+import PatientDashboard from './pages/patient_dashboard';
 import ProfileImageSelectorPage from './pages/ProfileImagePage';
 import SelectLetters from './components/Signup Forms/SignUpTestLetters';
 import UpdateProfile from './pages/PatientProfilePage';
-import ChatPage from './pages/ChatPage'; 
+import ChatPage from './pages/ChatPage';
+import { ChatProvider } from './components/chat/ChatContext'; // استيراد ChatProvider
 
 const App = () => {
   const dispatch = useDispatch();
@@ -34,68 +35,70 @@ const App = () => {
 
   return (
     <Router>
-      <div>
-        <CustomNavbar isAuthenticated={isAuthenticated} onLogout={handleLogout} />
-        <Routes>
-          {/* الصفحة الرئيسية */}
-          <Route
-            path="/"
-            element={
-              isAuthenticated && userType === 'Patient' ? (
-                <Navigate to="/PatientDashboard" />
-              ) : (
-                <HomePage />
-              )
-            }
-          />
+      <ChatProvider> {/* لف التطبيق كله ب ChatProvider */}
+        <div>
+          <CustomNavbar isAuthenticated={isAuthenticated} onLogout={handleLogout} />
+          <Routes>
+            {/* الصفحة الرئيسية */}
+            <Route
+              path="/"
+              element={
+                isAuthenticated && userType === 'Patient' ? (
+                  <Navigate to="/PatientDashboard" />
+                ) : (
+                  <HomePage />
+                )
+              }
+            />
 
-          {/* صفحات لا تحتاج مصادقة */}
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/chat" element={<ChatPage />} />
+            {/* صفحات لا تحتاج مصادقة */}
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/chat" element={<ChatPage />} />
 
-          {/* صفحات تحتاج مصادقة */}
-          <Route
-            path="/select-profile-image"
-            element={isAuthenticated ? <ProfileImageSelectorPage /> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/SelectLetters"
-            element={isAuthenticated ? <SelectLetters /> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/TestPage"
-            element={isAuthenticated ? <TestPage /> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/UpdateProfile"
-            element={isAuthenticated ? <UpdateProfile /> : <Navigate to="/login" />}
-          />
+            {/* صفحات تحتاج مصادقة */}
+            <Route
+              path="/select-profile-image"
+              element={isAuthenticated ? <ProfileImageSelectorPage /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/SelectLetters"
+              element={isAuthenticated ? <SelectLetters /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/TestPage"
+              element={isAuthenticated ? <TestPage /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/UpdateProfile"
+              element={isAuthenticated ? <UpdateProfile /> : <Navigate to="/login" />}
+            />
 
-          {/* مسار لوحة التحكم - سيعرض كلا المحتويين حسب المسار الفرعي */}
-          <Route
-            path="/PatientDashboard/*"
-            element={
-              isAuthenticated && userType === 'Patient' ?
-                <PatientDashboard /> :
-                <Navigate to="/" />
-            }
-          />
+            {/* مسار لوحة التحكم */}
+            <Route
+              path="/PatientDashboard/*"
+              element={
+                isAuthenticated && userType === 'Patient' ?
+                  <PatientDashboard /> :
+                  <Navigate to="/" />
+              }
+            />
 
-          <Route
-            path="/TestWelcome"
-            element={isAuthenticated ? <TestWelcome /> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/speech"
-            element={isAuthenticated ? <SpeechRecognitionPage /> : <Navigate to="/login" />}
-          />
+            <Route
+              path="/TestWelcome"
+              element={isAuthenticated ? <TestWelcome /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/speech"
+              element={isAuthenticated ? <SpeechRecognitionPage /> : <Navigate to="/login" />}
+            />
 
-          {/* Redirect للصفحة الرئيسية إذا كان المسار غير موجود */}
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-        <Footer />
-      </div>
+            {/* Redirect للصفحة الرئيسية إذا كان المسار غير موجود */}
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+          <Footer />
+        </div>
+      </ChatProvider>
     </Router>
   );
 };
