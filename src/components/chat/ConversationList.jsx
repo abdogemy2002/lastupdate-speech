@@ -1,14 +1,13 @@
 import React from 'react';
-import {
-    List,
-    Box,
-    Typography,
-    Button,
-    Divider
-} from '@mui/material';
+import { List } from '@mui/material';
 import ConversationItem from './ConversationItem';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { useChatContext } from './ChatContext';
+import {
+    EmptyListBox,
+    NoConversationsText,
+    StartConversationButton
+} from './styles/chatStyles';
 
 const ConversationList = ({
     conversations = [],
@@ -18,26 +17,26 @@ const ConversationList = ({
     setIsSidebarOpen,
     setIsNewConversationDialogOpen
 }) => {
-    const { lastSeen } = useChatContext(); // استخراج lastSeen من السياق
+    const { lastSeen } = useChatContext();
 
     return (
         <List sx={{ overflowY: 'auto', flex: 1 }}>
             {conversations.length === 0 ? (
-                <Box sx={{ p: 3, textAlign: 'center' }}>
-                    <Typography variant="body1" color="textSecondary">
-                        No conversations yet
-                    </Typography>
-                    <Button
+                <EmptyListBox>
+                    <NoConversationsText>
+                        لا توجد محادثات بعد
+                    </NoConversationsText>
+
+                    <StartConversationButton
                         variant="outlined"
                         startIcon={<PersonAddIcon />}
                         onClick={() => setIsNewConversationDialogOpen(true)}
-                        sx={{ mt: 2 }}
                     >
-                        Start a Conversation
-                    </Button>
-                </Box>
+                        ابدأ محادثة
+                    </StartConversationButton>
+                </EmptyListBox>
             ) : (
-                conversations.map(conversation => (
+                conversations.map(conversation =>
                     conversation && (
                         <ConversationItem
                             key={conversation.id}
@@ -48,10 +47,10 @@ const ConversationList = ({
                                 setSelectedConversation(conv);
                                 setIsSidebarOpen(false);
                             }}
-                            lastSeen={lastSeen} // تمرير lastSeen كمprop
+                            lastSeen={lastSeen}
                         />
                     )
-                ))
+                )
             )}
         </List>
     );

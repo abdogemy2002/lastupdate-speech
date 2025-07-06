@@ -1,8 +1,6 @@
 import React from 'react';
 import {
-    ListItem,
     ListItemText,
-    Avatar,
     Badge,
     Typography,
     Box,
@@ -14,6 +12,15 @@ import {
     isToday
 } from './utils/dateUtils';
 import { useChatContext } from './ChatContext';
+import {
+    StyledListItem,
+    StyledAvatar,
+    StyledUserName,
+    StyledMessageText,
+    StyledTimeText,
+    StyledUnreadBadge,
+    StyledUnreadCountBox
+} from './styles/chatStyles';
 
 const ConversationItem = ({
     conversation = {},
@@ -44,111 +51,60 @@ const ConversationItem = ({
     }).length || 0;
 
     return (
-        <ListItem
+        <StyledListItem
             button
             selected={isSelected}
             onClick={() => onSelect(conversation)}
-            sx={{
-                borderBottom: '1px solid #B2EBF2',
-                backgroundColor: isSelected ? '#FFECB3' : 'transparent',
-                '&:hover': {
-                    backgroundColor: '#E0F7FA'
-                }
-            }}
         >
             <ListItemAvatar>
                 <Badge
                     badgeContent={unreadCount}
                     color="primary"
                     invisible={unreadCount === 0}
-                    sx={{
-                        '& .MuiBadge-badge': {
-                            backgroundColor: '#E65100',
-                            color: 'white',
-                            fontFamily: "'Tajawal', sans-serif",
-                            fontWeight: 'bold'
-                        }
-                    }}
+                    sx={StyledUnreadBadge}
                 >
-                    <Avatar
+                    <StyledAvatar
                         alt={conversation.receiverDisplayName || `User ${otherUser}`}
                         src={conversation.receiverProfileImage}
-                        sx={{
-                            bgcolor: '#20B2AA',
-                            width: 40,
-                            height: 40,
-                            border: '2px solid white'
-                        }}
                     >
                         {(conversation.receiverDisplayName || `User ${otherUser}`).charAt(0)}
-                    </Avatar>
+                    </StyledAvatar>
                 </Badge>
             </ListItemAvatar>
+
             <ListItemText
                 primary={
-                    <Typography
-                        sx={{
-                            fontFamily: "'Tajawal', sans-serif",
-                            fontWeight: 'bold',
-                            color: '#00695C'
-                        }}
-                    >
+                    <StyledUserName component="span">
                         {conversation.receiverDisplayName || `User ${otherUser}`}
-                    </Typography>
+                    </StyledUserName>
                 }
                 secondary={
-                    <Typography
-                        sx={{
-                            fontFamily: "'Tajawal', sans-serif",
-                            color: unreadCount > 0 ? '#E65100' : '#0097A7',
-                            fontWeight: unreadCount > 0 ? 'bold' : 'normal'
-                        }}
-                    >
+                    <StyledMessageText component="span">
                         {lastMessage?.content || 'لا توجد رسائل'}
-                    </Typography>
+                    </StyledMessageText>
                 }
                 secondaryTypographyProps={{
-                    noWrap: true,
-                    style: {
-                        width: '200px',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis'
-                    }
+                    noWrap: true
                 }}
             />
+
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                <Typography variant="caption" sx={{
-                    fontFamily: "'Tajawal', sans-serif",
-                    color: '#0097A7'
-                }}>
+                <StyledTimeText variant="caption" component="span">
                     {conversation.lastMessageAt &&
                         (isToday(conversation.lastMessageAt)
                             ? formatTime(conversation.lastMessageAt)
                             : formatDate(conversation.lastMessageAt))}
-                </Typography>
+                </StyledTimeText>
+
                 {unreadCount > 0 && (
-                    <Box sx={{
-                        bgcolor: '#E65100',
-                        borderRadius: '50%',
-                        width: 20,
-                        height: 20,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        marginTop: 0.5
-                    }}>
-                        <Typography variant="caption" sx={{
-                            color: 'white',
-                            fontFamily: "'Tajawal', sans-serif",
-                            fontWeight: 'bold',
-                            fontSize: '0.7rem'
-                        }}>
+                    <StyledUnreadCountBox>
+                        <Typography variant="caption" component="span">
                             {unreadCount}
                         </Typography>
-                    </Box>
+                    </StyledUnreadCountBox>
                 )}
             </Box>
-        </ListItem>
+        </StyledListItem>
     );
 };
 

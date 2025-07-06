@@ -30,7 +30,7 @@ const ChatHeader = ({
                     <Avatar
                         alt={selectedConversation.receiverDisplayName}
                         src={selectedConversation.receiverProfileImage || undefined}
-                        sx={{ mr: 2, bgcolor: '#3f51b5' }}
+                        sx={{ mr: 2, bgcolor: '#20b2aa' }}
                     >
                         {selectedConversation.receiverDisplayName?.charAt(0) || 'U'}
                     </Avatar>

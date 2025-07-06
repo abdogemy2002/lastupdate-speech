@@ -2,36 +2,37 @@ import React, { useState, useEffect, useRef } from 'react';
 import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 import { useSelector } from 'react-redux';
 import {
-    Box,
-    Paper,
     IconButton,
     CircularProgress,
     Typography,
-    Button
+    Button,
+    Avatar,
+    Box
 } from '@mui/material';
 import {
     PersonAdd as PersonAddIcon,
     Close as CloseIcon
 } from '@mui/icons-material';
 
-// المكونات الفرعية
-import ConnectionStatus from './components/ConnectionStatus';
-import MessageBubble from './components/MessageBubble';
-import MessageInput from './components/MessageInput';
-import NewConversationDialog from './components/NewConversationDialog';
-import ConversationList from './components/ConversationList';
-import ChatHeader from './components/ChatHeader';
+// مكونات فرعية
+import ConnectionStatus from './ConnectionStatus';
+import MessageBubble from './MessageBubble';
+import MessageInput from './MessageInput';
+import NewConversationDialog from './NewConversationDialog';
+import ConversationList from './ConversationList';
+import ChatHeader from './ChatHeader';
 
-// الأنماط
+// أنماط مفصولة
 import {
     ChatContainer,
     Sidebar,
     MainContent,
     MessageArea,
-    MessageInputArea
+    MessageInputArea,
+    CenteredBox,
+    EmptyMessageBox,
 } from './styles/chatStyles';
 
-// الأدوات المساعدة
 import { formatFullDate } from './utils/dateUtils';
 
 export default function ChatMain() {
@@ -50,7 +51,6 @@ export default function ChatMain() {
     const [loading, setLoading] = useState(true);
     const messageEndRef = useRef(null);
 
-    // Initialize SignalR connection
     useEffect(() => {
         if (!token) return;
 
@@ -58,7 +58,7 @@ export default function ChatMain() {
             .withUrl('wss://speech-correction-api.azurewebsites.net/chathub', {
                 accessTokenFactory: () => token,
                 skipNegotiation: true,
-                transport: 1 // WebSockets
+                transport: 1
             })
             .configureLogging(LogLevel.Information)
             .withAutomaticReconnect({
@@ -79,7 +79,7 @@ export default function ChatMain() {
                 setConnectionStatus('connected');
                 setLoading(false);
             })
-            .catch(e => {
+            .catch(() => {
                 setConnectionStatus('disconnected');
             });
 
@@ -100,24 +100,21 @@ export default function ChatMain() {
         };
     }, [token]);
 
-    // Setup SignalR event handlers
     useEffect(() => {
         if (!connection) return;
 
-        connection.on('InitializeConversations', (conversations) => {
-            setConversations(conversations);
-            if (conversations.length > 0 && !selectedConversation) {
-                setSelectedConversation(conversations[0]);
+        connection.on('InitializeConversations', (convs) => {
+            setConversations(convs);
+            if (convs.length > 0 && !selectedConversation) {
+                setSelectedConversation(convs[0]);
             }
             setLoading(false);
         });
 
-        connection.on('ConversationStarted', (conversation) => {
+        connection.on('ConversationStarted', (conv) => {
             setConversations(prev => {
-                const exists = prev.some(c => c.id === conversation.id);
-                if (!exists) {
-                    return [...prev, conversation];
-                }
+                const exists = prev.some(c => c.id === conv.id);
+                if (!exists) return [...prev, conv];
                 return prev;
             });
         });
@@ -125,7 +122,7 @@ export default function ChatMain() {
         connection.on('ReceiveMessage', (messageContent, conversationId) => {
             setConversations(prev => prev.map(conv => {
                 if (conv.id === conversationId) {
-                    const newMessage = {
+                    const newMessageObj = {
                         senderId: currentUserId === conv.user1Id ? conv.user2Id : conv.user1Id,
                         content: messageContent,
                         sentAt: new Date().toISOString()
@@ -133,7 +130,7 @@ export default function ChatMain() {
 
                     const updatedConv = {
                         ...conv,
-                        messages: [...conv.messages, newMessage],
+                        messages: [...conv.messages, newMessageObj],
                         lastMessageAt: new Date().toISOString()
                     };
 
@@ -156,7 +153,6 @@ export default function ChatMain() {
         };
     }, [connection, selectedConversation, currentUserId]);
 
-    // Scroll to bottom when messages change
     useEffect(() => {
         messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [selectedConversation?.messages]);
@@ -204,71 +200,55 @@ export default function ChatMain() {
 
     if (!token) {
         return (
-            <Box sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: '100vh',
-                flexDirection: 'column',
-                textAlign: 'center',
-                p: 3
-            }}>
+            <CenteredBox>
                 <Typography variant="h5" gutterBottom>
                     Authentication Required
                 </Typography>
                 <Typography variant="body1" color="textSecondary" sx={{ mb: 3 }}>
                     Please log in to access the chat feature
                 </Typography>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    href="/login"
-                >
+                <Button variant="contained" color="primary" href="/login">
                     Go to Login
                 </Button>
-            </Box>
+            </CenteredBox>
         );
     }
 
     if (loading) {
         return (
-            <Box sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: '100vh'
-            }}>
+            <CenteredBox>
                 <CircularProgress size={60} />
-            </Box>
+            </CenteredBox>
         );
     }
 
     return (
         <ChatContainer>
-            {/* Sidebar */}
             <Sidebar sx={{ display: { xs: isSidebarOpen ? 'block' : 'none', md: 'block' } }}>
-                <Box sx={{ p: 2, display: 'flex', alignItems: 'center' }}>
-                    <Typography variant="h6" sx={{ flexGrow: 1 }}>Conversations</Typography>
-                    <IconButton
-                        onClick={() => setIsNewConversationDialogOpen(true)}
-                        color="primary"
-                    >
+                <Box
+                    sx={{
+                        p: 1.5,
+                        display: 'flex',
+                        alignItems: 'center',
+                        backgroundColor: '#20B2AA',
+                        color: '#fff'
+                    }}
+                >
+                    <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
+                        الرسائل
+                    </Typography>
+                    <IconButton onClick={() => setIsNewConversationDialogOpen(true)} sx={{ color: '#fff' }}>
                         <PersonAddIcon />
                     </IconButton>
-                    <IconButton
-                        onClick={() => setIsSidebarOpen(false)}
-                        sx={{ display: { md: 'none' } }}
-                    >
+                    <IconButton onClick={() => setIsSidebarOpen(false)} sx={{ display: { md: 'none' }, color: '#fff' }}>
                         <CloseIcon />
                     </IconButton>
                 </Box>
-                <Divider />
 
                 <ConnectionStatus
                     status={connectionStatus}
                     userName={`${user.firstName} ${user.lastName}`}
                 />
-                <Divider />
 
                 <ConversationList
                     conversations={conversations}
@@ -280,7 +260,6 @@ export default function ChatMain() {
                 />
             </Sidebar>
 
-            {/* Main Chat Area */}
             <MainContent>
                 <ChatHeader
                     selectedConversation={selectedConversation}
@@ -288,24 +267,15 @@ export default function ChatMain() {
                     setIsSidebarOpen={setIsSidebarOpen}
                 />
 
-                {/* Message Display Area */}
                 <MessageArea>
                     {selectedConversation ? (
                         <>
                             {selectedConversation.messages.length === 0 ? (
-                                <Box sx={{
-                                    display: 'flex',
-                                    flex: 1,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    textAlign: 'center',
-                                    p: 3,
-                                    flexDirection: 'column'
-                                }}>
+                                <EmptyMessageBox>
                                     <Avatar
                                         alt={selectedConversation.receiverDisplayName}
                                         src={selectedConversation.receiverProfileImage || undefined}
-                                        sx={{ width: 80, height: 80, mb: 2, bgcolor: '#3f51b5' }}
+                                        sx={{ width: 80, height: 80, mb: 2, bgcolor: '#FFA726', color: '#fff', fontSize: 32 }}
                                     >
                                         {selectedConversation.receiverDisplayName?.charAt(0) || 'U'}
                                     </Avatar>
@@ -316,36 +286,25 @@ export default function ChatMain() {
                                                 : selectedConversation.user1Id}`}
                                     </Typography>
                                     <Typography variant="body1" color="textSecondary">
-                                        This is the beginning of your conversation
+                                        هذه هي بداية المحادثة
                                     </Typography>
-                                </Box>
+                                </EmptyMessageBox>
                             ) : (
                                 selectedConversation.messages.map((message, index) => {
                                     const isCurrentUser = message.senderId === currentUserId;
-                                    const showDate = index === 0 ||
+                                    const showDate =
+                                        index === 0 ||
                                         new Date(message.sentAt).toDateString() !==
                                         new Date(selectedConversation.messages[index - 1].sentAt).toDateString();
 
                                     return (
                                         <React.Fragment key={index}>
-                                            {showDate && (
-                                                <Box sx={{
-                                                    alignSelf: 'center',
-                                                    my: 2,
-                                                    px: 2,
-                                                    py: 1,
-                                                    bgcolor: 'rgba(0,0,0,0.05)',
-                                                    borderRadius: 2
-                                                }}>
-                                                    <Typography variant="caption">
-                                                        {formatFullDate(message.sentAt)}
-                                                    </Typography>
-                                                </Box>
-                                            )}
                                             <MessageBubble
                                                 isCurrentUser={isCurrentUser}
                                                 content={message.content}
                                                 sentAt={message.sentAt}
+                                                showDate={showDate}
+                                                dateString={formatFullDate(message.sentAt)}
                                             />
                                         </React.Fragment>
                                     );
@@ -354,40 +313,31 @@ export default function ChatMain() {
                             <div ref={messageEndRef} />
                         </>
                     ) : (
-                        <Box sx={{
-                            display: 'flex',
-                            flex: 1,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            textAlign: 'center',
-                            p: 3
-                        }}>
+                        <EmptyMessageBox>
                             <Box>
                                 <Typography variant="h5" gutterBottom>
-                                    Welcome to Speech Correction Chat
+                                    مرحبًا بك في المحادثات
                                 </Typography>
                                 <Typography variant="body1" color="textSecondary" sx={{ mb: 3 }}>
                                     {conversations.length > 0
-                                        ? "Select a conversation from the sidebar to start chatting"
-                                        : "Start a new conversation by clicking the '+' button"}
+                                        ? 'اختر محادثة من القائمة الجانبية'
+                                        : 'ابدأ محادثة جديدة بالضغط على زر +'}
                                 </Typography>
                                 <Button
                                     variant="contained"
-                                    color="primary"
+                                    sx={{ backgroundColor: '#FFA726', '&:hover': { backgroundColor: '#fb8c00' } }}
                                     startIcon={<PersonAddIcon />}
                                     onClick={() => setIsNewConversationDialogOpen(true)}
-                                    sx={{ mt: 2 }}
                                 >
-                                    Start New Conversation
+                                    محادثة جديدة
                                 </Button>
                             </Box>
-                        </Box>
+                        </EmptyMessageBox>
                     )}
                 </MessageArea>
 
-                {/* Message Input */}
                 {selectedConversation && (
-                    <MessageInputArea>
+                    <MessageInputArea sx={{ position: 'sticky', bottom: 0, zIndex: 1 }}>
                         <MessageInput
                             newMessage={newMessage}
                             setNewMessage={setNewMessage}
@@ -397,7 +347,6 @@ export default function ChatMain() {
                 )}
             </MainContent>
 
-            {/* New Conversation Dialog */}
             <NewConversationDialog
                 open={isNewConversationDialogOpen}
                 onClose={() => setIsNewConversationDialogOpen(false)}
@@ -407,4 +356,5 @@ export default function ChatMain() {
             />
         </ChatContainer>
     );
+
 }

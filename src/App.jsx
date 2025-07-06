@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from './store/slices/userSlice';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -17,11 +17,13 @@ import PatientDashboard from './pages/patient_dashboard';
 import ProfileImageSelectorPage from './pages/ProfileImagePage';
 import SelectLetters from './components/Signup Forms/SignUpTestLetters';
 import UpdateProfile from './pages/PatientProfilePage';
-import ChatPage from './pages/ChatPage';
+import ChatPage from './components/chat/ChatMain';
 import { ChatProvider } from './components/chat/ChatContext'; // استيراد ChatProvider
 
-const App = () => {
+// ✅ هنا بنستخدم useLocation داخل Wrapper علشان نقدر نتحكم في الـ Footer
+const AppWrapper = () => {
   const dispatch = useDispatch();
+  const location = useLocation(); // 🟢 هنا بنجيب المسار الحالي
   const { isAuthenticated, userType } = useSelector((state) => state.user);
 
   useEffect(() => {
@@ -33,74 +35,75 @@ const App = () => {
     localStorage.removeItem("user");
   };
 
+  // 🟠 المسارات اللي مش عايزين نظهر فيها الفوتر
+  const hideFooterPaths = ['/chat'];
+
   return (
-    <Router>
-      <ChatProvider> {/* لف التطبيق كله ب ChatProvider */}
-        <div>
-          <CustomNavbar isAuthenticated={isAuthenticated} onLogout={handleLogout} />
-          <Routes>
-            {/* الصفحة الرئيسية */}
-            <Route
-              path="/"
-              element={
-                isAuthenticated && userType === 'Patient' ? (
-                  <Navigate to="/PatientDashboard" />
-                ) : (
-                  <HomePage />
-                )
-              }
-            />
+    <ChatProvider>
+      <div>
+        <CustomNavbar isAuthenticated={isAuthenticated} onLogout={handleLogout} />
+        <Routes>
+          <Route
+            path="/"
+            element={
+              isAuthenticated && userType === 'Patient' ? (
+                <Navigate to="/PatientDashboard" />
+              ) : (
+                <HomePage />
+              )
+            }
+          />
 
-            {/* صفحات لا تحتاج مصادقة */}
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/chat" element={<ChatPage />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/chat" element={<ChatPage />} />
 
-            {/* صفحات تحتاج مصادقة */}
-            <Route
-              path="/select-profile-image"
-              element={isAuthenticated ? <ProfileImageSelectorPage /> : <Navigate to="/login" />}
-            />
-            <Route
-              path="/SelectLetters"
-              element={isAuthenticated ? <SelectLetters /> : <Navigate to="/login" />}
-            />
-            <Route
-              path="/TestPage"
-              element={isAuthenticated ? <TestPage /> : <Navigate to="/login" />}
-            />
-            <Route
-              path="/UpdateProfile"
-              element={isAuthenticated ? <UpdateProfile /> : <Navigate to="/login" />}
-            />
+          <Route
+            path="/select-profile-image"
+            element={isAuthenticated ? <ProfileImageSelectorPage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/SelectLetters"
+            element={isAuthenticated ? <SelectLetters /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/TestPage"
+            element={isAuthenticated ? <TestPage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/UpdateProfile"
+            element={isAuthenticated ? <UpdateProfile /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/PatientDashboard/*"
+            element={
+              isAuthenticated && userType === 'Patient' ? <PatientDashboard /> : <Navigate to="/" />
+            }
+          />
+          <Route
+            path="/TestWelcome"
+            element={isAuthenticated ? <TestWelcome /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/speech"
+            element={isAuthenticated ? <SpeechRecognitionPage /> : <Navigate to="/login" />}
+          />
 
-            {/* مسار لوحة التحكم */}
-            <Route
-              path="/PatientDashboard/*"
-              element={
-                isAuthenticated && userType === 'Patient' ?
-                  <PatientDashboard /> :
-                  <Navigate to="/" />
-              }
-            />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
 
-            <Route
-              path="/TestWelcome"
-              element={isAuthenticated ? <TestWelcome /> : <Navigate to="/login" />}
-            />
-            <Route
-              path="/speech"
-              element={isAuthenticated ? <SpeechRecognitionPage /> : <Navigate to="/login" />}
-            />
-
-            {/* Redirect للصفحة الرئيسية إذا كان المسار غير موجود */}
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
-          <Footer />
-        </div>
-      </ChatProvider>
-    </Router>
+        {/* ✅ الشرط هنا: لو مش في صفحة من صفحات الإخفاء، اعرض الفوتر */}
+        {!hideFooterPaths.includes(location.pathname) && <Footer />}
+      </div>
+    </ChatProvider>
   );
 };
+
+// نستخدم <AppWrapper /> داخل <Router>
+const App = () => (
+  <Router>
+    <AppWrapper />
+  </Router>
+);
 
 export default App;

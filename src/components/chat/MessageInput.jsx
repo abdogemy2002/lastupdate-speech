@@ -1,21 +1,21 @@
 import React from 'react';
-import {
-    Box,
-    TextField,
-    IconButton
-} from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
+import {
+    InputWrapper,
+    StyledTextField,
+    StyledSendButton
+} from './styles/chatStyles';
 
 const MessageInput = ({
     newMessage,
     setNewMessage,
     handleSendMessage
 }) => (
-    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <TextField
+    <InputWrapper>
+        <StyledTextField
             fullWidth
             variant="outlined"
-            placeholder="Type a message..."
+            placeholder="اكتب رسالتك..."
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyDown={(e) => {
@@ -26,17 +26,14 @@ const MessageInput = ({
             }}
             multiline
             maxRows={4}
-            sx={{ mr: 1 }}
         />
-        <IconButton
-            color="primary"
+        <StyledSendButton
             onClick={handleSendMessage}
             disabled={!newMessage.trim()}
-            sx={{ alignSelf: 'flex-end', mb: 1 }}
         >
             <SendIcon />
-        </IconButton>
-    </Box>
+        </StyledSendButton>
+    </InputWrapper>
 );
 
 export default MessageInput;

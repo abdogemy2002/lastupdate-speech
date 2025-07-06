@@ -317,7 +317,7 @@ const PatientProfilePage = () => {
               sx={{
                 width: 120,
                 height: 120,
-                border: '3px solid #1c8d8d'
+                border: '5px solid #FFA726'
               }}
             />
             <IconButton
