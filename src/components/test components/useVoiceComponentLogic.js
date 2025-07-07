@@ -29,6 +29,7 @@ const useVoiceComponentLogic = (token, selectedLetters) => {
                     }
                 );
                 setTestData(res.data);
+                console.log('✅ تم جلب البيانات بنجاح:', res.data);
                 setIsLoading(false);
             } catch (err) {
                 console.error('❌ خطأ في جلب البيانات:', err);
@@ -46,7 +47,6 @@ const useVoiceComponentLogic = (token, selectedLetters) => {
                 selectedLetters.includes(item.letter)
             );
 
-            // فقط أول 3 كلمات من كل حرف
             const limited = [];
             const seenLetters = new Map();
 
@@ -73,7 +73,11 @@ const useVoiceComponentLogic = (token, selectedLetters) => {
         const audio = new Audio(userRecordingRef.current);
         setIsPlayingRecording(true);
 
-        audio.play();
+        audio.play().catch((error) => {
+            console.error('Error playing audio:', error);
+            setIsPlayingRecording(false);
+        });
+
         audio.onended = () => {
             setIsPlayingRecording(false);
         };
@@ -91,7 +95,7 @@ const useVoiceComponentLogic = (token, selectedLetters) => {
             .trim()
             .toLowerCase()
             .replace(/[.,،؟?!\s]/g, '')
-            .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            .normalize('NFD').replace(/[^\u0621-\u064A]/g, '');
     };
 
     const handleRecordingUploaded = (response) => {
@@ -110,17 +114,15 @@ const useVoiceComponentLogic = (token, selectedLetters) => {
         });
 
         if (cleanedRecorded === cleanedExpected) {
-            if (letterId && cleanedRecorded === cleanedExpected) {
+            if (letterId) {
                 if (!letterConfidenceHistory.current[letterId]) {
                     letterConfidenceHistory.current[letterId] = [];
                 }
                 letterConfidenceHistory.current[letterId].push(confidence);
                 console.log('📊 تم تخزين الثقة:', confidence, 'للحرف', letterId);
-            } else if (!letterId) {
+            } else {
                 console.warn('⚠️ letterId مش موجود في الاستجابة:', response);
             }
-
-            // handleNext();
         } else {
             console.warn('❌ الكلمات لا تتطابق:', {
                 مسجلة: recordedWord,
@@ -145,22 +147,20 @@ const useVoiceComponentLogic = (token, selectedLetters) => {
     const getProblematicLetters = (threshold = 80) => {
         const problems = [];
 
-        for (const letter in letterConfidenceHistory.current) {
-            const scores = letterConfidenceHistory.current[letter];
+        for (const letterId in letterConfidenceHistory.current) {
+            const scores = letterConfidenceHistory.current[letterId];
             if (!scores || scores.length === 0) continue;
 
             const total = scores.reduce((sum, val) => sum + val, 0);
             const avg = total / scores.length;
 
             if (avg < threshold) {
-                problems.push({ letter, average: parseFloat(avg.toFixed(2)) }); // ✅ رقم مضبوط مش string
+                problems.push({ letterId: parseInt(letterId), average: parseFloat(avg.toFixed(2)) });
             }
         }
 
         return problems;
     };
-
-
 
     return {
         filteredData,
@@ -177,7 +177,7 @@ const useVoiceComponentLogic = (token, selectedLetters) => {
         handleRecordingUploaded,
         handleNext,
         letterConfidenceHistory: letterConfidenceHistory.current,
-        getProblematicLetters // ✅ تقدر تناديها من بره
+        getProblematicLetters
     };
 };
 

@@ -19,7 +19,8 @@ import SelectLetters from './components/Signup Forms/SignUpTestLetters';
 import UpdateProfile from './pages/PatientProfilePage';
 import ChatPage from './components/chat/ChatMain';
 import { ChatProvider } from './components/chat/ChatContext'; // استيراد ChatProvider
-
+import DocDetails from './components/SpecialistsList/DocDetails';
+import BookingPage from './components/SpecialistsList/BookingPage'; // عدل المسار حسب مكانك
 // ✅ هنا بنستخدم useLocation داخل Wrapper علشان نقدر نتحكم في الـ Footer
 const AppWrapper = () => {
   const dispatch = useDispatch();
@@ -74,6 +75,15 @@ const AppWrapper = () => {
             path="/UpdateProfile"
             element={isAuthenticated ? <UpdateProfile /> : <Navigate to="/login" />}
           />
+          <Route
+            path="/doctors/:id"
+            element={isAuthenticated ? <DocDetails /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/booking/:id"
+            element={isAuthenticated ? <BookingPage /> : <Navigate to="/login" />}
+          />
+
           <Route
             path="/PatientDashboard/*"
             element={

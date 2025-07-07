@@ -29,48 +29,6 @@ const DashboardPage = () => {
     { id: 3, title: "جمل صعبة", description: "نطق جمل طويلة ومعقدة", icon: <ForumIcon fontSize="large" />, completed: false }
   ];
 
-const doctors = [
-  { 
-    id: 1, 
-    name: "د. محمد علي", 
-    specialty: "أخصائي نطق ولغة", 
-    rating: 4.8, 
-    image: "https://randomuser.me/api/portraits/men/32.jpg",
-    availableSlots: ["الإثنين 10 ص", "الأربعاء 2 م", "السبت 11 ص"]
-  },
-  { 
-    id: 2, 
-    name: "د. أحمد مصطفى", 
-    specialty: "استشائي تخاطب", 
-    rating: 4.6, 
-    image: "https://randomuser.me/api/portraits/men/44.jpg",
-    availableSlots: ["الأحد 9 ص", "الثلاثاء 3 م", "الخميس 1 م"]
-  },
-  { 
-    id: 3, 
-    name: "د. سارة عبد الرحمن", 
-    specialty: "اخصائية نطق أطفال", 
-    rating: 4.9, 
-    image: "https://randomuser.me/api/portraits/women/65.jpg",
-    availableSlots: ["الاثنين 11 ص", "الأربعاء 10 ص", "الجمعة 4 م"]
-  },
-  { 
-    id: 4, 
-    name: "د. خالد سعيد", 
-    specialty: "استشائي لغة وتواصل", 
-    rating: 4.7, 
-    image: "https://randomuser.me/api/portraits/men/22.jpg",
-    availableSlots: ["السبت 9 ص", "الاحد 2 م", "الثلاثاء 5 م"]
-  },
-  { 
-    id: 5, 
-    name: "د. نورا محمد", 
-    specialty: "اخصائية تأهيل نطق", 
-    rating: 4.5, 
-    image: "https://randomuser.me/api/portraits/women/33.jpg",
-    availableSlots: ["الخميس 8 ص", "الجمعة 11 ص", "الاحد 4 م"]
-  }
-];
 
   const recommendedLessons = [
     {

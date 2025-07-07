@@ -186,15 +186,18 @@ const RecordControlsGroup = ({
 
     const handlePlayPause = () => {
         if (audioSrc && audioRef.current) {
+            console.log("🎧 Trying to play:", audioSrc);
             if (isPlaying) {
                 audioRef.current.pause();
             } else {
                 audioRef.current.play().catch((error) => {
-                    console.error('Error playing audio:', error);
+                    console.error('❌ Error playing audio:', error);
                     setIsPlaying(false);
                 });
             }
             setIsPlaying(!isPlaying);
+        } else {
+            console.warn("⚠️ لا يوجد مصدر للصوت أو المرجع غير موجود");
         }
     };
 

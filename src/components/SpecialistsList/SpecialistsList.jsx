@@ -1,26 +1,43 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+// src/pages/SpecialistsList.jsx
+import React from 'react';
 import {
     Box,
-    Card,
-    Typography,
-    Rating,
     Stack,
-    useTheme,
-    useMediaQuery,
-    Chip,
+    Typography,
     Button,
     CircularProgress,
     Alert,
-    Pagination
+    Pagination,
+    Card,
+    Chip,
+    Rating,
+    useMediaQuery,
+    useTheme
 } from '@mui/material';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import EventIcon from '@mui/icons-material/Event';
 import ChatIcon from '@mui/icons-material/Chat';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import EventIcon from '@mui/icons-material/Event';
 import doctorImage1 from '../../assets/docF.png';
 import doctorImage2 from '../../assets/docM.png';
+
+import {
+    mainBoxStyles,
+    chatButtonStyles,
+    headerBoxStyles,
+    paginationStyles,
+    noDoctorsStyles,
+    cardStyles,
+    imageBoxStyles,
+    infoBoxStyles,
+    ratingBoxStyles,
+    aboutTextStyles,
+    chipBoxStyles,
+    workingDaysBox,
+    dayChip
+} from './specialistsStyles';
+
+import useSpecialistsLogic from './specialistsLogic';
 
 const DoctorCard = ({ doctor, onClick }) => {
     const theme = useTheme();
@@ -32,78 +49,29 @@ const DoctorCard = ({ doctor, onClick }) => {
 
     const translateDay = (day) => {
         const daysMap = {
-            'Sunday': 'الأحد',
-            'Monday': 'الإثنين',
-            'Tuesday': 'الثلاثاء',
-            'Wednesday': 'الأربعاء',
-            'Thursday': 'الخميس',
-            'Friday': 'الجمعة',
-            'Saturday': 'السبت'
+            Sunday: 'الأحد',
+            Monday: 'الإثنين',
+            Tuesday: 'الثلاثاء',
+            Wednesday: 'الأربعاء',
+            Thursday: 'الخميس',
+            Friday: 'الجمعة',
+            Saturday: 'السبت'
         };
         return daysMap[day] || day;
     };
 
     return (
-        <Card
-            sx={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'stretch',
-                borderRadius: '16px',
-                border: '2px solid #FFA726',
-                backgroundColor: '#20B2AA',
-                overflow: 'hidden',
-                height: 'auto', // تغيير من 170 إلى auto لاستيعاب المحتوى الإضافي
-                minHeight: 170,
-                cursor: 'pointer',
-                transition: '0.3s',
-                '&:hover': {
-                    transform: 'scale(1.01)',
-                    boxShadow: '0 4px 12px rgba(255, 167, 38, 0.3)'
-                },
-            }}
-            onClick={onClick}
-        >
-            {/* صورة الطبيب */}
-            <Box
-                sx={{
-                    width: 220,
-                    minWidth: 220,
-                    overflow: 'hidden',
-                    '& img': {
-                        width: '100%',
-                        height: '101%',
-                        objectFit: 'cover',
-                        borderLeft: '2.5px solid #FFA726',
-                        borderBottomLeftRadius: '16px',
-                        borderTopLeftRadius: '16px',
-                    }
-                }}
-            >
+        <Card sx={cardStyles} onClick={onClick}>
+            <Box sx={imageBoxStyles}>
                 <img
                     src={doctor.profilePictureUrl || getDoctorImage(doctor.gender)}
                     alt={`${doctor.firstName} ${doctor.lastName}`}
-                    onError={(e) => {
-                        e.target.src = getDoctorImage(doctor.gender);
-                    }}
+                    onError={(e) => (e.target.src = getDoctorImage(doctor.gender))}
                 />
             </Box>
 
-            {/* بيانات الطبيب */}
-            <Box sx={{
-                flex: 1,
-                p: 2,
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between'
-            }}>
-                {/* الاسم والتقييم */}
-                <Box sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    flexWrap: 'wrap'
-                }}>
+            <Box sx={infoBoxStyles}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap' }}>
                     <Typography
                         variant="h6"
                         fontWeight="bold"
@@ -112,21 +80,15 @@ const DoctorCard = ({ doctor, onClick }) => {
                     >
                         د. {doctor.firstName || ''} {doctor.lastName || ''}
                     </Typography>
-                    <Box dir="rtl"
-                        sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 1,
-                            flexWrap: 'wrap',
-                        }}>
-                        {/* حل مشكلة ترتيب النجوم */}
-                        <Box sx={{
-                            display: 'flex',
-                            flexDirection: 'row-reverse',
-                            justifyContent: 'flex-end',
-                            alignItems: 'center',
-                            gap: 0.5
-                        }}>
+                    <Box dir="rtl" sx={ratingBoxStyles}>
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                flexDirection: 'row-reverse',
+                                alignItems: 'center',
+                                gap: 0.5
+                            }}
+                        >
                             <Rating
                                 value={doctor.rating ? Math.min(doctor.rating, 5) : 0}
                                 max={5}
@@ -137,22 +99,11 @@ const DoctorCard = ({ doctor, onClick }) => {
                                     transform: 'scaleX(-1)',
                                     direction: 'ltr',
                                     color: '#FFD700',
-                                    '& .MuiRating-icon': {
-                                        fontSize: '1.2rem'
-                                    }
+                                    '& .MuiRating-icon': { fontSize: '1.2rem' }
                                 }}
                             />
                         </Box>
-                        <Typography
-                            variant="body2"
-                            fontWeight="bold"
-                            color="text.secondary"
-                            sx={{
-                                mx: 0.5,
-                                fontFamily: "'Tajawal', sans-serif",
-                                color: '#fff'
-                            }}
-                        >
+                        <Typography variant="body2" fontWeight="bold" color="#fff">
                             {doctor.rating ? Math.min(doctor.rating, 5).toFixed(1) : '0.0'}
                         </Typography>
                         <Chip
@@ -167,35 +118,12 @@ const DoctorCard = ({ doctor, onClick }) => {
                         />
                     </Box>
                 </Box>
-                {/* النبذة */}
-                <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{
-                        mt: 0.5,
-                        fontSize: '0.82rem',
-                        lineHeight: 1.4,
-                        height: '2.8em',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        fontFamily: "'Tajawal', sans-serif",
-                        color: '#fff'
-                    }}
-                >
+
+                <Typography sx={aboutTextStyles}>
                     {doctor.about || 'لا يوجد وصف متوفر'}
                 </Typography>
 
-                {/* المدينة والوقت */}
-                <Box sx={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: 1,
-                    mt: 1,
-                    fontFamily: "'Tajawal', sans-serif"
-                }}>
+                <Box sx={chipBoxStyles}>
                     <Chip
                         icon={<LocationOnIcon sx={{ fontSize: 16 }} />}
                         label={`${doctor.city || 'غير محدد'}, ${doctor.nationality || 'غير محدد'}`}
@@ -205,8 +133,7 @@ const DoctorCard = ({ doctor, onClick }) => {
                             color: '#00695C',
                             fontSize: '0.7rem',
                             height: 24,
-                            px: 1,
-                            fontFamily: "'Tajawal', sans-serif"
+                            px: 1
                         }}
                     />
                     <Chip
@@ -218,40 +145,22 @@ const DoctorCard = ({ doctor, onClick }) => {
                             color: '#E65100',
                             fontSize: '0.7rem',
                             height: 24,
-                            px: 1,
-                            fontFamily: "'Tajawal', sans-serif"
+                            px: 1
                         }}
                     />
                 </Box>
 
-                {/* أيام العمل المتاحة */}
                 {doctor.workingDays && doctor.workingDays.length > 0 && (
                     <Box sx={{ mt: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
                             <EventIcon sx={{ fontSize: 16, color: '#fff' }} />
-                            <Typography variant="body2" sx={{
-                                fontFamily: "'Tajawal', sans-serif",
-                                color: '#fff',
-                                fontSize: '0.8rem'
-                            }}>
+                            <Typography variant="body2" sx={{ fontSize: '0.8rem', color: '#fff' }}>
                                 الأيام المتاحة:
                             </Typography>
                         </Box>
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                            {doctor.workingDays.map((day, index) => (
-                                <Chip
-                                    key={index}
-                                    label={translateDay(day)}
-                                    size="small"
-                                    sx={{
-                                        backgroundColor: '#B3E5FC',
-                                        color: '#01579B',
-                                        fontSize: '0.65rem',
-                                        height: 22,
-                                        px: 0.5,
-                                        fontFamily: "'Tajawal', sans-serif"
-                                    }}
-                                />
+                        <Box sx={workingDaysBox}>
+                            {doctor.workingDays.map((day, i) => (
+                                <Chip key={i} label={translateDay(day)} size="small" sx={dayChip} />
                             ))}
                         </Box>
                     </Box>
@@ -260,60 +169,18 @@ const DoctorCard = ({ doctor, onClick }) => {
         </Card>
     );
 };
-const DoctorsList = () => {
-    const navigate = useNavigate();
-    const [doctors, setDoctors] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
 
-    // حالات التقسيم الصفحي
-    const [pageIndex, setPageIndex] = useState(1);
-    const pageSize = 5; // حجم الصفحة ثابت على 5 نتائج
-    const [totalCount, setTotalCount] = useState(0);
-    const [totalPages, setTotalPages] = useState(1);
-
-    useEffect(() => {
-        const fetchDoctors = async () => {
-            try {
-                setLoading(true);
-
-                const response = await axios.get('https://speech-correction-api.azurewebsites.net/api/Doctor/get-all-doctors', {
-                    params: {
-                        pageIndex,
-                        pageSize
-                    }
-                });
-
-                console.log('API Response:', response.data);
-                console.log('Doctors IDs:', response.data.data.map(doctor => doctor.id));
-
-                setDoctors(response.data.data || []);
-                setTotalCount(response.data.count || 0);
-                setTotalPages(Math.ceil(response.data.count / pageSize));
-            } catch (err) {
-                setError(err.message);
-                console.error('Error fetching doctors:', err);
-
-                if (err.response) {
-                    console.error('Error response data:', err.response.data);
-                    console.error('Error status:', err.response.status);
-                }
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchDoctors();
-    }, [pageIndex]);
-
-    const handleDoctorClick = (doctor) => {
-        console.log('Clicked Doctor ID:', doctor.id);
-        navigate(`/doctors/${doctor.id}`, { state: { doctor } });
-    };
-
-    const handlePageChange = (event, value) => {
-        setPageIndex(value);
-    };
+const SpecialistsList = () => {
+    const {
+        doctors,
+        loading,
+        error,
+        pageIndex,
+        totalPages,
+        handleDoctorClick,
+        handlePageChange,
+        navigate
+    } = useSpecialistsLogic();
 
     if (error) {
         return (
@@ -324,57 +191,13 @@ const DoctorsList = () => {
     }
 
     return (
-        <Box sx={{
-            p: 3,
-            maxWidth: 800,
-            mx: 'auto',
-            pb: 6
-        }} dir="rtl">
-            <Button
-                onClick={() => navigate('/chat')} // أضف هذا السطر
-                variant="contained"
-                sx={{
-                    mb: 4,
-                    mx: 'auto',
-                    display: 'flex',
-                    backgroundColor: '#20B2AA',
-                    color: 'white',
-                    fontFamily: "'Kidzhood Arabic', Arial, sans-serif",
-                    fontSize: '1.5rem',
-                    fontWeight: 'bold',
-                    borderRadius: '12px',
-                    padding: '12px 24px',
-                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                    width: '100%',
-                    maxWidth: '800px',
-                    justifyContent: 'flex-start',
-                    position: 'relative',
-                    '&:hover': {
-                        backgroundColor: '#1E9C96',
-                        transform: 'translateY(-2px)'
-                    }
-                }}
-            >
-                <ChatIcon sx={{
-                    position: 'absolute',
-                    left: '24px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    fontSize: '1.8rem',
-                }} />
-
+        <Box sx={mainBoxStyles} dir="rtl">
+            <Button onClick={() => navigate('/chat')} variant="contained" sx={chatButtonStyles}>
+                <ChatIcon sx={{ position: 'absolute', left: 24, top: '50%', transform: 'translateY(-50%)', fontSize: '1.8rem' }} />
                 الرسائل
             </Button>
-            <Box sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                mb: 3,
-                backgroundColor: '#E0F7FA',
-                p: 2,
-                borderRadius: '12px',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-            }}>
+
+            <Box sx={headerBoxStyles}>
                 <Typography variant="body1" sx={{ fontFamily: "'Tajawal', sans-serif", fontWeight: 'bold', fontSize: '1.2rem' }}>
                     الاخصائيون
                 </Typography>
@@ -386,20 +209,7 @@ const DoctorsList = () => {
                         page={pageIndex}
                         onChange={handlePageChange}
                         size="medium"
-                        sx={{
-                            '& .MuiPaginationItem-root': {
-                                fontFamily: "'Tajawal', sans-serif",
-                                fontWeight: 'bold',
-                                fontSize: '1rem',
-                                minWidth: '36px',
-                                height: '36px'
-                            },
-                            '& .Mui-selected': {
-                                backgroundColor: '#FFA726!important',
-                                color: 'white',
-                                fontWeight: 'bold'
-                            }
-                        }}
+                        sx={paginationStyles}
                     />
                 )}
             </Box>
@@ -412,24 +222,15 @@ const DoctorsList = () => {
 
             <Stack spacing={4}>
                 {!loading && doctors.length > 0 ? (
-                    doctors.map((doctor) => {
-                        return (
-                            <DoctorCard
-                                key={doctor.id || `${doctor.firstName}-${doctor.lastName}`}
-                                doctor={doctor}
-                                onClick={() => handleDoctorClick(doctor)}
-                            />
-                        );
-                    })
+                    doctors.map((doctor) => (
+                        <DoctorCard
+                            key={doctor.id || `${doctor.firstName}-${doctor.lastName}`}
+                            doctor={doctor}
+                            onClick={() => handleDoctorClick(doctor)}
+                        />
+                    ))
                 ) : !loading && (
-                    <Typography variant="h6" textAlign="center" sx={{
-                        mt: 4,
-                        fontFamily: "'Tajawal', sans-serif",
-                        backgroundColor: '#FFF8E1',
-                        p: 3,
-                        borderRadius: '12px',
-                        border: '1px solid #FFD54F'
-                    }}>
+                    <Typography variant="h6" textAlign="center" sx={noDoctorsStyles}>
                         لا يوجد أطباء متاحين حالياً. يرجى المحاولة لاحقاً.
                     </Typography>
                 )}
@@ -438,6 +239,4 @@ const DoctorsList = () => {
     );
 };
 
-export default function SpecialistsList() {
-    return <DoctorsList />;
-}
+export default SpecialistsList;
