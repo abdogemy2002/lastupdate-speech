@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     Box,
     Button,
@@ -11,9 +11,9 @@ import {
 } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ListAltIcon from "@mui/icons-material/ListAlt";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import backgroundPattern from '../../assets/flower-bg.jpg';
-import { useSelector } from 'react-redux'; // Import useSelector
+import { useSelector } from 'react-redux';
 
 const arabicLetters = [
     "ا", "ب", "ت", "ث", "ج", "ح", "خ",
@@ -24,11 +24,19 @@ const arabicLetters = [
 
 const LetterTrainingPage = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [selectedLetters, setSelectedLetters] = useState([]);
     const [trainAll, setTrainAll] = useState(false);
-    
-    // Get token from Redux store
+
     const token = useSelector(state => state.user.token);
+
+    useEffect(() => {
+        const state = location.state;
+        if (state?.problematicLetters?.length > 0) {
+            const lettersToMark = state.problematicLetters.map(({ letterId }) => arabicLetters[letterId - 1]);
+            setSelectedLetters(lettersToMark);
+        }
+    }, [location.state]);
 
     const handleLetterToggle = (letter) => {
         setSelectedLetters((prev) =>
@@ -48,16 +56,15 @@ const LetterTrainingPage = () => {
     };
 
     const storeSelectedLetters = async () => {
-        // تحضير البيانات حسب متطلبات API
         const issuesData = selectedLetters.map(letter => {
             const letterIndex = arabicLetters.indexOf(letter);
+            const originalConfidence = location.state?.problematicLetters?.find(l => l.letterId === letterIndex + 1)?.average || 0;
             return {
-                letterId: letterIndex + 1, // الفهرس من 1 إلى 28
-                confidence: 0 // قيمة الثقة دائماً 0 كما طُلب
+                letterId: letterIndex + 1,
+                confidence: parseFloat(originalConfidence)
             };
         });
 
-        // لوج البيانات المرسلة
         console.log("بيانات الإرسال إلى الخادم:", {
             endpoint: "https://speech-correction-api.azurewebsites.net/api/Test/store-issues",
             method: "POST",
@@ -81,7 +88,6 @@ const LetterTrainingPage = () => {
                 }
             );
 
-            // لوج الاستجابة الخام من الخادم
             console.log("استجابة الخادم الخام:", response);
 
             if (!response.ok) {
@@ -89,10 +95,8 @@ const LetterTrainingPage = () => {
             }
 
             const result = await response.json();
-            
-            // لوج البيانات المستلمة من الخادم
             console.log("بيانات الاستجابة من الخادم:", result);
-            
+
             return true;
         } catch (error) {
             console.error('حدث خطأ أثناء إرسال البيانات:', error);
@@ -102,22 +106,20 @@ const LetterTrainingPage = () => {
 
     const handleStartTraining = async () => {
         console.log("بدء عملية التدريب...");
-        
+
         if (!token) {
             console.error("لا يوجد توكن، يرجى تسجيل الدخول أولاً");
             return;
         }
-        
-        // إرسال البيانات أولاً
+
         const success = await storeSelectedLetters();
-        
+
         if (success) {
             console.log("تم حفظ البيانات بنجاح، الانتقال إلى لوحة التحكم");
         } else {
             console.log("حدثت مشكلة في حفظ البيانات، ولكن سيتم الانتقال إلى لوحة التحكم");
         }
-        
-        // الانتقال للصفحة التالية
+
         // navigate("/dashboard");
     };
 
@@ -137,7 +139,6 @@ const LetterTrainingPage = () => {
                 py: 4,
                 fontFamily: "Kidzhood Arabic",
                 position: "relative",
-                
             }}
         >
             <Container maxWidth="sm">

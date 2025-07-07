@@ -1,415 +1,107 @@
-import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import React, { useMemo, useRef } from 'react';
+import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from 'react-redux';
-import childImage from '../../assets/vector.png';
 import {
-    Box,
-    Button,
-    Checkbox, // تم إضافة استيراد Checkbox هنا
     CircularProgress,
-    FormControl,
-    IconButton,
-    InputLabel,
-    MenuItem,
-    Select,
-    Stack,
-    styled,
-    Typography
+    Typography,
+    Box
 } from '@mui/material';
-
 import {
     Pause as PauseIcon,
     PlayArrow as PlayArrowIcon,
-    Bookmark as BookmarkIcon,
-    FilterList as FilterListIcon
+    Bookmark as BookmarkIcon
 } from '@mui/icons-material';
-import RecordControlsGroup from './RecordControlsGroup';
+
+import {
+    MainContainer,
+    TopSection,
+    ChildFigure,
+    PromptDisplayContainer,
+    BottomControls,
+    WaveDivider,
+    SideButtons,
+    SideButton,
+    NextButton,
+    LoadingContainer
+} from './voiceComponentStyles';
+
 import PromptDisplay from './PromptDisplay';
+import RecordControlsGroup from './RecordControlsGroup';
+import childImage from '../../assets/vector.png';
+import useVoiceComponentLogic from './useVoiceComponentLogic';
 
-
-const MainContainer = styled(Box)(({ theme }) => ({
-    width: '50%',
-    height: 'auto',
-    minHeight: '70vh',
-    margin: 'auto',
-    borderRadius: '16px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-    padding: '0',
-    display: 'flex',
-    flexDirection: 'column',
-    backgroundColor: '#fff',
-    fontFamily: 'Tahoma, sans-serif',
-    overflow: 'visible',
-    position: 'relative',
-    [theme.breakpoints.up('md')]: {
-        width: '70%'
-    },
-    [theme.breakpoints.up('lg')]: {
-        width: '50%'
-    }
-}));
-
-const TopSection = styled(Box)(({ theme }) => ({
-    display: 'flex',
-    flex: 1,
-    gap: '0px',
-    padding: '20px',
-    [theme.breakpoints.down('sm')]: {
-        flexDirection: 'column',
-        alignItems: 'center',
-        padding: '15px'
-    },
-}));
-
-const ChildFigure = styled(Box)(({ theme }) => ({
-    width: '30%',
-    backgroundColor: '#FDFBF6',
-    borderRadius: '0px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-    '& img': {
-        width: '80%',
-        height: '80%',
-        objectFit: 'contain',
-        transition: 'transform 0.3s ease',
-    },
-    [theme.breakpoints.down('sm')]: {
-        width: '80%',
-        height: '200px',
-        marginBottom: '10px',
-        '& img': {
-            width: '70%',
-            height: '70%',
-        }
-    },
-}));
-
-const PromptDisplayContainer = styled(Box)(({ theme }) => ({
-    flex: 1,
-    backgroundColor: '#FDFBF6',
-    borderRadius: '0px',
-    height: '300px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-    [theme.breakpoints.down('sm')]: {
-        width: '90%',
-        height: '150px',
-    },
-}));
-
-const LetterBadge = styled(Box)(({ theme }) => ({
-    position: 'absolute',
-    top: '20px',
-    backgroundColor: '#18b9c0',
-    color: 'white',
-    borderRadius: '50%',
-    width: '60px',
-    height: '60px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '1.8rem',
-    fontWeight: 'bold',
-    boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-}));
-
-const WaveDivider = styled(Box)(({ theme }) => ({
-    position: 'absolute',
-    bottom: '100%',
-    left: 0,
-    width: '100%',
-    height: '40px',
-    lineHeight: 0,
-    zIndex: 1,
-    '& svg': {
-        display: 'block',
-        width: '100%',
-        height: '100%',
-        transform: 'scaleY(-1)',
-    },
-    '& path': {
-        fill: '#18b9c0'
-    },
-    [theme.breakpoints.down('sm')]: {
-        height: '30px'
-    }
-}));
-
-const BottomControls = styled(Box)(({ theme }) => ({
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#18b9c0',
-    padding: '20px',
-    borderBottomLeftRadius: '16px',
-    borderBottomRightRadius: '16px',
-    position: 'relative',
-    zIndex: 2,
-    flexWrap: 'wrap',
-    gap: '15px',
-    [theme.breakpoints.down('sm')]: {
-        flexDirection: 'column',
-        padding: '15px',
-        gap: '20px'
-    }
-}));
-
-const SideButtons = styled(Stack)(({ theme }) => ({
-    gap: '10px',
-    zIndex: 3,
-    flex: 1,
-    marginLeft: '2.5%',
-    maxWidth: '25%',
-    [theme.breakpoints.down('sm')]: {
-        width: '100%',
-        flexDirection: 'row',
-        justifyContent: 'center',
-        flexWrap: 'wrap'
-    }
-}));
-
-const SideButton = styled(Button)(({ theme }) => ({
-    backgroundColor: 'white',
-    color: '#666666',
-    fontWeight: 'bold',
-    fontFamily: 'Kidzhood Arabic',
-    borderRadius: '10px',
-    padding: '12px 20px',
-    fontSize: '16px',
-    flex: 1,
-    minWidth: '120px',
-    '&:hover': {
-        backgroundColor: '#f5f5f5'
-    },
-    '&.Mui-disabled': {
-        color: '#ccc',
-        '& svg': {
-            color: '#ccc !important'
-        }
-    },
-    [theme.breakpoints.down('sm')]: {
-        fontSize: '14px',
-        padding: '10px 15px',
-        flex: 'none'
-    }
-}));
-
-const NextButton = styled(Button)(({ theme }) => ({
-    width: '100%',
-    maxWidth: '50%',
-    margin: '20px auto',
-    display: 'block',
-    backgroundColor: '#FCA43C',
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: '1.5rem',
-    fontFamily: "RTL Mocha Yemen Sadah",
-    padding: '12px 0',
-    borderRadius: '12px',
-    transition: 'all 0.3s ease',
-    '&:hover': {
-        backgroundColor: '#e5942e',
-        transform: 'scale(1.03)'
-    },
-    '&.Mui-disabled': {
-        backgroundColor: '#ccc',
-    },
-    [theme.breakpoints.down('sm')]: {
-        fontSize: '1rem',
-        padding: '10px',
-        width: 'calc(100% - 30px)',
-        maxWidth: '100%'
-    },
-}));
-
-const LoadingContainer = styled(Box)({
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: '100%',
-    gap: '20px'
-});
-
-const FilterContainer = styled(Box)(({ theme }) => ({
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: '15px',
-    marginBottom: '20px',
-    padding: '10px',
-    backgroundColor: '#f5f5f5',
-    borderRadius: '12px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-    width: '80%',
-    margin: '0 auto 20px auto',
-    [theme.breakpoints.down('sm')]: {
-        flexDirection: 'column',
-        width: '90%',
-    }
-}));
-
-const FilterLabel = styled(Typography)({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    fontWeight: 'bold',
-    color: '#18b9c0',
-    fontFamily: 'Kidzhood Arabic',
-    fontSize: '1.2rem'
-});
-
-
-// =================== Main Component ===================
 const VoiceComponent = () => {
     const token = useSelector(state => state.user.token);
-    const [testData, setTestData] = useState([]);
-    const [filteredData, setFilteredData] = useState([]);
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const [userRecording, setUserRecording] = useState(null);
-    const [hasRecorded, setHasRecorded] = useState(false);
-    const [isPlayingRecording, setIsPlayingRecording] = useState(false);
-    const userRecordingRef = useRef(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [progress, setProgress] = useState(0);
-    const [selectedLetters] = useState(['ر', 'س']);
-    const [uploadResponse, setUploadResponse] = useState(null);
-    const [isUploading, setIsUploading] = useState(false);
-    const [uploadSuccess, setUploadSuccess] = useState(false);
+    const selectedLetters = useMemo(() => ['ر', 'س'], []);
 
-    // إضافة مرجع لدالة إرسال التسجيل
-    const uploadRecordingRef = useRef(null);
+    const handleNextRef = useRef(null);
 
-    useEffect(() => {
-        const fetchTestData = async () => {
-            try {
-                setIsLoading(true);
-                const response = await axios.get(
-                    'https://speech-correction-api.azurewebsites.net/api/Test/init-data',
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`
-                        }
-                    }
-                );
-                setTestData(response.data);
-                console.log('تم جلب بيانات الاختبار:', response.data);
-                setIsLoading(false);
-            } catch (error) {
-                console.error('حدث خطأ في جلب بيانات الاختبار:', error);
-                setIsLoading(false);
+    const {
+        filteredData,
+        currentIndex,
+        userRecording,
+        hasRecorded,
+        isPlayingRecording,
+        isLoading,
+        isUploading,
+        uploadResponse,
+        playUserRecording,
+        handleRecordComplete: logicHandleRecordComplete,
+        handleRecordingUploaded,
+        handleNext: logicHandleNext,
+        getProblematicLetters
+    } = useVoiceComponentLogic(token, selectedLetters);
+    const navigate = useNavigate();
+
+    const limitedData = useMemo(() => {
+        const map = new Map();
+        filteredData.forEach(item => {
+            const letter = item.letterId;
+            if (!map.has(letter)) map.set(letter, []);
+            if (map.get(letter).length < 3) {
+                map.get(letter).push(item);
             }
-        };
-        fetchTestData();
-    }, [token]);
+        });
+        return Array.from(map.values()).flat();
+    }, [filteredData]);
 
-    useEffect(() => {
-        if (testData.length > 0) {
-            const filtered = testData.filter(item =>
-                selectedLetters.includes(item.letter)
-            );
-            setFilteredData(filtered);
-            setCurrentIndex(0);
-        }
-    }, [testData, selectedLetters]);
+    const currentItem = limitedData[currentIndex] || {};
 
-    useEffect(() => {
-        if (filteredData.length > 0 && currentIndex < filteredData.length) {
-            const currentItem = filteredData[currentIndex];
-            console.log('Current item data:', {
-                letterId: currentItem.letterId,
-                name: currentItem.name,
-                recordingUrl: currentItem.recordingUrl
-            });
-        }
-    }, [currentIndex, filteredData]);
-
-    // دالة تشغيل تسجيل المستخدم
-    const playUserRecording = () => {
-        if (!userRecording) return;
-
-        if (isPlayingRecording) {
-            userRecordingRef.current.pause();
-            setIsPlayingRecording(false);
-        } else {
-            if (userRecordingRef.current) {
-                userRecordingRef.current.currentTime = 0;
-            }
-            userRecordingRef.current = new Audio(userRecording);
-            userRecordingRef.current.play();
-            setIsPlayingRecording(true);
-
-            userRecordingRef.current.onended = () => {
-                setIsPlayingRecording(false);
-            };
-        }
-    };
-
-    // معالجة اكتمال التسجيل
     const handleRecordComplete = ({ audioUrl, handleNext }) => {
-        setUserRecording(audioUrl);
-        setHasRecorded(true);
-
-        // تخزين دالة الإرسال في المرجع
-        uploadRecordingRef.current = handleNext;
+        logicHandleRecordComplete({ audioUrl, handleNext });
+        handleNextRef.current = handleNext;
     };
 
-    // معالجة النتيجة المرتجعة من الإرسال
-    const handleRecordingUploaded = (response) => {
-        console.log('تم استلام نتيجة التقييم:', response);
-        setUploadResponse(response);
-        setUploadSuccess(true);
-    };
-
-    // معالجة الضغط على زر التالي
     const handleNext = async () => {
-        if (!uploadRecordingRef.current) return;
-
-        try {
-            setIsUploading(true);
-            setUploadSuccess(false);
-
-            // استدعاء دالة الإرسال المخزنة في المرجع
-            const success = await uploadRecordingRef.current();
-
-            if (success) {
-                console.log('تم إرسال التسجيل بنجاح!');
-
-                // الانتقال للكلمة التالية
-                if (currentIndex < filteredData.length - 1) {
-                    setCurrentIndex(prev => prev + 1);
-                    setUserRecording(null);
-                    setHasRecorded(false);
-                    setIsPlayingRecording(false);
-                } else {
-                    alert('تهانينا! لقد أكملت جميع الكلمات بنجاح');
-                }
-            } else {
-                alert('حدث خطأ أثناء حفظ التسجيل');
-            }
-        } catch (error) {
-            console.error('حدث خطأ أثناء معالجة التسجيل:', error);
-            alert('حدث خطأ غير متوقع');
-        } finally {
-            setIsUploading(false);
+        if (handleNextRef.current) {
+            const success = await handleNextRef.current();
+            if (!success) return;
         }
+
+        const isLast = currentIndex === limitedData.length - 1;
+
+        if (isLast) {
+            const problems = getProblematicLetters();
+            if (problems.length === 0) {
+                console.log('✅ الطفل عدى الاختبار بنجاح!');
+            } else {
+                console.warn('⚠️ الطفل عنده مشكلة في الحروف التالية:');
+                problems.forEach(({ letter, average }) => {
+                    console.warn(`- الحرف "${letter}" بمتوسط ${average}%`);
+                });
+
+                const problematicLetterIds = problems.map(p => parseInt(p.letter));
+                navigate("/SelectLetters", { state: { problematicLetterIds } });
+            }
+        }
+
+        logicHandleNext();
     };
-
-    const currentItem = filteredData[currentIndex] || {};
-
     return (
-        <Box sx={{
-            mt: 4,
-            width: '100%',
-            padding: '0 15px',
-            boxSizing: 'border-box'
-        }}>
+        <Box sx={{ mt: 4, width: '100%', padding: '0 15px', boxSizing: 'border-box' }}>
             <MainContainer>
+
+                {/* ===== Top Section ===== */}
                 <TopSection>
                     <ChildFigure>
                         <img src={childImage} alt="صورة الطفل" />
@@ -423,13 +115,12 @@ const VoiceComponent = () => {
                                     جاري تحميل بيانات الاختبار...
                                 </Typography>
                             </LoadingContainer>
-                        ) : filteredData.length === 0 ? (
+                        ) : limitedData.length === 0 ? (
                             <Typography variant="h4" color="error" align="center">
                                 لا توجد كلمات متاحة للحروف المحددة
                             </Typography>
                         ) : (
                             <>
-                                {/* الترقيم في الأعلى يمين */}
                                 <Box sx={{
                                     position: 'absolute',
                                     top: '20px',
@@ -443,12 +134,11 @@ const VoiceComponent = () => {
                                     boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
                                     fontFamily: 'Kidzhood Arabic'
                                 }}>
-                                    {currentIndex + 1} / {filteredData.length}
+                                    {currentIndex + 1} / {limitedData.length}
                                 </Box>
 
                                 <PromptDisplay prompt={currentItem.name} />
-
-                                {/* عرض نتيجة التقييم */}
+                                {/* 
                                 {uploadResponse && (
                                     <Box sx={{
                                         position: 'absolute',
@@ -470,13 +160,13 @@ const VoiceComponent = () => {
                                             ? 'أحسنت! نطقك صحيح'
                                             : `يمكنك التحسين! الدرجة: ${uploadResponse.score}%`}
                                     </Box>
-                                )}
+                                )} */}
                             </>
                         )}
                     </PromptDisplayContainer>
-
                 </TopSection>
 
+                {/* ===== Bottom Controls ===== */}
                 <BottomControls>
                     <WaveDivider>
                         <svg viewBox="0 0 1200 120" preserveAspectRatio="none" style={{ display: 'block' }}>
@@ -493,43 +183,29 @@ const VoiceComponent = () => {
 
                     <SideButtons>
                         <SideButton
-                            startIcon={
-                                isPlayingRecording ? (
-                                    <PauseIcon sx={{
-                                        color: hasRecorded ? '#FCA43C' : '#ccc',
-                                        fontSize: '36px'
-                                    }} />
-                                ) : (
-                                    <PlayArrowIcon sx={{
-                                        color: hasRecorded ? '#FCA43C' : '#ccc',
-                                        fontSize: '36px'
-                                    }} />
-                                )
-                            }
+                            startIcon={isPlayingRecording ? (
+                                <PauseIcon sx={{ color: hasRecorded ? '#FCA43C' : '#ccc', fontSize: '36px' }} />
+                            ) : (
+                                <PlayArrowIcon sx={{ color: hasRecorded ? '#FCA43C' : '#ccc', fontSize: '36px' }} />
+                            )}
                             onClick={playUserRecording}
-                            disabled={!hasRecorded || isLoading || filteredData.length === 0}
+                            disabled={!hasRecorded || isLoading || limitedData.length === 0}
                         >
                             {isPlayingRecording ? 'إيقاف' : 'اسمع صوتك'}
                         </SideButton>
+
                         <SideButton
                             startIcon={<BookmarkIcon sx={{ color: '#FCA43C', fontSize: '20px' }} />}
-                            disabled={isLoading || filteredData.length === 0}
+                            disabled={isLoading || limitedData.length === 0}
                         >
                             كلماتي
                         </SideButton>
                     </SideButtons>
 
-                    <Box sx={{
-                        flex: 1,
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center'
-                    }}>
+                    <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                         {isLoading ? (
-                            <Box sx={{ width: '100%', textAlign: 'center' }}>
-                                <CircularProgress size={40} sx={{ color: 'white' }} />
-                            </Box>
-                        ) : filteredData.length === 0 ? (
+                            <CircularProgress size={40} sx={{ color: 'white' }} />
+                        ) : limitedData.length === 0 ? (
                             <Typography variant="h6" color="white" textAlign="center">
                                 لا توجد كلمات متاحة
                             </Typography>
@@ -537,7 +213,7 @@ const VoiceComponent = () => {
                             <RecordControlsGroup
                                 audioSrc={currentItem.recordingUrl}
                                 onRecordComplete={handleRecordComplete}
-                                currentLetter={currentItem.letter} // تغيير من letterId إلى letter
+                                currentLetter={currentItem.letterId}
                                 currentWordName={currentItem.name}
                                 onRecordingUploaded={handleRecordingUploaded}
                             />
@@ -546,23 +222,24 @@ const VoiceComponent = () => {
                 </BottomControls>
             </MainContainer>
 
+            {/* ===== Next Button ===== */}
             <Box sx={{ position: 'relative', width: '100%', maxWidth: '50%', margin: '20px auto' }}>
                 <NextButton
                     onClick={handleNext}
-                    disabled={isLoading || !hasRecorded || filteredData.length === 0 || isUploading}
+                    disabled={isLoading || !hasRecorded || limitedData.length === 0 || isUploading}
                 >
                     {isUploading ? (
                         <CircularProgress size={24} sx={{ color: 'white' }} />
-                    ) : filteredData.length > 0 && currentIndex < filteredData.length - 1 ? (
+                    ) : limitedData.length > 0 && currentIndex < limitedData.length - 1 ? (
                         'الى بعده'
-                    ) : filteredData.length > 0 ? (
+                    ) : limitedData.length > 0 ? (
                         'انهاء الاختبار'
                     ) : (
                         'لا توجد كلمات'
                     )}
                 </NextButton>
 
-                {uploadResponse && (
+                {/* {uploadResponse && (
                     <Box sx={{
                         position: 'absolute',
                         top: '-30px',
@@ -581,11 +258,10 @@ const VoiceComponent = () => {
                             ? '✓ نطق صحيح'
                             : `✗ الدرجة: ${uploadResponse.score}%`}
                     </Box>
-                )}
+                )} */}
             </Box>
         </Box>
     );
 };
 
 export default VoiceComponent;
-

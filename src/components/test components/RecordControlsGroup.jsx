@@ -1,3 +1,5 @@
+// src/components/voice/RecordControlsGroup.jsx
+import { toast } from 'react-toastify';
 import React, { useState, useRef, useEffect } from 'react';
 import { styled, Box, IconButton, Slider } from '@mui/material';
 import {
@@ -6,10 +8,11 @@ import {
     Pause as PauseIcon,
     Bookmark as BookmarkIcon,
     Mic as MicIcon,
-    Stop as StopIcon
+    Stop as StopIcon,
 } from '@mui/icons-material';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
+import RecordRTC from 'recordrtc';
 
 // Styled Components
 const MicCircle = styled(Box, {
@@ -27,12 +30,16 @@ const MicCircle = styled(Box, {
     zIndex: 3,
     flexShrink: 0,
     position: 'relative',
-    boxShadow: isRecording ? '0 0 0 0 rgba(255, 0, 0, 0.7)' : '0 0 0 0 rgba(252, 164, 60, 0.7)',
+    boxShadow: isRecording
+        ? '0 0 0 0 rgba(255, 0, 0, 0.7)'
+        : '0 0 0 0 rgba(252, 164, 60, 0.7)',
     animation: isRecording ? 'pulseRed 1.5s infinite' : 'pulse 1.5s infinite',
     transition: 'all 0.3s ease',
     '&:hover': {
         transform: 'scale(1.05)',
-        boxShadow: isRecording ? '0 0 0 10px rgba(255, 0, 0, 0)' : '0 0 0 10px rgba(252, 164, 60, 0)',
+        boxShadow: isRecording
+            ? '0 0 0 10px rgba(255, 0, 0, 0)'
+            : '0 0 0 10px rgba(252, 164, 60, 0)',
     },
     '& svg': {
         position: 'relative',
@@ -84,8 +91,8 @@ const MicCircle = styled(Box, {
             '100%': {
                 boxShadow: '0 0 0 0 rgba(255, 0, 0, 0)',
             },
-        }
-    }
+        },
+    },
 }));
 
 const ControlsContainer = styled(Box)(({ theme }) => ({
@@ -129,13 +136,12 @@ const SeekBar = styled(Slider)(({ theme }) => ({
     },
 }));
 
-// Main Component
 const RecordControlsGroup = ({
     audioSrc,
     onRecordComplete,
-    currentLetter, // تغيير الاسم من currentLetterId إلى currentLetter
+    currentLetter,
     currentWordName,
-    onRecordingUploaded
+    onRecordingUploaded,
 }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
@@ -143,12 +149,10 @@ const RecordControlsGroup = ({
     const [duration, setDuration] = useState(0);
     const [userRecording, setUserRecording] = useState(null);
 
-    const token = useSelector(state => state.user.token);
+    const token = useSelector((state) => state.user.token);
     const audioRef = useRef(null);
-    const mediaRecorderRef = useRef(null);
-    const audioChunksRef = useRef([]);
+    const recorderRef = useRef(null);
 
-    // Audio event handlers
     useEffect(() => {
         const audio = audioRef.current;
         if (!audio) return;
@@ -180,13 +184,12 @@ const RecordControlsGroup = ({
         };
     }, []);
 
-    // Audio control functions
     const handlePlayPause = () => {
         if (audioSrc && audioRef.current) {
             if (isPlaying) {
                 audioRef.current.pause();
             } else {
-                audioRef.current.play().catch(error => {
+                audioRef.current.play().catch((error) => {
                     console.error('Error playing audio:', error);
                     setIsPlaying(false);
                 });
@@ -218,37 +221,50 @@ const RecordControlsGroup = ({
         console.log(`Bookmarked at ${audioRef.current?.currentTime || 0} seconds`);
     };
 
-    // Recording functions
     const startRecording = async () => {
         try {
-            setIsRecording(true);
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorderRef.current = new MediaRecorder(stream);
-            audioChunksRef.current = [];
 
-            mediaRecorderRef.current.ondataavailable = (e) => {
-                audioChunksRef.current.push(e.data);
-            };
+            const recorder = new RecordRTC(stream, {
+                type: 'audio',
+                mimeType: 'audio/wav',
+                recorderType: RecordRTC.StereoAudioRecorder,
+                desiredSampRate: 16000,
+                numberOfAudioChannels: 1,
+            });
 
-            mediaRecorderRef.current.onstop = () => {
-                const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
-                setUserRecording(audioBlob);
-                handleRecordingComplete(audioBlob);
-            };
-
-            mediaRecorderRef.current.start();
+            recorder.startRecording();
+            recorderRef.current = recorder;
+            setIsRecording(true);
         } catch (error) {
-            console.error('Error accessing microphone:', error);
+            console.error('Error starting recording:', error);
             setIsRecording(false);
         }
     };
-
+    // في دالة stopRecording
     const stopRecording = () => {
-        if (mediaRecorderRef.current && isRecording) {
-            mediaRecorderRef.current.stop();
-            mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+        if (!recorderRef.current) return;
+
+        // إظهار تحميل أثناء معالجة التسجيل
+        toast.info('جاري معالجة التسجيل...', { autoClose: false });
+
+        recorderRef.current.stopRecording(() => {
+            toast.dismiss(); // إغلاق رسالة التحميل
+
+            const blob = recorderRef.current.getBlob();
+
+            // تنظيف الـ stream
+            if (recorderRef.current.stream) {
+                recorderRef.current.stream.getTracks().forEach(track => {
+                    track.stop();
+                    track.enabled = false;
+                });
+            }
+
+            setUserRecording(blob);
+            handleRecordingComplete(blob);
             setIsRecording(false);
-        }
+        });
     };
 
     const handleMicClick = () => {
@@ -259,97 +275,118 @@ const RecordControlsGroup = ({
         }
     };
 
-    // Recording completion handler
     const handleRecordingComplete = (audioBlob) => {
-        try {
-            if (!(audioBlob instanceof Blob)) {
-                throw new Error('Invalid audio blob');
-            }
+        if (!audioBlob) return;
+        const audioUrl = URL.createObjectURL(audioBlob);
+        setUserRecording(audioBlob);
 
-            const audioUrl = URL.createObjectURL(audioBlob);
-            setUserRecording(audioBlob);
-
-            if (onRecordComplete) {
-                onRecordComplete({
-                    audioUrl,
-                    handleNext: async () => {
-                        return await uploadRecording(audioBlob);
-                    }
-                });
-            }
-        } catch (error) {
-            console.error('Error in recording complete:', error);
+        if (onRecordComplete) {
+            onRecordComplete({
+                audioUrl,
+                handleNext: async () => await uploadRecording(audioBlob),
+            });
         }
     };
 
-    // Upload recording to API
- const uploadRecording = async (audioBlob) => {
-        // تحقق من البيانات المطلوبة
-        console.log("Uploading with data:", {
-            audioBlob,
-            currentLetter,
-            currentWordName
-        });
+    const levenshteinDistance = (a, b) => {
+        const matrix = Array.from({ length: a.length + 1 }, () =>
+            Array(b.length + 1).fill(0)
+        );
 
-        if (!audioBlob) {
-            console.error("Audio blob is missing!");
+        for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
+        for (let j = 0; j <= b.length; j++) matrix[0][j] = j;
+
+        for (let i = 1; i <= a.length; i++) {
+            for (let j = 1; j <= b.length; j++) {
+                const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j] + 1,       // حذف
+                    matrix[i][j - 1] + 1,       // إضافة
+                    matrix[i - 1][j - 1] + cost // استبدال
+                );
+            }
+        }
+
+        return matrix[a.length][b.length];
+    };
+
+
+    const uploadRecording = async (audioBlob) => {
+        if (!audioBlob || !currentLetter || !currentWordName) {
+            toast.error("بيانات ناقصة في رفع التسجيل");
             return false;
         }
 
-        if (!currentLetter) {
-            console.error("currentLetter is missing! Value:", currentLetter);
-            return false;
-        }
-
-        if (!currentWordName) {
-            console.error("currentWordName is missing! Value:", currentWordName);
-            return false;
-        }
+        const formData = new FormData();
+        formData.append('LetterId', currentLetter);
+        formData.append('WordName', currentWordName);
+        formData.append('AudioFile', audioBlob, 'recording.wav');
 
         try {
-            const formData = new FormData();
-            formData.append('Letter', currentLetter); // تغيير من LetterId إلى Letter
-            formData.append('WordName', currentWordName);
-            formData.append('AudioFile', audioBlob, 'recording.wav');
-
-            // Log request details
-            console.log('Sending request to API with:', {
-                Letter: currentLetter,
-                WordName: currentWordName,
-                AudioFile: { size: audioBlob.size, type: audioBlob.type }
-            });
-
             const response = await axios.post(
                 'https://speech-correction-api.azurewebsites.net/api/Test/evaluate',
                 formData,
                 {
                     headers: {
-                        'Authorization': `Bearer ${token}`,
+                        Authorization: `Bearer ${token}`,
                         'Content-Type': 'multipart/form-data'
-                    }
+                    },
+                    timeout: 10000
                 }
             );
 
-            // Log response details
-            console.log('Received response from API:', {
-                status: response.status,
-                data: response.data,
-                headers: response.headers
-            });
-
-            if (onRecordingUploaded) {
-                onRecordingUploaded(response.data);
+            // ✅ التحقق من وجود البيانات المطلوبة
+            if (!response.data || typeof response.data.confidence === 'undefined') {
+                throw new Error('استجابة الخادم غير مكتملة');
             }
 
-            return true;
-        } catch (error) {
-            console.error('Error uploading recording:', {
-                error: error.response ? {
-                    status: error.response.status,
-                    data: error.response.data,
-                    headers: error.response.headers
-                } : error.message
+            const { recordedWord, confidence } = response.data;
+            const finalRecorded = recordedWord || '';
+
+            console.log('📊 بيانات الاستجابة:', {
+                مسجلة: finalRecorded,
+                متوقعة: currentWordName,
+                confidence
             });
+
+            // ✅ مقارنة أكثر دقة للكلمات العربية
+            const cleanWord = (word) => {
+                if (!word) return '';
+                return word
+                    .trim()
+                    .toLowerCase()
+                    .replace(/[.,،؟?!\s]/g, '')
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            };
+
+            const cleanedRecorded = cleanWord(recordedWord);
+            const cleanedExpected = cleanWord(currentWordName);
+
+            const distance = levenshteinDistance(cleanedRecorded, cleanedExpected);
+            const isCorrect = distance <= 1; // نسمح بحرف واحد اختلاف
+            console.log(`📏 الفرق بين الكلمتين: ${distance}`);
+            console.log(`✅ الكلمة المسجلة: ${cleanedRecorded}`);
+            if (onRecordingUploaded) {
+                onRecordingUploaded({
+                    recordedWord: finalRecorded,
+                    wordName: currentWordName,
+                    confidence,
+                    letterId: currentLetter
+                });
+            }
+
+            if (isCorrect) {
+                toast.success('✅ تم تسجيل الكلمة بنجاح!');
+            } else {
+                toast.error('❌ الكلمة المسجلة لا تطابق الكلمة المطلوبة');
+                console.warn('الكلمة المتوقعة:', currentWordName, 'المسجلة:', finalRecorded);
+            }
+
+            return isCorrect;
+
+        } catch (error) {
+            console.error('❌ خطأ في رفع التسجيل:', error);
+            toast.error(error.response?.data?.message || 'حدث خطأ في معالجة التسجيل');
             return false;
         }
     };
@@ -373,15 +410,13 @@ const RecordControlsGroup = ({
                 />
 
                 <Box display="flex" justifyContent="center" gap="40px">
-                    <IconButton
-                        onClick={handleReplay}
-                        aria-label="replay"
-                        disabled={!audioSrc}
-                    >
-                        <ReplayIcon sx={{
-                            color: !audioSrc ? '#ccc' : '#FCA43C',
-                            fontSize: '28px'
-                        }} />
+                    <IconButton onClick={handleReplay} aria-label="replay" disabled={!audioSrc}>
+                        <ReplayIcon
+                            sx={{
+                                color: !audioSrc ? '#ccc' : '#FCA43C',
+                                fontSize: '28px',
+                            }}
+                        />
                     </IconButton>
 
                     <IconButton
@@ -390,15 +425,9 @@ const RecordControlsGroup = ({
                         disabled={!audioSrc}
                     >
                         {isPlaying ? (
-                            <PauseIcon sx={{
-                                color: !audioSrc ? '#ccc' : '#FCA43C',
-                                fontSize: '28px'
-                            }} />
+                            <PauseIcon sx={{ color: '#FCA43C', fontSize: '28px' }} />
                         ) : (
-                            <PlayArrowIcon sx={{
-                                color: !audioSrc ? '#ccc' : '#FCA43C',
-                                fontSize: '28px'
-                            }} />
+                            <PlayArrowIcon sx={{ color: '#FCA43C', fontSize: '28px' }} />
                         )}
                     </IconButton>
 
@@ -407,23 +436,19 @@ const RecordControlsGroup = ({
                         aria-label="bookmark"
                         disabled={!audioSrc}
                     >
-                        <BookmarkIcon sx={{
-                            color: !audioSrc ? '#ccc' : '#FCA43C',
-                            fontSize: '28px'
-                        }} />
+                        <BookmarkIcon sx={{ color: '#FCA43C', fontSize: '28px' }} />
                     </IconButton>
                 </Box>
             </ControlsContainer>
 
-            <Box sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                marginTop: '20px'
-            }}>
-                <MicCircle
-                    isRecording={isRecording}
-                    onClick={handleMicClick}
-                >
+            <Box
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    marginTop: '20px',
+                }}
+            >
+                <MicCircle isRecording={isRecording} onClick={handleMicClick}>
                     {isRecording ? (
                         <StopIcon sx={{ color: 'red', fontSize: '45px' }} />
                     ) : (
