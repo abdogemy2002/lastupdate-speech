@@ -12,8 +12,7 @@ const BackgroundWrapper = ({ children }) => {
                 backgroundAttachment: 'fixed',
                 py: 0,
                 position: 'relative',
-                zIndex: -1,
-                    '&::before': {
+                '&::before': {
                     content: '""',
                     position: 'absolute',
                     top: 0,

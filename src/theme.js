@@ -1,20 +1,20 @@
-// In your theme configuration file
+
 import { createTheme } from '@mui/material/styles';
 
 const theme = createTheme({
   direction: 'rtl',
   palette: {
     primary: {
-      main: '#fca43c', // bright orange
+      main: '#fca43c', 
     },
     secondary: {
-      main: '#20B2AA', // teal green
+      main: '#20B2AA', 
     },
     background: {
-      default: '#fffaf0', // warm beige
+      default: '#fffaf0', 
     },
     text: {
-      primary: '#2b2b2b', // charcoal grey
+      primary: '#2b2b2b', 
     },
   },
   typography: {
@@ -28,7 +28,7 @@ const theme = createTheme({
     h3: {
       fontFamily: 'Kidzhood Arabic, Arial, sans-serif',
     },
-    // Add other heading variants as needed
+    
   },
 });
 
