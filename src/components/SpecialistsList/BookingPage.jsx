@@ -106,52 +106,54 @@ const BookingPage = () => {
     const isBookingReady = selectedDate && selectedTime && selectedPackage;
 
     // إرسال البيانات للباك-إند
-   const handleBooking = async () => {
-    if (!isBookingReady) return;
+    const handleBooking = async () => {
+        if (!isBookingReady) return;
 
-    setLoading(true);
-    setError(null);
+        setLoading(true);
+        setError(null);
 
-    try {
-        const paymentData = {
-            sessionCount: selectedPackage.sessions,
-            totalPrice: selectedPackage.price,
-            sessionDate: formatDateForBackend(selectedDate),
-            sessionTime: selectedTime,
-            doctorId: doctor?.id || null
-        };
+        try {
+            const paymentData = {
+                sessionCount: selectedPackage.sessions,
+                totalPrice: selectedPackage.price,
+                sessionDate: formatDateForBackend(selectedDate),
+                sessionTime: selectedTime,
+                doctorId: doctor?.id || null
+            };
 
-        const response = await axios.post(
-            'https://speech-correction-api.azurewebsites.net/api/Payment/CreateOrUpdatePaymentIntent',
-            paymentData,
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+            const response = await axios.post(
+                'https://speech-correction-api.azurewebsites.net/api/Payment/CreateOrUpdatePaymentIntent',
+                paymentData,
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
                 }
+            );
+            console.log('Payment intent response:', response.data);
+            if (response.data && response.data.clientSecret) {
+                navigate('/booking-confirmation', {
+                    state: {
+                        doctor,
+                        selectedDate,
+                        selectedTime,
+                        selectedPackage,
+                        clientSecret: response.data.clientSecret, // 👈 مهم جدًا
+                        paymentIntent: response.data
+                    }
+                });
+
+            } else {
+                throw new Error('لم يتم إنشاء جلسة الدفع بنجاح');
             }
-        );
-console.log('Payment intent response:', response.data);
-        if (response.data && response.data.clientSecret) {
-            // navigate('/booking-confirmation', {
-            //     state: {
-            //         doctor,
-            //         selectedDate,
-            //         selectedTime,
-            //         selectedPackage,
-            //         paymentIntent: response.data
-            //     }
-            // });
-        } else {
-            throw new Error('لم يتم إنشاء جلسة الدفع بنجاح');
+        } catch (err) {
+            setError(err.response?.data?.message || err.message || 'حدث خطأ أثناء محاولة الحجز');
+            console.error('Error creating payment intent:', err);
+        } finally {
+            setLoading(false);
         }
-    } catch (err) {
-        setError(err.response?.data?.message || err.message || 'حدث خطأ أثناء محاولة الحجز');
-        console.error('Error creating payment intent:', err);
-    } finally {
-        setLoading(false);
-    }
-};
+    };
 
     const handleConfirmPayment = () => {
         setOpenConfirmation(false);
@@ -201,11 +203,11 @@ console.log('Payment intent response:', response.data);
                     >
                         <ChevronRightIcon />
                     </IconButton>
-                    
+
                     <Typography variant="h6" sx={styles.dateText}>
                         {formatDate(selectedDate)}
                     </Typography>
-                    
+
                     <IconButton
                         sx={styles.navIconButton}
                         onClick={() => handleDateChange('next')}
@@ -219,7 +221,7 @@ console.log('Payment intent response:', response.data);
                     <Typography variant="h6" sx={styles.packagesTitle}>
                         اختر وقت الجلسة
                     </Typography>
-                    
+
                     <Box
                         sx={{
                             display: 'grid',
@@ -336,16 +338,16 @@ console.log('Payment intent response:', response.data);
                     </Box>
                 </DialogContent>
                 <DialogActions sx={{ justifyContent: 'center' }}>
-                    <Button 
-                        onClick={handleCloseConfirmation} 
+                    <Button
+                        onClick={handleCloseConfirmation}
                         color="primary"
                         variant="outlined"
                         sx={{ mx: 1 }}
                     >
                         إلغاء
                     </Button>
-                    <Button 
-                        onClick={handleConfirmPayment} 
+                    <Button
+                        onClick={handleConfirmPayment}
                         color="primary"
                         variant="contained"
                         sx={{ mx: 1 }}

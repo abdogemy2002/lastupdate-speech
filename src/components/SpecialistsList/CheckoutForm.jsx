@@ -5,6 +5,8 @@ import {
     useElements
 } from '@stripe/react-stripe-js';
 import { Box, Button, CircularProgress, Alert } from '@mui/material';
+import { toast } from 'react-toastify';
+
 
 const CheckoutForm = ({ doctorId, paymentIntentId, navigate }) => {
     const stripe = useStripe();
@@ -32,18 +34,17 @@ const CheckoutForm = ({ doctorId, paymentIntentId, navigate }) => {
             setError(error.message);
             setLoading(false);
         } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-            navigate('/payment-success', {
-                state: {
-                    paymentIntentId,
-                    doctorId
-                }
-            });
+            toast.success('🎉 تمت العملية بنجاح! سيتم تحويلك للوحة التحكم...');
+
+            setTimeout(() => {
+                navigate('/dashboard'); // عدل المسار لو عندك مسار مختلف
+            }, 2000); // 2 ثانية
+
         } else {
             setError('فشل في تأكيد الدفع. الرجاء المحاولة مرة أخرى.');
             setLoading(false);
         }
     };
-
     return (
         <Box component="form" onSubmit={handleSubmit}>
             <PaymentElement />

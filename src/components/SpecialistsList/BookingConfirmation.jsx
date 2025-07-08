@@ -5,15 +5,21 @@ import {
     Container,
     CircularProgress,
     Button,
-    Alert
+    Alert,
+    Card,
+    CardContent,
+    Divider,
+    Stack,
+    Grid // أضفنا هذا الاستيراد
 } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import CheckoutForm from './CheckoutForm';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { styles } from './BookingStyles';
 
-// مفروض تستبدل المفتاح ده بمفتاح السترايب العام الحقيقي
-const stripePromise = loadStripe('pk_test_YourStripePublicKeyHere');
+const stripePromise = loadStripe('pk_test_51Rhrs2R9USyatFmQB9JPKe5K4C5zMaSevHM0UZCZyPEsCxbhnRr2FVX4aKk3FMXaTvmVGMekkvsQeBAFr8geSms800BIhcHciP');
 
 const BookingConfirmationPage = () => {
     const { state } = useLocation();
@@ -36,11 +42,38 @@ const BookingConfirmationPage = () => {
         }
     }, [clientSecret]);
 
+    const stripeOptions = {
+        clientSecret,
+        appearance: {
+            theme: 'stripe',
+            variables: {
+                colorPrimary: '#1976d2',
+                borderRadius: '8px',
+                spacingUnit: '4px'
+            }
+        },
+        fields: {
+            billingDetails: {
+                address: 'never',
+                email: 'never',
+                phone: 'never',
+                name: 'never'
+            }
+        },
+        paymentMethodOrder: ['card']
+    };
+
     if (!clientSecret) {
         return (
-            <Container sx={{ textAlign: 'center', mt: 5 }}>
-                <Alert severity="error">لا توجد بيانات دفع متاحة. الرجاء الرجوع للمحاولة مرة أخرى.</Alert>
-                <Button variant="contained" sx={{ mt: 2 }} onClick={() => navigate('/')}>
+            <Container sx={{ ...styles.errorContainer, textAlign: 'center' }}>
+                <Alert severity="error" sx={styles.errorAlert}>
+                    لا توجد بيانات دفع متاحة. الرجاء الرجوع للمحاولة مرة أخرى.
+                </Alert>
+                <Button 
+                    variant="contained" 
+                    sx={styles.backButton} 
+                    onClick={() => navigate('/')}
+                >
                     العودة للصفحة الرئيسية
                 </Button>
             </Container>
@@ -48,34 +81,117 @@ const BookingConfirmationPage = () => {
     }
 
     return (
-        <Container maxWidth="sm" dir="rtl" sx={{ mt: 5 }}>
-            <Typography variant="h4" gutterBottom textAlign="center">
-                إتمام الدفع
-            </Typography>
+        <Box sx={styles.root}>
+            <Container maxWidth="md" dir="rtl">
+                {/* زر الرجوع */}
+                <Button
+                    startIcon={<ArrowBackIcon />}
+                    onClick={() => navigate(-1)}
+                    sx={styles.backButton}
+                >
+                    العودة
+                </Button>
 
-            <Box sx={{ my: 3 }}>
-                <Typography variant="subtitle1">تفاصيل الجلسة:</Typography>
-                <Typography>الباقة: {selectedPackage?.title}</Typography>
-                <Typography>السعر: {selectedPackage?.price} ج.م</Typography>
-                <Typography>التاريخ: {new Date(selectedDate).toLocaleDateString('ar-EG')}</Typography>
-                <Typography>الوقت: {selectedTime}</Typography>
-            </Box>
+                <Typography variant="h4" sx={styles.pageTitle} gutterBottom>
+                    إتمام عملية الدفع
+                </Typography>
 
-            {stripeReady ? (
-                <Elements options={{ clientSecret }} stripe={stripePromise}>
-                    <CheckoutForm 
-                        doctorId={paymentIntent?.doctorId}
-                        paymentIntentId={paymentIntent?.paymentIntentId}
-                        navigate={navigate}
-                    />
-                </Elements>
-            ) : (
-                <Box textAlign="center" mt={5}>
-                    <CircularProgress />
-                    <Typography mt={2}>جاري تحميل بوابة الدفع...</Typography>
-                </Box>
-            )}
-        </Container>
+                <Grid container spacing={3}>
+                    <Grid item xs={12} md={6}>
+                        <Card sx={styles.detailsCard}>
+                            <CardContent>
+                                <Typography variant="h6" sx={styles.sectionTitle} gutterBottom>
+                                    تفاصيل الحجز
+                                </Typography>
+                                
+                                <Stack spacing={2} sx={styles.detailsStack}>
+                                    <Box>
+                                        <Typography variant="subtitle1" sx={styles.detailLabel}>
+                                            الطبيب:
+                                        </Typography>
+                                        <Typography sx={{
+                                            fontFamily: "'Tajawal', sans-serif",
+                                        }}>
+                                            د. {doctor?.firstName} {doctor?.lastName}
+                                        </Typography>
+                                    </Box>
+
+                                    <Box>
+                                        <Typography variant="subtitle1" sx={styles.detailLabel}>
+                                            الباقة:
+                                        </Typography>
+                                        <Typography sx={{
+                                            fontFamily: "'Tajawal', sans-serif",
+                                        }}>{selectedPackage?.title}</Typography>
+                                    </Box>
+
+                                    <Box>
+                                        <Typography variant="subtitle1" sx={styles.detailLabel}>
+                                            السعر:
+                                        </Typography>
+                                        <Typography sx={{
+                                            fontFamily: "'Tajawal', sans-serif",
+                                        }}>{selectedPackage?.price } ج.م</Typography>
+                                    </Box>
+
+                                    <Box>
+                                        <Typography variant="subtitle1" sx={styles.detailLabel}>
+                                            التاريخ:
+                                        </Typography>
+                                        <Typography sx={{
+                                            fontFamily: "'Tajawal', sans-serif",
+                                        }}>
+                                            {new Date(selectedDate).toLocaleDateString('ar-EG', {
+                                                weekday: 'long',
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric'
+                                            })}
+                                        </Typography>
+                                    </Box>
+
+                                    <Box>
+                                        <Typography variant="subtitle1" sx={styles.detailLabel}>
+                                            الوقت:
+                                        </Typography>
+                                        <Typography sx={{
+                                            fontFamily: "'Tajawal', sans-serif",
+                                        }}>{selectedTime}</Typography>
+                                    </Box>
+                                </Stack>
+                            </CardContent>
+                        </Card>
+                    </Grid>
+
+                    <Grid item xs={12} md={6}>
+                        <Card sx={styles.paymentCard}>
+                            <CardContent>
+                                <Typography variant="h6" sx={styles.sectionTitle} gutterBottom>
+                                    بيانات الدفع
+                                </Typography>
+
+                                {stripeReady ? (
+                                    <Elements options={stripeOptions} stripe={stripePromise}>
+                                        <CheckoutForm
+                                            doctorId={paymentIntent?.doctorId}
+                                            paymentIntentId={paymentIntent?.paymentIntentId}
+                                            navigate={navigate}
+                                        />
+                                    </Elements>
+                                ) : (
+                                    <Box sx={styles.loadingBox}>
+                                        <CircularProgress />
+                                        <Typography sx={styles.loadingText}>
+                                            جاري تحميل بوابة الدفع...
+                                        </Typography>
+                                    </Box>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                </Grid>
+            </Container>
+        </Box>
     );
 };
 

@@ -500,7 +500,7 @@ const DocDetails = () => {
                                     سعر الجلسة
                                 </Typography>
                                 <Typography variant="h4" fontWeight="bold" sx={styles.priceValue}>
-                                    250 ج.م
+                                    200 ج.م
                                 </Typography>
                                 <Typography variant="body2" color="text.secondary" sx={{ fontFamily: "'Tajawal', sans-serif" }}>
                                     لمدة 45 دقيقة
