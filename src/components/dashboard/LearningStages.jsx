@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  Card, CardHeader, CardContent, Typography, IconButton, Box
+  Card, CardHeader, CardContent, Typography, IconButton, Box,
+  CircularProgress, Alert
 } from '@mui/material';
 import { Lock, ChevronLeft, ChevronRight } from '@mui/icons-material';
 import Assessment from './levels/Assessment';
@@ -8,23 +9,122 @@ import AssessmentIcon from '../../assets/assessment.svg';
 import Milestones1 from '../../assets/milestones1.svg';
 import Milestones2 from '../../assets/milestones2.svg';
 import Milestones3 from '../../assets/milestones3.svg';
+import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { logout } from '../../store/slices/userSlice'; // تأكد من المسار الصحيح
 
 const LearningStages = () => {
   const [openAssessment, setOpenAssessment] = useState(false);
-  const [currentUserLevel, setCurrentUserLevel] = useState(0); // 0 = لم يبدأ بعد، 1-3 = المستوى الحالي
+  const [currentUserLevel, setCurrentUserLevel] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const levelsContainerRef = useRef(null);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  // جلب التوكن من Redux store
+  const { token, isAuthenticated } = useSelector((state) => state.user);
 
   useEffect(() => {
-    // TODO: استبدل هذا بطلب API فعلي لجلب مستوى المستخدم
-    const fetchUserLevel = () => {
-   
-      setCurrentUserLevel(3);
+    const fetchUserLevel = async () => {
+      try {
+        // setLoading(true);
+        
+        if (!isAuthenticated || !token) {
+          throw new Error('يجب تسجيل الدخول أولاً');
+        }
+
+        console.log('Fetching with token:', token); // لأغراض التصحيح
+
+        const response = await fetch(
+          'https://speech-correction-api.azurewebsites.net/api/training/progress',
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        console.log('Response status:', response.status);
+
+        if (response.status === 401) {
+          dispatch(logout());
+          throw new Error('انتهت صلاحية الجلسة، يرجى تسجيل الدخول مرة أخرى');
+        }
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        const progressData = await response.json();
+        setCurrentUserLevel(progressData.highestUnlockedLevel || 0);
+        
+      } catch (error) {
+        console.error('Error fetching user level:', error);
+        setError(error.message);
+        setCurrentUserLevel(0);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    fetchUserLevel();
-  }, []);
+    if (isAuthenticated && token) {
+      fetchUserLevel();
+    } else {
+      setError('يجب تسجيل الدخول للوصول إلى المراحل التعليمية');
+    }
+  }, [token, isAuthenticated, dispatch]);
 
-  // إنشاء بيانات المستويات ديناميكيًا بناءً على مستوى المستخدم
+  const handleLevelClick = async (levelId) => {
+    if (levelId === 0) {
+      handleOpenAssessment();
+      return;
+    }
+
+    if (levelId > currentUserLevel + 1) {
+      setError('هذا المستوى غير متاح بعد');
+      return;
+    }
+
+    try {
+      // setLoading(true);
+      setError(null);
+      
+      const response = await fetch(
+        `https://speech-correction-api.azurewebsites.net/api/training/level?level=${levelId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.status === 401) {
+        dispatch(logout());
+        throw new Error('انتهت صلاحية الجلسة');
+      }
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const levelData = await response.json();
+      handleNavigateToTraining(levelData);
+      console.log('Level data:', levelData);
+    } catch (error) {
+      console.error('Error fetching level data:', error);
+      setError(error.message || 'حدث خطأ أثناء جلب بيانات المستوى');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleNavigateToTraining = (levelData) => {
+    navigate('/levelDisplay', { state: { levelData } });
+  };
+
   const getLevelsData = () => {
     const baseLevels = [
       {
@@ -60,7 +160,8 @@ const LearningStages = () => {
     ];
 
     learningLevels.forEach(level => {
-      const unlocked = level.id <= currentUserLevel;
+      const unlocked = level.id <= currentUserLevel + 1;
+      
       baseLevels.push({
         ...level,
         unlocked,
@@ -107,6 +208,16 @@ const LearningStages = () => {
     }
   };
 
+  if (!isAuthenticated) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+        <Alert severity="error" sx={{ width: '100%', maxWidth: 600 }}>
+          يجب تسجيل الدخول لعرض المراحل التعليمية
+        </Alert>
+      </Box>
+    );
+  }
+
   return (
     <Card sx={{
       mb: 4,
@@ -138,6 +249,18 @@ const LearningStages = () => {
           border: '3px solid #FCA43C',
           boxShadow: '0 2px 8px rgba(219, 0, 0, 0.05)'
         }}>
+          {loading && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+              <CircularProgress />
+            </Box>
+          )}
+
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
+          
           <Box sx={{ display: 'flex', alignItems: 'center', position: 'relative', width: '100%', px: 3 }}>
             <IconButton
               onClick={() => scrollLevels('left')}
@@ -196,7 +319,7 @@ const LearningStages = () => {
                       p: 3,
                       ...(level.isAssessment && { '&:hover': { transform: 'scale(1.02)' } })
                     }}
-                    onClick={level.isAssessment ? handleOpenAssessment : undefined}
+                    onClick={() => handleLevelClick(level.id)}
                   >
                     <Box sx={{
                       display: 'flex',

@@ -22,6 +22,7 @@ import { ChatProvider } from './components/chat/ChatContext'; // استيراد 
 import DocDetails from './components/SpecialistsList/DocDetails';
 import BookingPage from './components/SpecialistsList/BookingPage'; // عدل المسار حسب مكانك
 import BookingConfirmation from './components/SpecialistsList/BookingConfirmation'; // عدل المسار حسب مكانك
+import LevelDisplay from './components/dashboard/levels/LevelDisplay'; // عدل المسار حسب مكانك
 // ✅ هنا بنستخدم useLocation داخل Wrapper علشان نقدر نتحكم في الـ Footer
 const AppWrapper = () => {
   const dispatch = useDispatch();
@@ -71,6 +72,10 @@ const AppWrapper = () => {
           <Route
             path="/TestPage"
             element={isAuthenticated ? <TestPage /> : <Navigate to="/login" />}
+          />
+            <Route
+            path="/levelDisplay"
+            element={isAuthenticated ? <LevelDisplay /> : <Navigate to="/login" />}
           />
           <Route
             path="/UpdateProfile"
