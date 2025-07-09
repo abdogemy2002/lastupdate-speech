@@ -1,4 +1,3 @@
-// src/components/voice/RecordControlsGroup.jsx
 import { toast } from 'react-toastify';
 import React, { useState, useRef, useEffect } from 'react';
 import { styled, Box, IconButton, Slider } from '@mui/material';
@@ -14,7 +13,6 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 import RecordRTC from 'recordrtc';
 
-// Styled Components
 const MicCircle = styled(Box, {
     shouldForwardProp: (prop) => prop !== 'isRecording',
 })(({ theme, isRecording }) => ({
@@ -136,22 +134,24 @@ const SeekBar = styled(Slider)(({ theme }) => ({
     },
 }));
 
-const RecordControlsGroup = ({
+const TrainingControlsGroup = ({
     audioSrc,
     onRecordComplete,
-    currentLetter,
     currentWordName,
-    onRecordingUploaded,
+    level,
+    trainingRecordId,
+    currentItem,
+    onRecordingUploaded
 }) => {
-    const [isPlaying, setIsPlaying] = useState(false);
+    const [isPlayingRef, setIsPlayingRef] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
     const [progress, setProgress] = useState(0);
     const [duration, setDuration] = useState(0);
-    const [userRecording, setUserRecording] = useState(null);
 
     const token = useSelector((state) => state.user.token);
     const audioRef = useRef(null);
     const recorderRef = useRef(null);
+    const userRecordingRef = useRef(null);
 
     useEffect(() => {
         const audio = audioRef.current;
@@ -170,7 +170,7 @@ const RecordControlsGroup = ({
         };
 
         const handleAudioEnd = () => {
-            setIsPlaying(false);
+            setIsPlayingRef(false);
         };
 
         audio.addEventListener('timeupdate', updateProgress);
@@ -182,52 +182,44 @@ const RecordControlsGroup = ({
             audio.removeEventListener('loadedmetadata', setAudioData);
             audio.removeEventListener('ended', handleAudioEnd);
         };
-    }, []);
+    }, [audioSrc]);
 
     const handlePlayPause = () => {
-        if (audioSrc && audioRef.current) {
-            console.log("🎧 Trying to play:", audioSrc);
-            if (isPlaying) {
-                audioRef.current.pause();
-            } else {
-                audioRef.current.play().catch((error) => {
-                    console.error('❌ Error playing audio:', error);
-                    setIsPlaying(false);
-                });
-            }
-            setIsPlaying(!isPlaying);
+        if (!audioRef.current) return;
+
+        if (isPlayingRef) {
+            audioRef.current.pause();
         } else {
-            console.warn("⚠️ لا يوجد مصدر للصوت أو المرجع غير موجود");
+            audioRef.current.play()
+                .catch(error => {
+                    console.error('Error playing audio:', error);
+                    setIsPlayingRef(false);
+                });
         }
+        setIsPlayingRef(!isPlayingRef);
     };
 
     const handleSeek = (e, newValue) => {
         if (audioRef.current?.duration) {
-            const seekTime = (newValue / 100) * audioRef.current.duration;
-            audioRef.current.currentTime = seekTime;
+            audioRef.current.currentTime = (newValue / 100) * audioRef.current.duration;
             setProgress(newValue);
         }
     };
 
     const handleReplay = () => {
-        if (audioRef.current?.duration) {
+        if (audioRef.current) {
             audioRef.current.currentTime = 0;
             setProgress(0);
-            if (isPlaying) {
-                audioRef.current.pause();
-                setIsPlaying(false);
+            if (!isPlayingRef) {
+                audioRef.current.play()
+                    .catch(error => console.error('Error replaying:', error));
             }
         }
-    };
-
-    const handleBookmark = () => {
-        console.log(`Bookmarked at ${audioRef.current?.currentTime || 0} seconds`);
     };
 
     const startRecording = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
             const recorder = new RecordRTC(stream, {
                 type: 'audio',
                 mimeType: 'audio/wav',
@@ -240,159 +232,132 @@ const RecordControlsGroup = ({
             recorderRef.current = recorder;
             setIsRecording(true);
         } catch (error) {
-            console.error('Error starting recording:', error);
+            console.error('Recording error:', error);
+            toast.error('لا يمكن الوصول إلى الميكروفون');
             setIsRecording(false);
         }
     };
-    // في دالة stopRecording
+
     const stopRecording = () => {
         if (!recorderRef.current) return;
 
-        // إظهار تحميل أثناء معالجة التسجيل
         toast.info('جاري معالجة التسجيل...', { autoClose: false });
 
         recorderRef.current.stopRecording(() => {
-            toast.dismiss(); // إغلاق رسالة التحميل
-
+            toast.dismiss();
             const blob = recorderRef.current.getBlob();
 
-            // تنظيف الـ stream
             if (recorderRef.current.stream) {
-                recorderRef.current.stream.getTracks().forEach(track => {
-                    track.stop();
-                    track.enabled = false;
-                });
+                recorderRef.current.stream.getTracks().forEach(track => track.stop());
             }
 
-            setUserRecording(blob);
             handleRecordingComplete(blob);
             setIsRecording(false);
         });
     };
 
-    const handleMicClick = () => {
-        if (isRecording) {
-            stopRecording();
-        } else {
-            startRecording();
-        }
-    };
-
     const handleRecordingComplete = (audioBlob) => {
-        if (!audioBlob) return;
         const audioUrl = URL.createObjectURL(audioBlob);
-        setUserRecording(audioBlob);
+        userRecordingRef.current = audioUrl;
 
         if (onRecordComplete) {
             onRecordComplete({
                 audioUrl,
-                handleNext: async () => await uploadRecording(audioBlob),
+                handleNext: async () => {
+                    return await uploadRecording(audioBlob);
+                }
             });
         }
     };
 
-    const levenshteinDistance = (a, b) => {
-        const matrix = Array.from({ length: a.length + 1 }, () =>
-            Array(b.length + 1).fill(0)
-        );
-
-        for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
-        for (let j = 0; j <= b.length; j++) matrix[0][j] = j;
-
-        for (let i = 1; i <= a.length; i++) {
-            for (let j = 1; j <= b.length; j++) {
-                const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-                matrix[i][j] = Math.min(
-                    matrix[i - 1][j] + 1,       // حذف
-                    matrix[i][j - 1] + 1,       // إضافة
-                    matrix[i - 1][j - 1] + cost // استبدال
-                );
-            }
+    const uploadRecording = async (audioBlob) => {
+        if (!audioBlob || audioBlob.size === 0) {
+            toast.error('لا يوجد بيانات صوتية صالحة للرفع');
+            return {
+                isSuccessful: false,
+                confidence: 0,
+                levelCompleted: false,
+                audioUrl: null,
+                recognizedText: null
+            };
         }
 
-        return matrix[a.length][b.length];
-    };
-
-
-    const uploadRecording = async (audioBlob) => {
-        if (!audioBlob || !currentLetter || !currentWordName) {
-            toast.error("بيانات ناقصة في رفع التسجيل");
-            return false;
+        if (!level || !trainingRecordId) {
+            toast.error('بيانات ناقصة: مستوى التدريب أو معرف التدريب');
+            return {
+                isSuccessful: false,
+                confidence: 0,
+                levelCompleted: false,
+                audioUrl: null,
+                recognizedText: null
+            };
         }
 
         const formData = new FormData();
-        formData.append('LetterId', currentLetter);
-        formData.append('WordName', currentWordName);
-        formData.append('AudioFile', audioBlob, 'recording.wav');
+        formData.append('Level', level);
+        formData.append('TrainingRecordId', trainingRecordId);
+        formData.append('AudioFile', audioBlob, `recording_${Date.now()}.wav`);
 
-        console.log()
+        console.log('FormData being sent:', formData.get('Level'), formData.get('TrainingRecordId'), formData.get('AudioFile'));
 
         try {
             const response = await axios.post(
-                'https://speech-correction-api.azurewebsites.net/api/Test/evaluate',
+                'https://speech-correction-api.azurewebsites.net/api/training/practice',
                 formData,
                 {
                     headers: {
-                        Authorization: `Bearer ${token}`,
+                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'multipart/form-data'
                     },
-                    timeout: 10000
+                    timeout: 15000
                 }
             );
-
-            // ✅ التحقق من وجود البيانات المطلوبة
-            if (!response.data || typeof response.data.confidence === 'undefined') {
-                throw new Error('استجابة الخادم غير مكتملة');
+            console.log('Response from server:', response.data);
+            if (!response.data || typeof response.data.isSuccessful === 'undefined') {
+                throw new Error('استجابة غير متوقعة من الخادم');
             }
 
-            const { recordedWord, confidence } = response.data;
-            const finalRecorded = recordedWord || '';
-
-            console.log('📊 بيانات الاستجابة:', {
-                مسجلة: finalRecorded,
-                متوقعة: currentWordName,
-                confidence
-            });
-
-            // ✅ مقارنة أكثر دقة للكلمات العربية
-            const cleanWord = (word) => {
-                if (!word) return '';
-                return word
-                    .trim()
-                    .toLowerCase()
-                    .replace(/[.,،؟?!\s]/g, '')
-                    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-            };
-
-            const cleanedRecorded = cleanWord(recordedWord);
-            const cleanedExpected = cleanWord(currentWordName);
-
-            const distance = levenshteinDistance(cleanedRecorded, cleanedExpected);
-            const isCorrect = distance <= 1; // نسمح بحرف واحد اختلاف
-            console.log(`📏 الفرق بين الكلمتين: ${distance}`);
-            console.log(`✅ الكلمة المسجلة: ${cleanedRecorded}`);
             if (onRecordingUploaded) {
                 onRecordingUploaded({
-                    recordedWord: finalRecorded,
+                    ...response.data,
                     wordName: currentWordName,
-                    confidence,
-                    letterId: currentLetter
+                    ...(currentItem && {
+                        letterSymbol: currentItem.letterSymbol
+                    })
                 });
             }
 
-            if (isCorrect) {
-                toast.success('✅ تم تسجيل الكلمة بنجاح!');
+            if (response.data.isSuccessful) {
+                toast.success(response.data.levelCompleted ?
+                    '🎉 لقد أكملت المستوى بنجاح!' :
+                    '✅ تم تقييم أدائك بنجاح');
             } else {
-                toast.error('❌ الكلمة المسجلة لا تطابق الكلمة المطلوبة');
-                console.warn('الكلمة المتوقعة:', currentWordName, 'المسجلة:', finalRecorded);
+                toast.warning('⚠️ يحتاج أداؤك إلى تحسين');
             }
 
-            return isCorrect;
+            return response.data;
 
         } catch (error) {
-            console.error('❌ خطأ في رفع التسجيل:', error);
-            toast.error(error.response?.data?.message || 'حدث خطأ في معالجة التسجيل');
-            return false;
+            let errorMessage = 'حدث خطأ أثناء معالجة التسجيل';
+
+            if (error.response?.data?.message) {
+                errorMessage = error.response.data.message;
+            } else if (error.message.includes('timeout')) {
+                errorMessage = 'تجاوز الوقت المحدد للاتصال بالخادم';
+            } else if (error.message.includes('Network Error')) {
+                errorMessage = 'فشل الاتصال بالخادم';
+            }
+
+            toast.error(`❌ ${errorMessage}`);
+
+            return {
+                isSuccessful: false,
+                confidence: 0,
+                levelCompleted: false,
+                audioUrl: null,
+                recognizedText: null,
+                error: errorMessage
+            };
         }
     };
 
@@ -403,33 +368,31 @@ const RecordControlsGroup = ({
                 src={audioSrc}
                 preload="none"
                 onError={(e) => console.error('Audio error:', e)}
-                onEnded={() => setIsPlaying(false)}
             />
 
             <ControlsContainer>
                 <SeekBar
                     value={progress}
                     onChange={handleSeek}
-                    aria-label="audio progress"
+                    aria-label="تقدم الصوت"
                     disabled={!audioSrc}
                 />
 
                 <Box display="flex" justifyContent="center" gap="40px">
-                    <IconButton onClick={handleReplay} aria-label="replay" disabled={!audioSrc}>
-                        <ReplayIcon
-                            sx={{
-                                color: !audioSrc ? '#ccc' : '#FCA43C',
-                                fontSize: '28px',
-                            }}
-                        />
+                    <IconButton
+                        onClick={handleReplay}
+                        aria-label="إعادة التشغيل"
+                        disabled={!audioSrc}
+                    >
+                        <ReplayIcon sx={{ color: !audioSrc ? '#ccc' : '#FCA43C', fontSize: '28px' }} />
                     </IconButton>
 
                     <IconButton
                         onClick={handlePlayPause}
-                        aria-label={isPlaying ? 'pause' : 'play'}
+                        aria-label={isPlayingRef ? 'إيقاف' : 'تشغيل'}
                         disabled={!audioSrc}
                     >
-                        {isPlaying ? (
+                        {isPlayingRef ? (
                             <PauseIcon sx={{ color: '#FCA43C', fontSize: '28px' }} />
                         ) : (
                             <PlayArrowIcon sx={{ color: '#FCA43C', fontSize: '28px' }} />
@@ -437,8 +400,8 @@ const RecordControlsGroup = ({
                     </IconButton>
 
                     <IconButton
-                        onClick={handleBookmark}
-                        aria-label="bookmark"
+                        onClick={() => console.log('حفظ الكلمة')}
+                        aria-label="حفظ الكلمة"
                         disabled={!audioSrc}
                     >
                         <BookmarkIcon sx={{ color: '#FCA43C', fontSize: '28px' }} />
@@ -446,14 +409,8 @@ const RecordControlsGroup = ({
                 </Box>
             </ControlsContainer>
 
-            <Box
-                sx={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    marginTop: '20px',
-                }}
-            >
-                <MicCircle isRecording={isRecording} onClick={handleMicClick}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                <MicCircle isRecording={isRecording} onClick={isRecording ? stopRecording : startRecording}>
                     {isRecording ? (
                         <StopIcon sx={{ color: 'red', fontSize: '45px' }} />
                     ) : (
@@ -465,4 +422,4 @@ const RecordControlsGroup = ({
     );
 };
 
-export default RecordControlsGroup;
+export default TrainingControlsGroup;

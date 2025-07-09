@@ -3,8 +3,9 @@ import VoiceRecorder from "../../components/test components/VoiceRecorder";
 import flowerBg from '../../assets/flower-bg.jpg'; 
 import DashboardTabs from '../../components/dashboard/DashboardTabs';
 import { Dashboard } from '@mui/icons-material';
+import TrainingVoiceRecord from './TrainingVoiceRecorder';
 
-const TempPage = () => {
+const TrainingPageVoice = () => {
   return (
     <div style={{ 
       backgroundImage: `url(${flowerBg})`,
@@ -18,10 +19,10 @@ const TempPage = () => {
     }}>
       <div className="container-fluid h-100 d-flex flex-column p-0">
         {/* <DashboardTabs /> */}
-        <VoiceRecorder />
+        <TrainingVoiceRecord />
       </div>
     </div>
   );
 };
 
-export default TempPage;
+export default TrainingPageVoice;

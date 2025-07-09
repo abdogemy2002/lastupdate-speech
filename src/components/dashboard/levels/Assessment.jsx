@@ -1,10 +1,8 @@
-import React, { useState } from 'react'; 
+import React, { useState, useRef } from 'react'; 
 import {
     Dialog, DialogTitle, DialogContent,
     DialogActions, Button, Box, Typography
 } from '@mui/material';
-
-import docConsultImage from '../../assets/docConsult.svg';
 
 const Assessment = ({ open, onClose, questions }) => {
     const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -144,7 +142,7 @@ const Assessment = ({ open, onClose, questions }) => {
                 <DialogContent sx={{ textAlign: 'center', py: 5 }}>
                     <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
                         <img
-                            src={docConsultImage}
+                            src="/src/assets/docConsult.svg"
                             alt="Doctor Consultation"
                             width="200"
                             height="200"

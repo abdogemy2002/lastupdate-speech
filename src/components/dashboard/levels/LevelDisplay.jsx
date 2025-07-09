@@ -25,7 +25,124 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom';
 
 // ============= Styled Components =============
-// ... (keep all your styled components exactly as they are) ...
+const MainContainer = styled(Container)(({ theme }) => ({
+    padding: theme.spacing(4),
+    maxWidth: '1200px',
+    [theme.breakpoints.down('sm')]: {
+        padding: theme.spacing(2),
+    },
+}));
+
+const TrainingPaper = styled(Paper)(({ theme }) => ({
+    borderRadius: '16px',
+    overflow: 'hidden',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
+    backgroundColor: '#fff',
+    position: 'relative',
+}));
+
+const HeaderBox = styled(Box)(({ theme }) => ({
+    display: 'flex',
+    alignItems: 'center',
+    padding: theme.spacing(3),
+    backgroundColor: '#20B2AA',
+    color: '#fff',
+    [theme.breakpoints.down('sm')]: {
+        padding: theme.spacing(2),
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+    },
+}));
+
+const LevelTitle = styled(Typography)(({ theme }) => ({
+    fontFamily: "'Tajawal', sans-serif",
+    fontWeight: 700,
+    fontSize: '2rem',
+    flexGrow: 1,
+    [theme.breakpoints.down('sm')]: {
+        fontSize: '1.5rem',
+        marginTop: theme.spacing(1),
+    },
+}));
+
+const StyledTabs = styled(Tabs)(({ theme }) => ({
+    '& .MuiTabs-indicator': {
+        backgroundColor: '#FCA43C',
+        height: 4,
+    },
+    backgroundColor: '#f5f5f5',
+}));
+
+const StyledTab = styled(Tab)(({ theme }) => ({
+    fontFamily: "'Tajawal', sans-serif",
+    fontWeight: 600,
+    fontSize: '1rem',
+    color: '#333',
+    '&.Mui-selected': {
+        color: '#20B2AA',
+    },
+}));
+
+const WordList = styled(List)(({ theme }) => ({
+    padding: 0,
+    backgroundColor: '#fff',
+}));
+
+const WordListItem = styled(ListItem)(({ theme }) => ({
+    padding: 0,
+    marginBottom: theme.spacing(1),
+    '&:last-child': {
+        marginBottom: 0,
+    },
+}));
+
+const WordButton = styled(ListItemButton)(({ theme }) => ({
+    borderRadius: '8px',
+    padding: theme.spacing(2),
+    transition: 'all 0.2s ease',
+    '&.Mui-selected': {
+        backgroundColor: '#E0F7FA',
+        '&:hover': {
+            backgroundColor: '#B2EBF2',
+        },
+    },
+    '&:hover': {
+        backgroundColor: '#f5f5f5',
+    },
+}));
+
+const WordAvatar = styled(Avatar)(({ theme, completed }) => ({
+    backgroundColor: completed ? '#FCA43C' : '#BDBDBD', // تغيير اللون إلى البرتقالي للمكتمل
+    color: '#fff',
+    marginRight: theme.spacing(2),
+    width: 40,
+    height: 40,
+}));
+
+const PlayButton = styled(IconButton)(({ theme }) => ({
+    color: '#20B2AA',
+    '&:hover': {
+        backgroundColor: 'rgba(32, 178, 170, 0.1)',
+    },
+}));
+
+const ProgressChip = styled(Chip)(({ theme }) => ({
+    backgroundColor: '#FDFBF6',
+    color: '#20B2AA',
+    fontWeight: 700,
+    fontSize: '1rem',
+    padding: theme.spacing(0.5),
+}));
+
+const BackButton = styled(IconButton)(({ theme }) => ({
+    color: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    marginRight: theme.spacing(2),
+    '&:hover': {
+        backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    },
+}));
+
 
 // ============= Main Component =============
 const TrainingPage = () => {
@@ -105,7 +222,7 @@ const TrainingPage = () => {
         const remainingWords = levelData.words.slice(currentIndex + 1);
         
         // Navigate to training page with word data
-        navigate('/word-training', {
+        navigate('/TrainingPage', {
             state: {
                 currentWord: word,
                 remainingWords,

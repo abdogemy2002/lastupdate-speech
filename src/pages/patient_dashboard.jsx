@@ -8,6 +8,11 @@ import LearningStages from '../components/dashboard/LearningStages';
 import RecommendedLessons from '../components/dashboard/RecommendedLessons';
 import SpecialistsList from '../components/SpecialistsList/SpecialistsList';
 import DoctorsCarousel from '../components/dashboard/DoctorsCarousel';
+import rec1 from "../assets/relesson1.jpg";
+import rec2 from "../assets/reclesson2.jpg";
+import rec3 from "../assets/reclesson3.jpg";
+
+
 import {
   EmojiObjects as EmojiObjectsIcon,
   RecordVoiceOver as RecordVoiceOverIcon,
@@ -30,18 +35,18 @@ const DashboardPage = () => {
           throw new Error('Network response was not ok');
         }
         const result = await response.json();
-        
+
         const transformedDoctors = result.data.map(doctor => ({
           id: doctor.id || Math.random().toString(36).substr(2, 9),
           name: `${doctor.firstName || 'دكتور'} ${doctor.lastName || ''}`.trim(),
           specialty: 'أخصائي تخاطب',
           image: doctor.profilePictureUrl || '/default-doctor-avatar.png',
           rating: doctor.rating || 0,
-          availableSlots: doctor.workingDays && doctor.workingDays.length > 0 
-            ? doctor.workingDays 
+          availableSlots: doctor.workingDays && doctor.workingDays.length > 0
+            ? doctor.workingDays
             : ['لا يوجد مواعيد متاحة'],
           about: doctor.about || 'لا يوجد معلومات إضافية',
-          workingHours: doctor.availableFrom && doctor.availableTo 
+          workingHours: doctor.availableFrom && doctor.availableTo
             ? `${doctor.availableFrom} - ${doctor.availableTo}`
             : 'غير محدد',
           city: doctor.city || null
@@ -74,31 +79,31 @@ const DashboardPage = () => {
     { id: 3, title: "جمل صعبة", description: "نطق جمل طويلة ومعقدة", icon: <ForumIcon fontSize="large" />, completed: false }
   ];
 
+
   const recommendedLessons = [
     {
-      title: "الحروف المفخمة",
-      description: "تعلم نطق الحروف المفخمة بشكل صحيح مع تمارين تفاعلية.",
-      image: "/img/pronunciation1.jpg"
+      title: "تمارين الفم التفاعليه",
+      description: "فتح الفم بقوة ثم ابتسامة عريضة",
+      image: rec1
     },
     {
-      title: "الحروف المنخفضة",
-      description: "إتقان نطق الحروف المنخفضة بتمارين عملية.",
-      image: "/img/pronunciation2.jpg"
+      title: "تمارين الفم التفاعليه",
+      description: "ثني اللسان و الضغط عليه",
+      image: rec2
     },
     {
-      title: "الجمل الطويلة",
-      description: "تحسين نطق الجمل الطويلة والمعقدة.",
-      image: "/img/pronunciation3.jpg"
+      title: "تمارين الفم التفاعليه",
+      description: "رفع اللسان و تثبيته على الخافض",
+      image: rec3
     }
   ];
-
   if (loading) {
     return (
       <BackgroundWrapper>
-        <Container maxWidth="lg" sx={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
+        <Container maxWidth="lg" sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
           minHeight: '70vh'
         }}>
           <CircularProgress size={60} />
