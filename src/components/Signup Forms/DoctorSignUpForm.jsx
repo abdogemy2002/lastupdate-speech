@@ -3,11 +3,14 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { Navigate, useNavigate } from "react-router-dom";
 import { IoArrowBack } from "react-icons/io5";
-
+import { useDispatch } from "react-redux";
+import { loginSuccess } from "../../store/slices/userSlice";
+import styles from "../../style/SignUp.module.css";
 const DoctorSignUp = ({ setActiveForm, setShowForm, handleLogin }) => {
   const [phase, setPhase] = useState(1); // 1 for basic info, 2 for doctor details
-
+const navigate = useNavigate();
   const formik = useFormik({
     initialValues: {
       // Phase 1 fields
@@ -17,7 +20,7 @@ const DoctorSignUp = ({ setActiveForm, setShowForm, handleLogin }) => {
       phoneNumber: "",
       password: "",
       confirmPassword: "",
-      
+
       // Phase 2 fields
       birthDate: "",
       nationality: "",
@@ -49,7 +52,7 @@ const DoctorSignUp = ({ setActiveForm, setShowForm, handleLogin }) => {
       confirmPassword: Yup.string()
         .oneOf([Yup.ref('password'), null], 'كلمات المرور غير متطابقة')
         .required('تأكيد كلمة المرور مطلوب'),
-      
+
       // Phase 2 validation
       birthDate: Yup.string().when('phase', {
         is: 2,
@@ -105,6 +108,7 @@ const DoctorSignUp = ({ setActiveForm, setShowForm, handleLogin }) => {
         .then((response) => {
           handleLogin(response.data);
           toast.success("تم التسجيل بنجاح كطبيب!");
+          navigate("/Doc-profile-image");
         })
         .catch((error) => {
           console.error("Registration error:", error);
@@ -143,270 +147,336 @@ const DoctorSignUp = ({ setActiveForm, setShowForm, handleLogin }) => {
     { value: "Saturday", label: "السبت" },
   ];
 
+
   return (
-    <form className="signup-form" onSubmit={formik.handleSubmit}>
-      <button type="button" className="back-button" onClick={goBack}>
-        <IoArrowBack className="icon" />
+    <form className={styles["signup-form"]} onSubmit={formik.handleSubmit}>
+      <button
+        className={styles["back-button"]}
+        onClick={goBack}
+        type="button"
+      >
+        <IoArrowBack className={styles.icon} />
       </button>
+
       <h2>تسجيل الطبيب - {phase === 1 ? "المعلومات الأساسية" : "المعلومات المهنية"}</h2>
 
-      {phase === 1 ? (
-        <>
-          <div className="mb-3">
-            <label className="form-label">
-              البريد الإلكتروني:{" "}
-              {formik.touched.email && formik.errors.email && (
-                <span className="error">({formik.errors.email})</span>
-              )}
-            </label>
-            <input
-              type="email"
-              className="form-control"
-              name="email"
-              value={formik.values.email}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              placeholder="أدخل بريدك الإلكتروني"
-            />
-          </div>
+      <div className={styles["form-fields-container"]}>
+        {phase === 1 ? (
+          <>
+            <div className={styles["mb-3"]}>
+              <label className={styles["form-label"]}>
+                البريد الإلكتروني:{" "}
+                {formik.touched.email && formik.errors.email && (
+                  <span className={styles.error}>({formik.errors.email})</span>
+                )}
+              </label>
+              <input
+                type="email"
+                className={styles["form-control"]}
+                name="email"
+                value={formik.values.email}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                placeholder="أدخل بريدك الإلكتروني"
+              />
+            </div>
 
-          <div className="mb-3">
-            <label className="form-label">
-              الاسم الأول:{" "}
-              {formik.touched.firstName && formik.errors.firstName && (
-                <span className="error">({formik.errors.firstName})</span>
-              )}
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              name="firstName"
-              value={formik.values.firstName}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              placeholder="أدخل الاسم الأول"
-            />
-          </div>
+            <div className={styles["mb-3"]}>
+              <label className={styles["form-label"]}>
+                الاسم الأول:{" "}
+                {formik.touched.firstName && formik.errors.firstName && (
+                  <span className={styles.error}>({formik.errors.firstName})</span>
+                )}
+              </label>
+              <input
+                type="text"
+                className={styles["form-control"]}
+                name="firstName"
+                value={formik.values.firstName}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                placeholder="أدخل الاسم الأول"
+              />
+            </div>
 
-          <div className="mb-3">
-            <label className="form-label">
-              الاسم الأخير:{" "}
-              {formik.touched.lastName && formik.errors.lastName && (
-                <span className="error">({formik.errors.lastName})</span>
-              )}
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              name="lastName"
-              value={formik.values.lastName}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              placeholder="أدخل الاسم الأخير"
-            />
-          </div>
+            <div className={styles["mb-3"]}>
+              <label className={styles["form-label"]}>
+                الاسم الأخير:{" "}
+                {formik.touched.lastName && formik.errors.lastName && (
+                  <span className={styles.error}>({formik.errors.lastName})</span>
+                )}
+              </label>
+              <input
+                type="text"
+                className={styles["form-control"]}
+                name="lastName"
+                value={formik.values.lastName}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                placeholder="أدخل الاسم الأخير"
+              />
+            </div>
 
-          <div className="mb-3">
-            <label className="form-label">
-              رقم الهاتف:{" "}
-              {formik.touched.phoneNumber && formik.errors.phoneNumber && (
-                <span className="error">({formik.errors.phoneNumber})</span>
-              )}
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              name="phoneNumber"
-              value={formik.values.phoneNumber}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              placeholder="أدخل رقم هاتفك (مثال: +201112223344)"
-            />
-          </div>
+            <div className={styles["mb-3"]}>
+              <label className={styles["form-label"]}>
+                رقم الهاتف:{" "}
+                {formik.touched.phoneNumber && formik.errors.phoneNumber && (
+                  <span className={styles.error}>({formik.errors.phoneNumber})</span>
+                )}
+              </label>
+              <input
+                type="text"
+                className={styles["form-control"]}
+                name="phoneNumber"
+                value={formik.values.phoneNumber}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                placeholder="أدخل رقم هاتفك (مثال: +201112223344)"
+              />
+            </div>
 
-          <div className="mb-3">
-            <label className="form-label">
-              كلمة المرور:{" "}
-              {formik.touched.password && formik.errors.password && (
-                <span className="error">({formik.errors.password})</span>
-              )}
-            </label>
-            <input
-              type="password"
-              className="form-control"
-              name="password"
-              value={formik.values.password}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              placeholder="أدخل كلمة المرور"
-            />
-          </div>
+            <div className={styles["mb-3"]}>
+              <label className={styles["form-label"]}>
+                كلمة المرور:{" "}
+                {formik.touched.password && formik.errors.password && (
+                  <span className={styles.error}>({formik.errors.password})</span>
+                )}
+              </label>
+              <input
+                type="password"
+                className={styles["form-control"]}
+                name="password"
+                value={formik.values.password}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                placeholder="أدخل كلمة المرور"
+              />
+            </div>
 
-          <div className="mb-3">
-            <label className="form-label">
-              تأكيد كلمة المرور:{" "}
-              {formik.touched.confirmPassword && formik.errors.confirmPassword && (
-                <span className="error">({formik.errors.confirmPassword})</span>
-              )}
-            </label>
-            <input
-              type="password"
-              className="form-control"
-              name="confirmPassword"
-              value={formik.values.confirmPassword}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              placeholder="أعد إدخال كلمة المرور"
-            />
-          </div>
+            <div className={styles["mb-3"]}>
+              <label className={styles["form-label"]}>
+                تأكيد كلمة المرور:{" "}
+                {formik.touched.confirmPassword && formik.errors.confirmPassword && (
+                  <span className={styles.error}>({formik.errors.confirmPassword})</span>
+                )}
+              </label>
+              <input
+                type="password"
+                className={styles["form-control"]}
+                name="confirmPassword"
+                value={formik.values.confirmPassword}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                placeholder="أعد إدخال كلمة المرور"
+              />
+            </div>
+          </>
+        ) : (
+          <>
+            <div className={styles["mb-3"]}>
+              <label className={styles["form-label"]}>
+                تاريخ الميلاد:{" "}
+                {formik.touched.birthDate && formik.errors.birthDate && (
+                  <span className={styles.error}>({formik.errors.birthDate})</span>
+                )}
+              </label>
+              <input
+                type="date"
+                className={styles["form-control"]}
+                name="birthDate"
+                value={formik.values.birthDate}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+              />
+            </div>
 
-          <button type="submit" className="btn btn-primary w-100 form-button">
+            <div className={styles["mb-3"]}>
+              <label className={styles["form-label"]}>
+                الجنسية:{" "}
+                {formik.touched.nationality && formik.errors.nationality && (
+                  <span className={styles.error}>({formik.errors.nationality})</span>
+                )}
+              </label>
+              <select
+                className={styles["form-control"]}
+                name="nationality"
+                value={formik.values.nationality}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+              >
+                <option value="Egyptian">مصري</option>
+                <option value="Saudi">سعودي</option>
+                <option value="Emirati">إماراتي</option>
+                <option value="Other">أخرى</option>
+              </select>
+            </div>
+
+            <div className={styles["mb-3"]}>
+              <label className={styles["form-label"]}>
+                المدينة:{" "}
+                {formik.touched.city && formik.errors.city && (
+                  <span className={styles.error}>({formik.errors.city})</span>
+                )}
+              </label>
+              <input
+                type="text"
+                className={styles["form-control"]}
+                name="city"
+                value={formik.values.city}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                placeholder="أدخل المدينة"
+              />
+            </div>
+
+            <div className={styles["mb-3"]}>
+              <label className={styles["form-label"]}>
+                الجنس:
+              </label>
+              <select
+                className={styles["form-control"]}
+                name="gender"
+                value={formik.values.gender}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+              >
+                <option value="male">ذكر</option>
+                <option value="female">أنثى</option>
+              </select>
+            </div>
+
+            <div className={styles["mb-3"]}>
+              <label className={styles["form-label"]}>
+                نبذة عنك:{" "}
+                {formik.touched.about && formik.errors.about && (
+                  <span className={styles.error}>({formik.errors.about})</span>
+                )}
+              </label>
+              <textarea
+                className={styles["form-control"]}
+                name="about"
+                value={formik.values.about}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                placeholder="أدخل نبذة عنك وتخصصك"
+                rows="4"
+              />
+            </div>
+            <div className={styles["mb-3"]}>
+              <label className={styles["form-label"]}>
+                أيام العمل:{" "}
+                {formik.touched.workingDays && formik.errors.workingDays && (
+                  <span className={styles.error}>({formik.errors.workingDays})</span>
+                )}
+              </label>
+
+              <div className={styles["working-days-grid"]}>
+                {daysOfWeek.map((day) => (
+                  <div key={day.value} className={styles["day-item"]}>
+                    <input
+                      type="checkbox"
+                      id={`day-${day.value}`}
+                      checked={formik.values.workingDays.includes(day.value)}
+                      onChange={() => handleWorkingDayChange(day.value)}
+                      className={styles["day-checkbox"]}
+                    />
+                    <label
+                      htmlFor={`day-${day.value}`}
+                      className={`${styles["day-label"]} ${formik.values.workingDays.includes(day.value) ? styles["selected"] : ""
+                        }`}
+                    >
+                      {day.label}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className={styles["time-selection"]}>
+              <div className={styles["time-input"]}>
+                <label className={styles["form-label"]}>متاح من:</label>
+                <input
+                  type="time"
+                  className={styles["form-control"]}
+                  name="availableFrom"
+                  value={formik.values.availableFrom}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+              </div>
+              <div className={styles["time-input"]}>
+                <label className={styles["form-label"]}>متاح حتى:</label>
+                <input
+                  type="time"
+                  className={styles["form-control"]}
+                  name="availableTo"
+                  value={formik.values.availableTo}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
+      <div style={{ marginTop: '2rem' }}>
+        {phase === 1 ? (
+          <button
+            type="button"
+            style={{
+              borderRadius: '15px',
+              fontWeight: 'bold',
+              fontSize: '1.1rem',
+              transition: 'all 0.3s ease',
+              padding: '0.75rem',
+              width: '100%',
+              backgroundColor: '#20B2AA',
+              color: 'white',
+              border: '2px solid #20B2AA'
+            }}
+            onClick={formik.handleSubmit}
+          >
             التالي
           </button>
-        </>
-      ) : (
-        <>
-          <div className="mb-3">
-            <label className="form-label">
-              تاريخ الميلاد:{" "}
-              {formik.touched.birthDate && formik.errors.birthDate && (
-                <span className="error">({formik.errors.birthDate})</span>
-              )}
-            </label>
-            <input
-              type="date"
-              className="form-control"
-              name="birthDate"
-              value={formik.values.birthDate}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-            />
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label">
-              الجنسية:{" "}
-              {formik.touched.nationality && formik.errors.nationality && (
-                <span className="error">({formik.errors.nationality})</span>
-              )}
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              name="nationality"
-              value={formik.values.nationality}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              placeholder="أدخل جنسيتك"
-            />
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label">
-              المدينة:{" "}
-              {formik.touched.city && formik.errors.city && (
-                <span className="error">({formik.errors.city})</span>
-              )}
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              name="city"
-              value={formik.values.city}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              placeholder="أدخل مدينتك"
-            />
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label">
-              الجنس:
-            </label>
-            <select
-              className="form-control"
-              name="gender"
-              value={formik.values.gender}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
+        ) : (
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <button
+              type="button"
+              style={{
+                flex: 1,
+                borderRadius: '15px',
+                fontWeight: 'bold',
+                fontSize: '1.1rem',
+                transition: 'all 0.3s ease',
+                padding: '0.75rem',
+                backgroundColor: 'white',
+                color: '#20B2AA',
+                border: '2px solid #20B2AA'
+              }}
+              onClick={() => setPhase(1)}
             >
-              <option value="male">ذكر</option>
-              <option value="female">أنثى</option>
-            </select>
+              السابق
+            </button>
+            <button
+              type="submit"
+              style={{
+                flex: 1,
+                borderRadius: '15px',
+                fontWeight: 'bold',
+                fontSize: '1.1rem',
+                transition: 'all 0.3s ease',
+                padding: '0.75rem',
+                backgroundColor: '#FCA43C',
+                color: 'white',
+                border: '2px solid #FCA43C'
+              }}
+            >
+              تسجيل
+            </button>
           </div>
-
-          <div className="mb-3">
-            <label className="form-label">
-              نبذة عنك:{" "}
-              {formik.touched.about && formik.errors.about && (
-                <span className="error">({formik.errors.about})</span>
-              )}
-            </label>
-            <textarea
-              className="form-control"
-              name="about"
-              value={formik.values.about}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              placeholder="أدخل نبذة عنك وتخصصك"
-            />
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label">
-              أيام العمل:{" "}
-              {formik.touched.workingDays && formik.errors.workingDays && (
-                <span className="error">({formik.errors.workingDays})</span>
-              )}
-            </label>
-            <div className="working-days-container">
-              {daysOfWeek.map((day) => (
-                <div key={day.value} className="form-check form-check-inline">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id={`day-${day.value}`}
-                    checked={formik.values.workingDays.includes(day.value)}
-                    onChange={() => handleWorkingDayChange(day.value)}
-                  />
-                  <label className="form-check-label" htmlFor={`day-${day.value}`}>
-                    {day.label}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="row">
-            <div className="col-md-6 mb-3">
-              <label className="form-label">متاح من:</label>
-              <input
-                type="time"
-                className="form-control"
-                name="availableFrom"
-                value={formik.values.availableFrom}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-              />
-            </div>
-            <div className="col-md-6 mb-3">
-              <label className="form-label">متاح حتى:</label>
-              <input
-                type="time"
-                className="form-control"
-                name="availableTo"
-                value={formik.values.availableTo}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-              />
-            </div>
-          </div>
-
-          <button type="submit" className="btn btn-primary w-100 form-button">
-            تسجيل
-          </button>
-        </>
-      )}
+        )}
+      </div>
     </form>
   );
 };

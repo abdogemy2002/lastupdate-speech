@@ -64,8 +64,8 @@ const LoginPage = () => {
 
         if (userType === "Patient") {
           navigate("/PatientDashboard");
-        } else if (userType === "Therapist") {
-          navigate("/therapist-dashboard");
+        } else if (userType === "Doctor") {
+          navigate("/DoctorDashboard");
         }
       } catch (error) {
         let errorMessage = "فشل تسجيل الدخول";

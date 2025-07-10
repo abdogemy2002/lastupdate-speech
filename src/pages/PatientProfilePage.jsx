@@ -259,9 +259,7 @@ const PatientProfilePage = () => {
           boxShadow: '0 0 20px rgba(255, 255, 255, 0.3)',
           backdropFilter: 'blur(5px)',
           transition: 'box-shadow 0.4s ease',
-          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)'
-
-
+          // boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)'
         }}>
           {/* رأس الصفحة */}
           <Box sx={{

@@ -24,6 +24,9 @@ import BookingPage from './components/SpecialistsList/BookingPage'; // عدل ا
 import BookingConfirmation from './components/SpecialistsList/BookingConfirmation'; // عدل المسار حسب مكانك
 import LevelDisplay from './components/dashboard/levels/LevelDisplay'; // عدل المسار حسب مكانك
 import TrainingPage from './components/training/TrainingPage';
+import DoctorDashboard from './pages/Doctor_dashboard';
+import DocImageSelectorPage from './components/Signup Forms/DocImageSelector'; // عدل المسار حسب مكانك
+import DocWallet from './components/DocDashboard/DocWallet'; // عدل المسار حسب مكانك
 // ✅ هنا بنستخدم useLocation داخل Wrapper علشان نقدر نتحكم في الـ Footer
 const AppWrapper = () => {
   const dispatch = useDispatch();
@@ -50,13 +53,20 @@ const AppWrapper = () => {
           <Route
             path="/"
             element={
-              isAuthenticated && userType === 'Patient' ? (
-                <Navigate to="/PatientDashboard" />
+              isAuthenticated ? (
+                userType === 'Patient' ? (
+                  <Navigate to="/PatientDashboard" />
+                ) : userType === 'Doctor' ? (
+                  <Navigate to="/DoctorDashboard" />
+                ) : (
+                  <HomePage />
+                )
               ) : (
                 <HomePage />
               )
             }
           />
+
 
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
@@ -67,6 +77,14 @@ const AppWrapper = () => {
             element={isAuthenticated ? <ProfileImageSelectorPage /> : <Navigate to="/login" />}
           />
           <Route
+            path="/Doc-profile-image"
+            element={isAuthenticated ? <DocImageSelectorPage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/DocWallet"
+            element={isAuthenticated ? <DocWallet /> : <Navigate to="/login" />}
+          />
+          <Route
             path="/SelectLetters"
             element={isAuthenticated ? <SelectLetters /> : <Navigate to="/login" />}
           />
@@ -74,11 +92,11 @@ const AppWrapper = () => {
             path="/TestPage"
             element={isAuthenticated ? <TestPage /> : <Navigate to="/login" />}
           />
-            <Route
+          <Route
             path="/levelDisplay"
             element={isAuthenticated ? <LevelDisplay /> : <Navigate to="/login" />}
           />
-              <Route
+          <Route
             path="/TrainingPage"
             element={isAuthenticated ? <TrainingPage /> : <Navigate to="/login" />}
           />
@@ -104,6 +122,13 @@ const AppWrapper = () => {
             path="/PatientDashboard/*"
             element={
               isAuthenticated && userType === 'Patient' ? <PatientDashboard /> : <Navigate to="/" />
+            }
+          />
+
+          <Route
+            path="/DoctorDashboard/*"
+            element={
+              isAuthenticated && userType === 'Doctor' ? <DoctorDashboard /> : <Navigate to="/" />
             }
           />
           <Route
