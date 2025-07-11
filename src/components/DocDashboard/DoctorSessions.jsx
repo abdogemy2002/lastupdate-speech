@@ -14,6 +14,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import GroupIcon from '@mui/icons-material/Group';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const DoctorSessionsPage = () => {
     const [tabIndex, setTabIndex] = useState(0);
@@ -21,9 +22,8 @@ const DoctorSessionsPage = () => {
     const [pastSessions, setPastSessions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
     const { token } = useSelector((state) => state.user);
-
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchSessions = async () => {
@@ -31,7 +31,6 @@ const DoctorSessionsPage = () => {
                 setLoading(true);
                 setError(null);
 
-                // إنشاء كائن axios مع الهيدر الأساسي
                 const api = axios.create({
                     baseURL: 'https://speech-correction-api.azurewebsites.net/api/Doctor',
                     headers: {
@@ -40,31 +39,40 @@ const DoctorSessionsPage = () => {
                     }
                 });
 
-                // جلب الجلسات القادمة والمنتهية بشكل متوازي
                 const [upcomingResponse, pastResponse] = await Promise.all([
-                    api.get('/upcoming-sessions-detailed'),
+                    api.get('/upcoming-sessions'),
                     api.get('/finished-sessions')
                 ]);
+                console.log(upcomingResponse)
 
-                // تحويل البيانات
                 setUpcomingSessions(upcomingResponse.data.map(session => ({
                     id: session.id,
+                    patientId: session.patientId,
                     name: session.displayName || 'مريض',
                     date: formatArabicDate(session.scheduledDate),
                     time: formatTime(session.sessionTime),
-                    sessionsCount: session.total || 1,
-                    avatar: session.pictureUrl
-                        ? <Avatar src={session.pictureUrl} sx={{ width: 56, height: 56 }} />
-                        : <Avatar sx={{ bgcolor: '#20B2AA', width: 56, height: 56 }}>م</Avatar>
+                    sessionNumber: session.order || 1,
+                    totalSessions: session.total || 1,
+                    pictureUrl: session.pictureUrl || null, // تخزين مسار الصورة فقط
+                    scheduledDate: session.scheduledDate,
+                    sessionTime: session.sessionTime,
+                    notes: session.notes || 'لا توجد ملاحظات',
+                    status: session.status || 'مجدولة'
                 })));
 
                 setPastSessions(pastResponse.data.map(session => ({
                     id: session.id,
-                    name: 'مريض',
+                    patientId: session.patientId,
+                    name: session.displayName || 'مريض',
                     date: formatArabicDate(session.scheduledDate),
                     time: formatTime(session.sessionTime),
-                    sessionsCount: 1,
-                    avatar: <Avatar sx={{ bgcolor: '#FFA726', width: 56, height: 56 }}>م</Avatar>
+                    sessionNumber: session.order || 1,
+                    totalSessions: session.total || 1,
+                    pictureUrl: session.pictureUrl || null, // تخزين مسار الصورة فقط
+                    scheduledDate: session.scheduledDate,
+                    sessionTime: session.sessionTime,
+                    notes: session.notes || 'لا توجد ملاحظات',
+                    status: 'منتهية'
                 })));
 
             } catch (err) {
@@ -83,7 +91,6 @@ const DoctorSessionsPage = () => {
         }
     }, [token]);
 
-    // دوال مساعدة لتنسيق التاريخ والوقت
     const formatArabicDate = (dateString) => {
         const options = { year: 'numeric', month: 'long', day: 'numeric' };
         return new Date(dateString).toLocaleDateString('ar-EG', options);
@@ -92,16 +99,42 @@ const DoctorSessionsPage = () => {
     const formatTime = (timeString) => {
         return timeString.split(':').slice(0, 2).join(':');
     };
+
     const handleTabChange = (event, newValue) => {
         setTabIndex(newValue);
     };
 
+    const handleCardClick = (session) => {
+    navigate(`/patient/${session.patientId}/${session.id}`, {
+        state: {
+            sessionData: {
+                id: session.id,
+                patientId: session.patientId,
+                scheduledDate: session.scheduledDate,
+                sessionTime: session.sessionTime,
+                sessionNumber: session.sessionNumber,
+                totalSessions: session.totalSessions,
+                notes: session.notes,
+                status: session.status
+            },
+            patientBasicInfo: {
+                id: session.patientId,
+                name: session.name,
+                pictureUrl: session.pictureUrl
+            }
+        }
+    });
+};
     const renderSessionCard = (session) => (
-        <Card key={session.id} sx={styles.card}>
+        <Card 
+            key={session.id} 
+            sx={styles.card}
+            onClick={() => handleCardClick(session)}
+        >
             <Box sx={styles.avatarBox}>
-                {typeof session.avatar === 'string' ?
-                    <Avatar src={session.avatar} sx={{ width: 60, height: 60 }} /> :
-                    session.avatar}
+                {session.pictureUrl ?
+                    <Avatar src={session.pictureUrl} sx={{ width: 60, height: 60 }} /> :
+                    <Avatar sx={{ bgcolor: '#20B2AA', width: 60, height: 60 }}>م</Avatar>}
             </Box>
             <CardContent sx={styles.contentBox}>
                 <Typography variant="h6" sx={styles.cardTitle}>
@@ -120,7 +153,19 @@ const DoctorSessionsPage = () => {
 
                 <Box sx={styles.iconRow}>
                     <GroupIcon sx={styles.icon} />
-                    <Typography sx={styles.iconText}>{session.sessionsCount} جلسات</Typography>
+                    <Typography sx={styles.iconText}>
+                        الجلسة {session.sessionNumber} من {session.totalSessions}
+                    </Typography>
+                </Box>
+
+                <Box sx={styles.iconRow}>
+                    <Typography sx={{
+                        ...styles.iconText,
+                        color: session.status === 'منتهية' ? '#FFA726' : '#20B2AA',
+                        fontWeight: 'bold'
+                    }}>
+                        {session.status}
+                    </Typography>
                 </Box>
             </CardContent>
         </Card>
@@ -178,7 +223,6 @@ const DoctorSessionsPage = () => {
 
 export default DoctorSessionsPage;
 
-// ======================= STYLES ===========================
 const styles = {
     mainBox: {
         p: { xs: 2, md: 3 },
@@ -207,7 +251,7 @@ const styles = {
     tab: (isActive) => ({
         fontFamily: "'Tajawal', sans-serif",
         fontWeight: 'bold',
-        color: isActive ? '#20B2AA' : '#666',
+        color: isActive ? '#000' : '#666',
         fontSize: '1rem',
         textTransform: 'none',
         px: { xs: 1, md: 2 },

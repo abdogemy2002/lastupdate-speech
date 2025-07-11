@@ -83,6 +83,7 @@ export const cardStyles = {
 export const imageBoxStyles = {
     width: 220,
     minWidth: 220,
+    height :220,
     overflow: 'hidden',
     '& img': {
         width: '100%',

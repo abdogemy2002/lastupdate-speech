@@ -27,6 +27,7 @@ import TrainingPage from './components/training/TrainingPage';
 import DoctorDashboard from './pages/Doctor_dashboard';
 import DocImageSelectorPage from './components/Signup Forms/DocImageSelector'; // عدل المسار حسب مكانك
 import DocWallet from './components/DocDashboard/DocWallet'; // عدل المسار حسب مكانك
+import PatientProfilePage from './components/DocDashboard/PatientSessionProfile'; // عدل المسار حسب مكانك
 // ✅ هنا بنستخدم useLocation داخل Wrapper علشان نقدر نتحكم في الـ Footer
 const AppWrapper = () => {
   const dispatch = useDispatch();
@@ -103,6 +104,12 @@ const AppWrapper = () => {
           <Route
             path="/UpdateProfile"
             element={isAuthenticated ? <UpdateProfile /> : <Navigate to="/login" />}
+          />
+
+          {/* <Route path="/patient/:patientId/:sessionId?" element={<PatientProfilePage />} /> */}
+            <Route
+            path="/patient/:patientId/:sessionId?"
+            element={isAuthenticated ? <PatientProfilePage /> : <Navigate to="/login" />}
           />
           <Route
             path="/doctors/:id"

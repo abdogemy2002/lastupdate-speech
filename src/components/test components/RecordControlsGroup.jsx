@@ -325,7 +325,6 @@ const RecordControlsGroup = ({
         formData.append('WordName', currentWordName);
         formData.append('AudioFile', audioBlob, 'recording.wav');
 
-        console.log()
 
         try {
             const response = await axios.post(

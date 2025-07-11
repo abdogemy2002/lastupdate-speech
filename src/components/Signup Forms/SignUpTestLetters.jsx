@@ -120,7 +120,7 @@ const LetterTrainingPage = () => {
             console.log("حدثت مشكلة في حفظ البيانات، ولكن سيتم الانتقال إلى لوحة التحكم");
         }
 
-        // navigate("/dashboard");
+        navigate("/");
     };
 
     const handleQuickTest = () => {

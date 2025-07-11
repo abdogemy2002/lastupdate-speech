@@ -120,7 +120,7 @@ const BookingPage = () => {
                 sessionTime: selectedTime,
                 doctorId: doctor?.id || null
             };
-
+console.log (paymentData)
             const response = await axios.post(
                 'https://speech-correction-api.azurewebsites.net/api/Payment/CreateOrUpdatePaymentIntent',
                 paymentData,
