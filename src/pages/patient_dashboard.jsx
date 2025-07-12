@@ -7,11 +7,11 @@ import StatsCards from '../components/dashboard/StatsCards';
 import LearningStages from '../components/dashboard/LearningStages';
 import RecommendedLessons from '../components/dashboard/RecommendedLessons';
 import SpecialistsList from '../components/SpecialistsList/SpecialistsList';
+import PatientReports from '../components/dashboard/reports/PatientReportsComponent';
 import DoctorsCarousel from '../components/dashboard/DoctorsCarousel';
 import rec1 from "../assets/relesson1.jpg";
 import rec2 from "../assets/reclesson2.jpg";
 import rec3 from "../assets/reclesson3.jpg";
-
 
 import {
   EmojiObjects as EmojiObjectsIcon,
@@ -79,7 +79,6 @@ const DashboardPage = () => {
     { id: 3, title: "جمل صعبة", description: "نطق جمل طويلة ومعقدة", icon: <ForumIcon fontSize="large" />, completed: false }
   ];
 
-
   const recommendedLessons = [
     {
       title: "تمارين الفم التفاعليه",
@@ -97,6 +96,7 @@ const DashboardPage = () => {
       image: rec3
     }
   ];
+
   if (loading) {
     return (
       <BackgroundWrapper>
@@ -124,7 +124,8 @@ const DashboardPage = () => {
     );
   }
 
-  const showSpecialists = location.pathname.endsWith('/specialists');
+  const showSpecialists = location.pathname.includes('/specialists');
+  const showReports = location.pathname.includes('/PatientReport');
 
   return (
     <BackgroundWrapper>
@@ -133,6 +134,8 @@ const DashboardPage = () => {
 
         {showSpecialists ? (
           <SpecialistsList doctors={doctors} />
+        ) : showReports ? (
+          <PatientReports />
         ) : (
           <>
             <StatsCards userData={userData} />

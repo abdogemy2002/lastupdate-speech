@@ -93,6 +93,7 @@ const AppWrapper = () => {
             path="/TestPage"
             element={isAuthenticated ? <TestPage /> : <Navigate to="/login" />}
           />
+          
           <Route
             path="/levelDisplay"
             element={isAuthenticated ? <LevelDisplay /> : <Navigate to="/login" />}

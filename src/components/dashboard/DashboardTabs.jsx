@@ -12,7 +12,7 @@ const NavigationTabs = () => {
     const getActiveTab = () => {
         if (location.pathname.includes('specialists')) return 0;
         if (location.pathname.includes('PatientDashboard')) return 1;
-        if (location.pathname.includes('lol') || location.pathname.includes('report')) return 2;
+        if (location.pathname.includes('PatientReport')) return 2;
         return 1;
     };
 
@@ -20,7 +20,7 @@ const NavigationTabs = () => {
         switch (newValue) {
             case 0: navigate('/PatientDashboard/specialists'); break;
             case 1: navigate('/PatientDashboard'); break;
-            case 2: navigate('/TestWelcomek'); break;
+            case 2: navigate('/PatientDashboard/PatientReport'); break;
             default: navigate('/PatientDashboard');
         }
     };
