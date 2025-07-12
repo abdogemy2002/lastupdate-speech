@@ -65,7 +65,7 @@ const ConversationItem = ({
                 >
                     <StyledAvatar
                         alt={conversation.receiverDisplayName || `User ${otherUser}`}
-                        src={conversation.receiverProfileImage}
+                        src={conversation.receiverProfilePictureUrl} // ← عدل هنا
                     >
                         {(conversation.receiverDisplayName || `User ${otherUser}`).charAt(0)}
                     </StyledAvatar>

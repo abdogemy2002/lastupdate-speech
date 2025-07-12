@@ -29,7 +29,7 @@ const ChatHeader = ({
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <Avatar
                         alt={selectedConversation.receiverDisplayName}
-                        src={selectedConversation.receiverProfileImage || undefined}
+                        src={selectedConversation.receiverProfilePictureUrl} // ← استخدم selectedConversation وليس conversation
                         sx={{ mr: 2, bgcolor: '#20b2aa' }}
                     >
                         {selectedConversation.receiverDisplayName?.charAt(0) || 'U'}

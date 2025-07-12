@@ -11,7 +11,8 @@ import {
 } from '@mui/material';
 import {
     PersonAdd as PersonAddIcon,
-    Close as CloseIcon
+    Close as CloseIcon,
+    Mic as MicIcon
 } from '@mui/icons-material';
 
 // مكونات فرعية
@@ -49,8 +50,10 @@ export default function ChatMain() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [connectionStatus, setConnectionStatus] = useState('disconnected');
     const [loading, setLoading] = useState(true);
+    const [isSending, setIsSending] = useState(false);
     const messageEndRef = useRef(null);
 
+    // Effect لإنشاء اتصال SignalR
     useEffect(() => {
         if (!token) return;
 
@@ -100,33 +103,114 @@ export default function ChatMain() {
         };
     }, [token]);
 
+    // Effect لمعالجة الرسائل الصوتية - تم التعديل هنا
+    // Effect لمعالجة الرسائل الصوتية
     useEffect(() => {
         if (!connection) return;
 
-        connection.on('InitializeConversations', (convs) => {
+        const handleAudioMessage = (audioUrl, conversationId) => {
+            console.log('🎧 [Hub Event] ReceiveAudioMessage:', {
+                audioUrl,
+                conversationId,
+                timestamp: new Date().toISOString()
+            });
+
+            setConversations(prev => prev.map(conv => {
+                if (conv.id === conversationId) {
+                    const senderId = currentUserId === conv.user1Id ? conv.user2Id : conv.user1Id;
+                    const newMessageObj = {
+                        senderId,
+                        content: "رسالة صوتية",
+                        audioUrl: audioUrl,
+                        sentAt: new Date().toISOString(),
+                        type: 1
+                    };
+
+                    console.log('💾 Updating conversation with audio message:', {
+                        conversationId,
+                        newMessage: newMessageObj
+                    });
+
+                    if (selectedConversation?.id === conversationId) {
+                        console.log('🔔 Updating currently open conversation');
+                        setSelectedConversation(prev => ({
+                            ...prev,
+                            messages: [...prev.messages, newMessageObj],
+                            lastMessageAt: new Date().toISOString()
+                        }));
+                    }
+
+                    return {
+                        ...conv,
+                        messages: [...conv.messages, newMessageObj],
+                        lastMessageAt: new Date().toISOString()
+                    };
+                }
+                return conv;
+            }));
+        };
+
+        connection.on('ReceiveAudioMessage', handleAudioMessage);
+
+        return () => {
+            if (connection) {
+                console.log('🧹 Cleaning up ReceiveAudioMessage listener');
+                connection.off('ReceiveAudioMessage', handleAudioMessage);
+            }
+        };
+    }, [connection, currentUserId, selectedConversation]);
+
+    // Effect لتهيئة المحادثات
+    useEffect(() => {
+        if (!connection) return;
+
+        const handleInitialize = (convs) => {
+            console.log('📦 [Hub Event] InitializeConversations:', {
+                conversations: convs,
+                count: convs.length,
+                timestamp: new Date().toISOString()
+            });
             setConversations(convs);
             if (convs.length > 0 && !selectedConversation) {
+                console.log('🔍 Selecting first conversation by default');
                 setSelectedConversation(convs[0]);
             }
             setLoading(false);
-        });
+        };
 
-        connection.on('ConversationStarted', (conv) => {
+        const handleNewConversation = (conv) => {
+            console.log('🆕 [Hub Event] ConversationStarted:', {
+                newConversation: conv,
+                timestamp: new Date().toISOString()
+            });
             setConversations(prev => {
                 const exists = prev.some(c => c.id === conv.id);
-                if (!exists) return [...prev, conv];
+                if (!exists) {
+                    console.log('➕ Adding new conversation to list');
+                    return [...prev, conv];
+                }
+                console.log('ℹ️ Conversation already exists in list');
                 return prev;
             });
-        });
+        };
 
-        connection.on('ReceiveMessage', (messageContent, conversationId) => {
+        const handleTextMessage = (messageContent, conversationId) => {
+            console.log('✉️ [Hub Event] ReceiveMessage:', {
+                messageContent,
+                conversationId,
+                timestamp: new Date().toISOString()
+            });
+
             setConversations(prev => prev.map(conv => {
                 if (conv.id === conversationId) {
                     const newMessageObj = {
                         senderId: currentUserId === conv.user1Id ? conv.user2Id : conv.user1Id,
                         content: messageContent,
-                        sentAt: new Date().toISOString()
+                        sentAt: new Date().toISOString(),
+                        type: 0
                     };
+
+                    console.log('📩 Adding new text message:', newMessageObj);
 
                     const updatedConv = {
                         ...conv,
@@ -135,6 +219,7 @@ export default function ChatMain() {
                     };
 
                     if (selectedConversation?.id === conversationId) {
+                        console.log('💬 Updating currently open conversation');
                         setSelectedConversation(updatedConv);
                     }
 
@@ -142,17 +227,22 @@ export default function ChatMain() {
                 }
                 return conv;
             }));
-        });
+        };
+
+        connection.on('InitializeConversations', handleInitialize);
+        connection.on('ConversationStarted', handleNewConversation);
+        connection.on('ReceiveMessage', handleTextMessage);
 
         return () => {
             if (connection) {
-                connection.off('InitializeConversations');
-                connection.off('ConversationStarted');
-                connection.off('ReceiveMessage');
+                console.log('🧹 Cleaning up all conversation listeners');
+                connection.off('InitializeConversations', handleInitialize);
+                connection.off('ConversationStarted', handleNewConversation);
+                connection.off('ReceiveMessage', handleTextMessage);
             }
         };
     }, [connection, selectedConversation, currentUserId]);
-
+    // Effect للتمرير إلى آخر رسالة
     useEffect(() => {
         messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [selectedConversation?.messages]);
@@ -160,13 +250,16 @@ export default function ChatMain() {
     const handleSendMessage = async () => {
         if (!newMessage.trim() || !selectedConversation || !connection) return;
 
+        setIsSending(true);
         try {
+            console.log('[SignalR] Sending message:', { conversationId: selectedConversation.id, newMessage });
             await connection.invoke('SendMessage', selectedConversation.id, newMessage);
 
             const tempMessage = {
                 senderId: currentUserId,
                 content: newMessage,
-                sentAt: new Date().toISOString()
+                sentAt: new Date().toISOString(),
+                type: 0
             };
 
             const updatedConversation = {
@@ -182,7 +275,9 @@ export default function ChatMain() {
             setSelectedConversation(updatedConversation);
             setNewMessage('');
         } catch (error) {
-            console.error('Error sending message:', error);
+            console.error('[SignalR] Error sending message:', error);
+        } finally {
+            setIsSending(false);
         }
     };
 
@@ -302,10 +397,14 @@ export default function ChatMain() {
                                             <MessageBubble
                                                 isCurrentUser={isCurrentUser}
                                                 content={message.content}
+                                                audioUrl={message.audioUrl}
                                                 sentAt={message.sentAt}
                                                 showDate={showDate}
                                                 dateString={formatFullDate(message.sentAt)}
+                                                messageType={message.type}
                                             />
+
+
                                         </React.Fragment>
                                     );
                                 })
@@ -342,6 +441,12 @@ export default function ChatMain() {
                             newMessage={newMessage}
                             setNewMessage={setNewMessage}
                             handleSendMessage={handleSendMessage}
+                            conversationId={selectedConversation?.id}
+                            isSending={isSending}
+                            currentUserId={currentUserId} // 👈 أضف السطر ده
+                            selectedConversation={selectedConversation}
+                            setSelectedConversation={setSelectedConversation}
+                            setConversations={setConversations}
                         />
                     </MessageInputArea>
                 )}
@@ -356,5 +461,4 @@ export default function ChatMain() {
             />
         </ChatContainer>
     );
-
 }
